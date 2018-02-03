@@ -17,6 +17,8 @@
   },
   "homepage": "https://github.com/stellar-fox/deneb#readme",
   "dependencies": {
-    "express": "^4.16.2"
+    "axios": "^0.17.1",
+    "express": "^4.16.2",
+    "pg-promise": "^7.4.1"
   }
 }

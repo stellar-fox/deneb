@@ -57,3 +57,6 @@ typings/
 # dotenv environment variables file
 .env
 
+# DB Config & Schema
+config.js
+schema.sql
