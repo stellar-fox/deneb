@@ -25,7 +25,6 @@ app.get('/api/v1/ticker/latest/:currency', (req, res, next) => {
               res.status(200).json({
                 status: 'success',
                 data: response.data[0],
-                new: true,
               })
             })
             .catch((error) => {
@@ -46,7 +45,6 @@ app.get('/api/v1/ticker/latest/:currency', (req, res, next) => {
               res.status(200).json({
                 status: 'success',
                 data: response.data[0],
-                updated: true,
               })
             })
             .catch((error) => {
@@ -62,7 +60,6 @@ app.get('/api/v1/ticker/latest/:currency', (req, res, next) => {
       res.status(200).json({
         status: 'success',
         data: data[0].data,
-        stale: true,
       })
 
     })
