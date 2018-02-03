@@ -1,0 +1,22 @@
+{
+  "name": "deneb",
+  "version": "0.1.0",
+  "description": "REST API for Stellar Fox.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stellar-fox/deneb.git"
+  },
+  "author": "Igor Wasinski",
+  "license": "BSD-2-Clause",
+  "bugs": {
+    "url": "https://github.com/stellar-fox/deneb/issues"
+  },
+  "homepage": "https://github.com/stellar-fox/deneb#readme",
+  "dependencies": {
+    "express": "^4.16.2"
+  }
+}
