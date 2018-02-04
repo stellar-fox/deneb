@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-const dbConfig = require('./config.js')
 const GETAPI = require('./api/v1/get.js')
+const POSTAPI = require('./api/v1/post.js')
 const express = require('express')
 const app = express()
 
@@ -18,5 +18,12 @@ app.use(function(req, res, next) {
 app.get('/api/v1', (req, res) => res.send('Deneb - REST API. v.1'))
 app.get('/api/v1/ticker/latest/:currency', GETAPI.latestCurrency)
 
+/*
+ *********************
+ ***** POST CALLS *****
+ *********************
+*/
+app.post('/api/v1/user/create/:email/:password', POSTAPI.createUser)
+app.post('/api/v1/user/authenticate/:email/:password', POSTAPI.authenticate)
 
 app.listen(4001, () => console.log('Deneb::4001'))

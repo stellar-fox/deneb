@@ -1,3 +1,6 @@
+const dbConfig = require('../config.js')
+const postgresp = require('pg-promise')({})
+const db = postgresp(dbConfig.config.connectionStr)
 const axios = require('axios')
 
 const fetchCMC = function (base='stellar', quot='eur') {
@@ -16,5 +19,6 @@ const fetchCMC = function (base='stellar', quot='eur') {
 }
 
 module.exports = {
-  fetchCMC: fetchCMC
+  fetchCMC: fetchCMC,
+  db: db
 }
