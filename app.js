@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 const dbConfig = require('./config.js')
 const express = require('express')
 const postgresp = require('pg-promise')({})
