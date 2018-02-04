@@ -33,11 +33,10 @@ function createUser(req, res, next) {
 function authenticate(req, res, next) {
   helpers.db.one('select * from users where email = ${email}', {email: req.params.email})
     .then((dbData) => {
-      console.log(dbData)
-      console.log(req.params.password)
       bcrypt.compare(req.params.password, dbData.password_digest, (err, auth) => {
-        res.status(200).json({
-          authenticated: auth
+        res.status(auth ? 200 : 401).json({
+          authenticated: auth,
+          user_id: dbData.id,
         })
       })
     }).catch((error) => {
