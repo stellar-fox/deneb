@@ -31,15 +31,27 @@ function createUser(req, res, next) {
 
 // ...
 function authenticate(req, res, next) {
-  helpers.db.one('select * from users where email = ${email}', {email: req.params.email})
+  helpers.db.any('select * from users where email = ${email}', {email: req.params.email})
     .then((dbData) => {
-      bcrypt.compare(req.params.password, dbData.password_digest, (err, auth) => {
-        res.status(auth ? 200 : 401).json({
-          authenticated: auth,
-          user_id: dbData.id,
+      // user found
+      if (dbData.length === 1) {
+        bcrypt.compare(req.params.password, dbData[0].password_digest, (err, auth) => {
+          res.status(auth ? 200 : 401).json({
+            authenticated: auth,
+            user_id: (auth ? dbData[0].id : null),
+          })
         })
-      })
+      }
+      // user not found in DB
+      else {
+        res.status(401).json({
+          authenticated: false,
+          user_id: null,
+        })
+      }
+
     }).catch((error) => {
+      console.log(error)
       res.status(500).json({
         error: error.message
       })
