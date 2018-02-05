@@ -17,13 +17,16 @@ app.use(function(req, res, next) {
 */
 app.get('/api/v1', (req, res) => res.send('Deneb - REST API. v.1'))
 app.get('/api/v1/ticker/latest/:currency', GETAPI.latestCurrency)
+app.get('/api/v1/user/:id', GETAPI.user)
+app.get('/api/v1/account/:user_id', GETAPI.account)
 
 /*
- *********************
+ **********************
  ***** POST CALLS *****
- *********************
+ **********************
 */
 app.post('/api/v1/user/create/:email/:password', POSTAPI.createUser)
+app.post('/api/v1/user/update/:id', POSTAPI.updateUser)
 app.post('/api/v1/user/authenticate/:email/:password', POSTAPI.authenticate)
 app.post('/api/v1/account/create/:user_id/:pubkey', POSTAPI.createAccount)
 

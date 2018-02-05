@@ -2,6 +2,39 @@ const helpers = require('../helpers.js')
 
 
 // ...
+function user(req, res, next) {
+  helpers.db.one('select * from users where id = ${id}', {
+    id: req.params.id
+  })
+  .then((dbData) => {
+    res.status(200).json({
+      status: 'success',
+      data: dbData,
+    })
+  })
+  .catch((error) => {
+    return next(error.message)
+  })
+}
+
+
+// ...
+function account(req, res, next) {
+  helpers.db.one('select * from accounts where user_id = ${user_id}', {
+    user_id: req.params.user_id
+  })
+  .then((dbData) => {
+    res.status(200).json({
+      status: 'success',
+      data: dbData,
+    })
+  })
+  .catch((error) => {
+    return next(error.message)
+  })
+}
+
+// ...
 function latestCurrency(req, res, next) {
   helpers.db.any('select * from ticker where currency = ${currency}', {currency: req.params.currency})
     .then((dbData) => {
@@ -66,4 +99,6 @@ function latestCurrency(req, res, next) {
 // ...
 module.exports = {
   latestCurrency: latestCurrency,
+  user: user,
+  account: account,
 }

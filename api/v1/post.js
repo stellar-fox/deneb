@@ -14,7 +14,7 @@ function createUser(req, res, next) {
       updated_at: now,
     })
     .then((result) => {
-      res.status(200).json({
+      res.status(201).json({
         status: 'success',
         id: result.id,
       })
@@ -24,6 +24,37 @@ function createUser(req, res, next) {
         status: 'failure',
         id: error.message,
       })
+    })
+  })
+}
+
+
+// ...
+function updateUser(req, res, next) {
+  helpers.db.tx(t => {
+    return t.batch([
+      (req.query.first_name !== undefined ?
+        t.none('UPDATE users SET first_name = $1 WHERE id = $2',
+          [req.query.first_name, req.params.id]) : null
+      ),
+      (req.query.last_name !== undefined ?
+        t.none('UPDATE users SET last_name = $1 WHERE id = $2',
+          [req.query.last_name, req.params.id]) : null
+      ),
+      (req.query.alias !== undefined ?
+        t.none('UPDATE accounts SET alias = $1 WHERE user_id = $2',
+          [req.query.alias, req.params.id]) : null
+      ),
+    ])
+  })
+  .then(data => {
+    res.status(204).json({
+      status: 'success',
+    })
+  })
+  .catch(error => {
+    res.status(500).json({
+      error: error.message,
     })
   })
 }
@@ -41,7 +72,7 @@ function createAccount(req, res, next) {
     RETURNING id', {
       pubkey: req.params.pubkey,
       alias: alias => {
-        return (req.query.alias !== 'undefined' ? req.query.alias : null)
+        return (req.query.alias !== undefined ? req.query.alias : null)
       },
       user_id: req.params.user_id,
       visible: visible => {
@@ -51,7 +82,7 @@ function createAccount(req, res, next) {
       updated_at: now,
     })
     .then((result) => {
-      res.status(200).json({
+      res.status(201).json({
         success: true,
         account_id: result.id
       })
@@ -114,6 +145,7 @@ function authenticate(req, res, next) {
 //...
 module.exports = {
   createUser: createUser,
+  updateUser: updateUser,
   authenticate: authenticate,
   createAccount: createAccount,
 }
