@@ -41,10 +41,8 @@ function updateUser(req, res, next) {
         t.none('UPDATE users SET last_name = $1 WHERE id = $2',
           [req.query.last_name, req.params.id]) : null
       ),
-      (req.query.alias !== undefined ?
-        t.none('UPDATE accounts SET alias = $1 WHERE user_id = $2',
-          [req.query.alias, req.params.id]) : null
-      ),
+      t.none('UPDATE users SET updated_at = $1 WHERE id = $2',
+        [new Date(), req.params.id]),
     ])
   })
   .then(data => {
@@ -92,6 +90,39 @@ function createAccount(req, res, next) {
         error: error.message
       })
     })
+}
+
+
+// ..
+function updateAccount(req, res, next) {
+  helpers.db.tx(t => {
+    return t.batch([
+      (req.query.alias !== undefined ?
+        t.none('UPDATE accounts SET alias = $1 WHERE user_id = $2',
+          [req.query.alias, req.params.user_id]) : null
+      ),
+      (req.query.visible !== undefined ?
+        t.none('UPDATE accounts SET visible = ${visible} WHERE user_id = ${user_id}',
+          {
+            visible: visible => {
+              return (req.query.visible == 'false' ? false : true)
+            },
+            user_id: req.params.user_id
+          }) : null
+      ),
+      t.none('UPDATE accounts SET updated_at = $1', [new Date()]),
+    ])
+  })
+  .then(data => {
+    res.status(204).json({
+      status: 'success',
+    })
+  })
+  .catch(error => {
+    res.status(500).json({
+      error: error.message,
+    })
+  })
 }
 
 
@@ -148,4 +179,5 @@ module.exports = {
   updateUser: updateUser,
   authenticate: authenticate,
   createAccount: createAccount,
+  updateAccount: updateAccount,
 }

@@ -29,5 +29,6 @@ app.post('/api/v1/user/create/:email/:password', POSTAPI.createUser)
 app.post('/api/v1/user/update/:id', POSTAPI.updateUser)
 app.post('/api/v1/user/authenticate/:email/:password', POSTAPI.authenticate)
 app.post('/api/v1/account/create/:user_id/:pubkey', POSTAPI.createAccount)
+app.post('/api/v1/account/update/:user_id', POSTAPI.updateAccount)
 
 app.listen(4001, () => console.log('Deneb::4001'))
