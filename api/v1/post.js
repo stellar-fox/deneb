@@ -31,6 +31,11 @@ function createUser(req, res, next) {
 
 // ...
 function updateUser(req, res, next) {
+  if(!helpers.tokenIsValid(req.query.token, req.params.id)) {
+    return res.status(403).json({
+      error: "Forbidden",
+    })
+  }
   helpers.db.tx(t => {
     return t.batch([
       (req.query.first_name !== undefined ?
@@ -95,6 +100,11 @@ function createAccount(req, res, next) {
 
 // ..
 function updateAccount(req, res, next) {
+  if(!helpers.tokenIsValid(req.query.token, req.params.user_id)) {
+    return res.status(403).json({
+      error: "Forbidden",
+    })
+  }
   helpers.db.tx(t => {
     return t.batch([
       (req.query.alias !== undefined ?
@@ -138,12 +148,18 @@ function authenticate(req, res, next) {
               user_id: dbData[0].id
             })
             .then((dbAccount) => {
-              // authenticated
-              res.status(200).json({
-                authenticated: true,
-                user_id: dbData[0].id,
-                pubkey: dbAccount.pubkey,
+              bcrypt.hash(`${helpers.getApiKey()}${dbData[0].id}`, saltRounds, (error, hash) => {
+                // authenticated
+                res.status(200).json({
+                  authenticated: true,
+                  user_id: dbData[0].id,
+                  pubkey: dbAccount.pubkey,
+                  token: new Buffer(hash).toString('base64'),
+                })
               })
+            })
+            .catch((error) => {
+              console.log(next(error.message))
             })
           } else {
             // not authenticated
