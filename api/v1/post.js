@@ -120,6 +120,14 @@ function updateAccount(req, res, next) {
             user_id: req.params.user_id
           }) : null
       ),
+      (req.query.currency !== undefined ?
+        t.none('UPDATE accounts SET currency = $1 WHERE user_id = $2',
+          [req.query.currency, req.params.user_id]) : null
+      ),
+      (req.query.precision !== undefined ?
+        t.none('UPDATE accounts SET precision = $1 WHERE user_id = $2',
+          [req.query.precision, req.params.user_id]) : null
+      ),
       t.none('UPDATE accounts SET updated_at = $1', [new Date()]),
     ])
   })
