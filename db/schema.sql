@@ -72,6 +72,7 @@ CREATE TABLE public.accounts
   visible boolean NOT NULL DEFAULT true,
   created_at timestamp without time zone NOT NULL,
   updated_at timestamp without time zone NOT NULL,
+  UNIQUE(pubkey, user_id),
   CONSTRAINT accounts_pkey PRIMARY KEY (id)
 )
 WITH (
