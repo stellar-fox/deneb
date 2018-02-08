@@ -59,4 +59,3 @@ typings/
 
 # DB Config & Schema
 config.js
-schema.sql
