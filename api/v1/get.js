@@ -34,6 +34,23 @@ function account(req, res, next) {
   })
 }
 
+
+// ...
+function findByPublicKey(req, res, next)  {
+  helpers.db.one('select count(*) from accounts where pubkey = ${public_key}', {
+    public_key: req.params.pubkey
+  }).then((dbData) => {
+      res.status(200).json({
+        status: 'success',
+        data: dbData,
+      })
+    })
+    .catch((error) => {
+      return next(error.message)
+    })
+}
+
+
 // ...
 function latestCurrency(req, res, next) {
   helpers.db.any('select * from ticker where currency = ${currency}', {currency: req.params.currency})
@@ -101,4 +118,5 @@ module.exports = {
   latestCurrency: latestCurrency,
   user: user,
   account: account,
+  findByPublicKey: findByPublicKey,
 }
