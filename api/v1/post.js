@@ -1,31 +1,66 @@
-const helpers = require('../helpers.js')
-const bcrypt = require('bcrypt')
+const helpers = require("../helpers.js")
+const bcrypt = require("bcrypt")
 const saltRounds = 10
 
 
 // ...
-function createUser(req, res, next) {
-  bcrypt.hash(req.params.password, saltRounds, (err, hash) => {
+function createUser (req, res, _) {
+    bcrypt.hash(req.params.password, saltRounds, (_, hash) => {
+        let now = new Date()
+        helpers.db.one(
+            "insert into users(email, password_digest, created_at, updated_at)\
+            values(${email}, ${password_digest}, ${created_at}, ${updated_at})\
+            RETURNING id", {
+                email: req.params.email,
+                password_digest: hash,
+                created_at: now,
+                updated_at: now,
+            })
+            .then((result) => {
+                res.status(201).json({
+                    status: "success",
+                    id: result.id,
+                })
+            }).catch((error) => {
+                res.status(500).json({
+                    status: "failure",
+                    id: error.message,
+                })
+            })
+    })
+}
+
+
+// ...
+function createAccount (req, res, _) {
     let now = new Date()
-    helpers.db.one('insert into users(email, password_digest, created_at, updated_at) values(${email}, ${password_digest}, ${created_at}, ${updated_at}) RETURNING id', {
-      email: req.params.email,
-      password_digest: hash,
-      created_at: now,
-      updated_at: now,
-    })
-    .then((result) => {
-      res.status(201).json({
-        status: 'success',
-        id: result.id,
-      })
-    })
-    .catch((error) => {
-      res.status(500).json({
-        status: 'failure',
-        id: error.message,
-      })
-    })
-  })
+    helpers.db.one(
+        "insert into accounts\
+        (pubkey, alias, user_id, visible, created_at, updated_at)\
+        values (${pubkey}, ${alias}, ${user_id}, ${visible}, ${created_at},\
+        ${updated_at}) RETURNING id", {
+            pubkey: req.params.pubkey,
+            alias: (_) => {
+                return (req.query.alias !== undefined ? req.query.alias : null)
+            },
+            user_id: req.params.user_id,
+            visible: (_) => {
+                return (req.query.visible == "false" ? false : true)
+            },
+            created_at: now,
+            updated_at: now,
+        })
+        .then((result) => {
+            res.status(201).json({
+                success: true,
+                account_id: result.id,
+            })
+        })
+        .catch((error) => {
+            res.status(500).json({
+                error: error.message,
+            })
+        })
 }
 
 
@@ -60,41 +95,6 @@ function updateUser(req, res, next) {
       error: error.message,
     })
   })
-}
-
-
-// ...
-function createAccount(req, res, next) {
-  let now = new Date()
-  helpers.db.one(
-    'insert into accounts\
-      (pubkey, alias, user_id, visible, created_at, updated_at)\
-    values (\
-      ${pubkey}, ${alias}, ${user_id}, ${visible}, ${created_at}, ${updated_at}\
-    )\
-    RETURNING id', {
-      pubkey: req.params.pubkey,
-      alias: alias => {
-        return (req.query.alias !== undefined ? req.query.alias : null)
-      },
-      user_id: req.params.user_id,
-      visible: visible => {
-        return (req.query.visible == 'false' ? false : true)
-      },
-      created_at: now,
-      updated_at: now,
-    })
-    .then((result) => {
-      res.status(201).json({
-        success: true,
-        account_id: result.id
-      })
-    })
-    .catch((error) => {
-      res.status(500).json({
-        error: error.message
-      })
-    })
 }
 
 
@@ -199,9 +199,9 @@ function authenticate(req, res, next) {
 
 //...
 module.exports = {
-  createUser: createUser,
   updateUser: updateUser,
   authenticate: authenticate,
   createAccount: createAccount,
   updateAccount: updateAccount,
+    createUser,
 }

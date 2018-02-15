@@ -1,8 +1,26 @@
-const config = require('../config.js')
-const postgresp = require('pg-promise')({})
+const config = require("../config.js")
+const postgresp = require("pg-promise")({})
 const db = postgresp(config.attributes.connectionStr)
-const axios = require('axios')
-const bcrypt = require('bcrypt')
+const axios = require("axios")
+const bcrypt = require("bcrypt")
+
+
+// ...
+const btoh = function (bcryptHash) {
+    return new Buffer(bcryptHash, "ascii").toString("hex")
+}
+
+
+// ...
+const htob = function (hexString) {
+    return new Buffer(hexString, "hex").toString("ascii")
+}
+
+
+// ...
+const apiKeyValid = function (hashedApiKey) {
+    return bcrypt.compareSync(config.attributes.apiKey, hashedApiKey)
+}
 
 
 // ...
@@ -41,4 +59,7 @@ module.exports = {
   db: db,
   tokenIsValid: tokenIsValid,
   getApiKey: getApiKey,
+    apiKeyValid,
+    btoh,
+    htob,
 }
