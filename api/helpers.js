@@ -6,6 +6,21 @@ const bcrypt = require("bcrypt")
 
 
 // ...
+const errorMessageToRetCode = function (message) {
+    let errorCode = null
+    switch (true) {
+        case (message.match(/duplicate key/) !== null):
+            errorCode = 409
+            break
+    
+        default:
+            errorCode = 500
+            break
+    }
+    return errorCode
+}
+
+// ...
 const btoh = function (bcryptHash) {
     return new Buffer(bcryptHash, "ascii").toString("hex")
 }
@@ -62,4 +77,5 @@ module.exports = {
     apiKeyValid,
     btoh,
     htob,
+    errorMessageToRetCode,
 }

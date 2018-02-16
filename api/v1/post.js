@@ -22,9 +22,11 @@ function createUser (req, res, _) {
                     id: result.id,
                 })
             }).catch((error) => {
-                res.status(500).json({
+                const retCode = helpers.errorMessageToRetCode(error.message)
+                res.status(retCode).json({
                     status: "failure",
                     id: error.message,
+                    code: retCode,
                 })
             })
     })
@@ -57,8 +59,11 @@ function createAccount (req, res, _) {
             })
         })
         .catch((error) => {
-            res.status(500).json({
-                error: error.message,
+            const retCode = helpers.errorMessageToRetCode(error.message)
+            res.status(retCode).json({
+                status: "failure",
+                id: error.message,
+                code: retCode,
             })
         })
 }
