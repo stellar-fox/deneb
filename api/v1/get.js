@@ -37,7 +37,7 @@ function account(req, res, next) {
 
 // ...
 function findByPublicKey(req, res, next)  {
-  helpers.db.one('select count(*) from accounts where pubkey = ${public_key}', {
+  helpers.db.one('select pubkey, path from accounts where pubkey = ${public_key}', {
     public_key: req.params.pubkey
   }).then((dbData) => {
       res.status(200).json({

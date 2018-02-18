@@ -88,3 +88,7 @@ ALTER TABLE public.accounts
 -- =============================================================================
 ALTER TABLE public.accounts
   ADD COLUMN precision integer NOT NULL DEFAULT 2;
+
+-- =============================================================================
+ALTER TABLE public.accounts
+  ADD COLUMN path integer NOT NULL DEFAULT 0;

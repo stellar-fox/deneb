@@ -38,13 +38,14 @@ function createAccount (req, res, _) {
     let now = new Date()
     helpers.db.one(
         "insert into accounts\
-        (pubkey, alias, user_id, visible, created_at, updated_at)\
-        values (${pubkey}, ${alias}, ${user_id}, ${visible}, ${created_at},\
+        (pubkey, path, alias, user_id, visible, created_at, updated_at)\
+        values (${pubkey}, ${path}, ${alias}, ${user_id}, ${visible}, ${created_at},\
         ${updated_at}) RETURNING id", {
             pubkey: req.params.pubkey,
             alias: (_) => {
                 return (req.query.alias !== undefined ? req.query.alias : null)
             },
+            path: req.query.path,
             user_id: req.params.user_id,
             visible: (_) => {
                 return (req.query.visible == "false" ? false : true)
