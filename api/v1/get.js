@@ -46,6 +46,9 @@ function findByPublicKey(req, res, next)  {
       })
     })
     .catch((error) => {
+      res.status(404).json({
+        error: "Not found.",
+      })
       return next(error.message)
     })
 }
