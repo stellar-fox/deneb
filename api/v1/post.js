@@ -150,6 +150,30 @@ function updateAccount(req, res, next) {
 }
 
 
+//  ...
+function issueToken (req, res, _) {
+    helpers.db.any("SELECT user_id FROM ACCOUNTS WHERE pubkey = ${pubkey} AND path = ${path}", {
+        pubkey: req.params.pubkey,
+        path: req.params.path,
+    }).then((dbData) => {
+        bcrypt.hash(`${helpers.getApiKey()}${dbData[0].user_id}`, saltRounds, (_, hash) => {
+            // authenticated
+            res.status(200).json({
+                authenticated: true,
+                user_id: dbData[0].user_id,
+                token: new Buffer(hash).toString("base64"),
+            })
+        })
+    }).catch((_) => {
+        res.status(401).json({
+            authenticated: false,
+            user_id: null,
+            token: null,
+        })
+    })
+}
+
+
 // ...
 function authenticate(req, res, next) {
   helpers.db.any('select * from users where email = ${email}', {email: req.params.email})
@@ -210,4 +234,5 @@ module.exports = {
   createAccount: createAccount,
   updateAccount: updateAccount,
     createUser,
+    issueToken,
 }
