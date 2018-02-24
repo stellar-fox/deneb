@@ -19,7 +19,7 @@ app.get('/api/v1', (req, res) => res.send('Deneb - REST API. v.1'))
 app.get('/api/v1/ticker/latest/:currency', GETAPI.latestCurrency)
 app.get('/api/v1/user/:id', GETAPI.user)
 app.get('/api/v1/account/:user_id', GETAPI.account)
-
+app.get("/api/v1/user/md5/:pubkey", GETAPI.emailMD5)
 /*
  **********************
  ***** POST CALLS *****

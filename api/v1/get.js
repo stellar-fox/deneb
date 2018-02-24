@@ -36,6 +36,27 @@ function account(req, res, next) {
 
 
 // ...
+function emailMD5 (req, res, _next) {
+    helpers.db.any("SELECT users.first_name, users.last_name, users.email, accounts.alias, accounts.email_md5 FROM accounts INNER JOIN users ON accounts.user_id = users.id WHERE accounts.pubkey = ${pubkey}", {
+        pubkey: req.params.pubkey,
+    }).then((dbData) => {
+        res.status(200).json({
+            status: "success",
+            first_name: dbData[0].first_name,
+            last_name: dbData[0].last_name,
+            email: dbData[0].email,
+            md5: dbData[0].email_md5,
+            alias: dbData[0].alias,
+        })
+    }).catch((_error) => {
+        res.status(404).json({
+            error: "Not found.",
+        })
+    })
+}
+
+
+// ...
 function latestCurrency(req, res, next) {
   helpers.db.any('select * from ticker where currency = ${currency}', {currency: req.params.currency})
     .then((dbData) => {
@@ -102,4 +123,5 @@ module.exports = {
   latestCurrency: latestCurrency,
   user: user,
   account: account,
+    emailMD5,
 }
