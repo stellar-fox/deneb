@@ -92,3 +92,7 @@ ALTER TABLE public.accounts
 -- =============================================================================
 ALTER TABLE public.accounts
   ADD COLUMN path integer NOT NULL DEFAULT 0;
+
+-- =============================================================================
+ALTER TABLE public.accounts
+  ADD COLUMN email_md5 character varying;

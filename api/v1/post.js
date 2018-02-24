@@ -38,9 +38,9 @@ function createAccount (req, res, _) {
     let now = new Date()
     helpers.db.one(
         "insert into accounts\
-        (pubkey, path, alias, user_id, visible, created_at, updated_at)\
+        (pubkey, path, alias, user_id, visible, created_at, updated_at, email_md5)\
         values (${pubkey}, ${path}, ${alias}, ${user_id}, ${visible}, ${created_at},\
-        ${updated_at}) RETURNING id", {
+        ${updated_at}, ${email_md5}) RETURNING id", {
             pubkey: req.params.pubkey,
             alias: (_) => {
                 return (req.query.alias !== undefined ? req.query.alias : null)
@@ -52,6 +52,7 @@ function createAccount (req, res, _) {
             },
             created_at: now,
             updated_at: now,
+            email_md5: req.query.md5,
         })
         .then((result) => {
             res.status(201).json({
