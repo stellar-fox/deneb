@@ -96,3 +96,11 @@ ALTER TABLE public.accounts
 -- =============================================================================
 ALTER TABLE public.accounts
   ADD COLUMN email_md5 character varying;
+
+-- =============================================================================
+ALTER TABLE public.accounts
+  ADD COLUMN domain character varying;
+
+-- =============================================================================
+ALTER TABLE public.accounts
+  ADD CONSTRAINT alias_domain UNIQUE (alias, domain);

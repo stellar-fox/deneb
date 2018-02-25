@@ -106,48 +106,70 @@ function updateUser(req, res, next) {
 
 
 // ..
-function updateAccount(req, res, next) {
-  if(!helpers.tokenIsValid(req.query.token, req.params.user_id)) {
-    return res.status(403).json({
-      error: "Forbidden",
+function updateAccount (req, res, _next) {
+    if(!helpers.tokenIsValid(req.query.token, req.params.user_id)) {
+        return res.status(403).json({
+            error: "Forbidden",
+        })
+    }
+
+    
+    
+    const federationCheck = new RegExp([
+        /^([a-zA-Z\-0-9.@]+)\*/,
+        /((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+    ].map(r => r.source).join(""))
+
+    
+    let alias = null,
+        domain = null
+        
+    if (req.query.alias !== undefined) {
+        const federationMatch = req.query.alias.match(federationCheck)
+        alias = federationMatch ? federationMatch[1] : null,
+        domain = federationMatch ? federationMatch[2] : null
+    }
+
+    helpers.db.tx(t => {
+        return t.batch([
+            (req.query.alias !== undefined ?
+                t.none("UPDATE accounts SET alias = $1, domain = $3 WHERE user_id = $2",
+                    [alias, req.params.user_id, domain,]) : null
+            ),
+            (req.query.visible !== undefined ?
+                t.none("UPDATE accounts SET visible = ${visible} WHERE user_id = ${user_id}",
+                    {
+                        visible: () => {
+                            return (req.query.visible == "false" ? false : true)
+                        },
+                        user_id: req.params.user_id,
+                    }) : null
+            ),
+            (req.query.currency !== undefined ?
+                t.none("UPDATE accounts SET currency = $1 WHERE user_id = $2",
+                    [req.query.currency, req.params.user_id,]) : null
+            ),
+            (req.query.precision !== undefined ?
+                t.none("UPDATE accounts SET precision = $1 WHERE user_id = $2",
+                    [req.query.precision, req.params.user_id,]) : null
+            ),
+            t.none("UPDATE accounts SET updated_at = $1", [new Date(),]),
+        ])
+    }).then(_ => {
+        res.status(204).json({
+            status: "success",
+        })
+    }).catch(error => {
+        if (/alias_domain/.test(error.message)) {
+            res.status(409).json({
+                error: "This payment address is already reserved.",
+            })    
+        } else {
+            res.status(500).json({
+                error: error.message,
+            })
+        }
     })
-  }
-  helpers.db.tx(t => {
-    return t.batch([
-      (req.query.alias !== undefined ?
-        t.none('UPDATE accounts SET alias = $1 WHERE user_id = $2',
-          [req.query.alias, req.params.user_id]) : null
-      ),
-      (req.query.visible !== undefined ?
-        t.none('UPDATE accounts SET visible = ${visible} WHERE user_id = ${user_id}',
-          {
-            visible: visible => {
-              return (req.query.visible == 'false' ? false : true)
-            },
-            user_id: req.params.user_id
-          }) : null
-      ),
-      (req.query.currency !== undefined ?
-        t.none('UPDATE accounts SET currency = $1 WHERE user_id = $2',
-          [req.query.currency, req.params.user_id]) : null
-      ),
-      (req.query.precision !== undefined ?
-        t.none('UPDATE accounts SET precision = $1 WHERE user_id = $2',
-          [req.query.precision, req.params.user_id]) : null
-      ),
-      t.none('UPDATE accounts SET updated_at = $1', [new Date()]),
-    ])
-  })
-  .then(data => {
-    res.status(204).json({
-      status: 'success',
-    })
-  })
-  .catch(error => {
-    res.status(500).json({
-      error: error.message,
-    })
-  })
 }
 
 
