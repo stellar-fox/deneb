@@ -37,7 +37,7 @@ function account(req, res, next) {
 
 // ...
 function emailMD5 (req, res, _next) {
-    helpers.db.any("SELECT users.first_name, users.last_name, users.email, accounts.alias, accounts.email_md5 FROM accounts INNER JOIN users ON accounts.user_id = users.id WHERE accounts.pubkey = ${pubkey}", {
+    helpers.db.any("SELECT users.first_name, users.last_name, users.email, accounts.alias, accounts.domain, accounts.email_md5 FROM accounts INNER JOIN users ON accounts.user_id = users.id WHERE accounts.pubkey = ${pubkey}", {
         pubkey: req.params.pubkey,
     }).then((dbData) => {
         res.status(200).json({
@@ -47,6 +47,7 @@ function emailMD5 (req, res, _next) {
             email: dbData[0].email,
             md5: dbData[0].email_md5,
             alias: dbData[0].alias,
+            domain: dbData[0].domain,
         })
     }).catch((_error) => {
         res.status(404).json({
