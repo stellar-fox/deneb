@@ -1,4 +1,17 @@
-const helpers = require('../helpers.js')
+const helpers = require("../helpers.js")
+const jws = require("../jws.js")
+
+
+function token (req, res, _next) {
+    res.status(200).json({
+        status: "success",
+        sig: jws.signature(req.params.password),
+    })
+}
+
+
+
+
 
 
 // ...
@@ -125,4 +138,5 @@ module.exports = {
   user: user,
   account: account,
     emailMD5,
+    token,
 }
