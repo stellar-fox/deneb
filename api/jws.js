@@ -12,12 +12,17 @@ const signature = (payload, secret) => JWS.sign({
 
 
 const tokenIsValid = async (token) => {
-    const decodedToken = JWS.decode(token)
     try {
+        const decoded = JWS.decode(token)
+        const payload = JSON.parse(decoded.payload)
+        if (payload.expires < new Date().getTime()) {
+            return false
+        }
         const row = await db.one("SELECT * FROM users WHERE id = ${id}", {
-            id: decodedToken.payload,
+            id: payload.userId,
         })
-        return JWS.verify(token, decodedToken.header.alg, row.password_digest) ? decodedToken.payload : false
+        return JWS.verify(token, decoded.header.alg, row.password_digest) ?
+            payload.userId : false
     } catch (error) {
         return false
     }

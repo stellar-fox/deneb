@@ -202,31 +202,38 @@ const db = require("../../lib/db.js")
 
 
 /**
+ * This function authenticates user with username/password combination and
+ * returns signed Json Web Token (JWT) for future interaction with the API.
+ * @param {Object} req Express.js request object.
+ * @param {Object} res Express.js response object.
+ * @param {function} _next Express.js next function in request-response cycle.
  * 
- * @param {Object} req 
- * @param {Object} res 
- * @param {function} _next
  */
-function authenticateUser (req, res, _next) {
-    db.one("SELECT * FROM users WHERE email = ${email}",
-        {email: req.params.email,}
-    ).then((dbRow) => { // EMAIL FOUND
+async function authenticateUser (req, res, _next) {
+    try {
+        const dbRow = await db.one("SELECT * FROM users WHERE email = ${email}",
+            {email: req.params.email,}
+        )    
         bcrypt.compareSync(req.params.password, dbRow.password_digest) ?
             res.status(200).json({ // SUCCESSFULLY AUTHENTICATED
                 authenticated: true,
-                token: jws.signature(dbRow.id, dbRow.password_digest),
+                token: jws.signature(JSON.stringify({
+                    userId: dbRow.id,
+                    expires: new Date(new Date().getTime() + 20 * 60000).getTime(),
+                }), dbRow.password_digest),
             }) :
             res.status(401).json({ // WRONG CREDENTIALS
                 authenticated: false,
                 error: "Wrong credentials.",
             })
-    }).catch((error) => { // EMAIL NOT FOUND OR ANY OTHER ERROR
+    }
+    catch (error){ // EMAIL NOT FOUND OR ANY OTHER ERROR
         res.status(helpers.codeToHttpRet(error.code)).json({
             authenticated: false,
             error: error.message,
             code: error.code,
         })
-    })
+    }
 }
 
 
@@ -243,7 +250,13 @@ function authenticateUser (req, res, _next) {
 // }
 
 
-// ...
+/**
+ * This function updates the user table based on the query parameters provided
+ * as well as validity of Jason Web Token (JWT)
+ * @param {Object} req Express.js request object.
+ * @param {Object} res Express.js response object.
+ * @param {function} _next Express.js next function in request-response cycle.
+ */
 async function updateUserAttributes (req, res, _next) {
     const userId = await jws.tokenIsValid(req.params.token)
     if (userId) {
