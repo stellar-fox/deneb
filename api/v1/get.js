@@ -1,73 +1,98 @@
 const helpers = require("../helpers.js")
 const jws = require("../jws.js")
+const db = require("../../lib/db.js")
 
 
-function token (req, res, _next) {
-    res.status(200).json({
-        status: "success",
-        sig: jws.signature(req.params.password),
-    })
-}
+// function token (req, res, _next) {
+//     res.status(200).json({
+//         status: "success",
+//         sig: jws.signature(req.params.password),
+//     })
+// }
 
 
-
-
-
-
-// ...
-function user(req, res, next) {
-  helpers.db.one('select * from users where id = ${id}', {
-    id: req.params.id
-  })
-  .then((dbData) => {
-    res.status(200).json({
-      status: 'success',
-      data: dbData,
-    })
-  })
-  .catch((error) => {
-    return next(error.message)
-  })
-}
-
-
-// ...
-function account(req, res, next) {
-  helpers.db.one('select * from accounts where user_id = ${user_id}', {
-    user_id: req.params.user_id
-  })
-  .then((dbData) => {
-    res.status(200).json({
-      status: 'success',
-      data: dbData,
-    })
-  })
-  .catch((error) => {
-    return next(error.message)
-  })
-}
-
-
-// ...
-function emailMD5 (req, res, _next) {
-    helpers.db.any("SELECT users.first_name, users.last_name, users.email, accounts.alias, accounts.domain, accounts.email_md5 FROM accounts INNER JOIN users ON accounts.user_id = users.id WHERE accounts.pubkey = ${pubkey}", {
-        pubkey: req.params.pubkey,
-    }).then((dbData) => {
+/**
+ * This function gets the user row from database based on verified signature
+ * of Jason Web Token (JWT)
+ * @param {Object} req Express.js request object.
+ * @param {Object} res Express.js response object.
+ * @param {function} _next Express.js next function in request-response cycle.
+ */
+async function getUser (req, res, _next) {
+    const userId = await jws.getUserIdFromToken(req.params.token)
+    if (!userId) {
+        return res.status(403).json({
+            error: "Forbidden. Invalid token.",
+        })
+    }
+    try {
+        const user = await db.one("SELECT * FROM users WHERE id = ${id}", {id: userId,})
         res.status(200).json({
-            status: "success",
-            first_name: dbData[0].first_name,
-            last_name: dbData[0].last_name,
-            email: dbData[0].email,
-            md5: dbData[0].email_md5,
-            alias: dbData[0].alias,
-            domain: dbData[0].domain,
+            ok: true,
+            user,
         })
-    }).catch((_error) => {
-        res.status(404).json({
-            error: "Not found.",
+    } catch (error) {
+        res.status(helpers.codeToHttpRet(error.code)).json({
+            error: error.message,
+            code: error.code,
         })
-    })
+    }
 }
+
+
+/**
+ * This function gets the account row from database based on verified signature
+ * of Jason Web Token (JWT)
+ * @param {Object} req Express.js request object.
+ * @param {Object} res Express.js response object.
+ * @param {function} _next Express.js next function in request-response cycle.
+ */
+async function getAccount (req, res, _next) {
+    const userId = await jws.getUserIdFromToken(req.params.token)
+    if (!userId) {
+        return res.status(403).json({
+            error: "Forbidden. Invalid token.",
+        })
+    }
+    try {
+        const user = await db.one(
+            "SELECT * FROM accounts WHERE user_id = ${user_id}",
+            { user_id: userId, }
+        )
+        res.status(200).json({
+            ok: true,
+            user,
+        })
+    } catch (error) {
+        res.status(helpers.codeToHttpRet(error.code)).json({
+            error: error.message,
+            code: error.code,
+        })
+    }
+}
+
+
+
+// // ...
+// function emailMD5 (req, res, _next) {
+//     helpers.db.any("SELECT users.first_name, users.last_name, users.email, accounts.alias, accounts.domain, accounts.email_md5 FROM accounts INNER JOIN users ON accounts.user_id = users.id WHERE accounts.pubkey = ${pubkey}", {
+//         pubkey: req.params.pubkey,
+//     }).then((dbData) => {
+//         res.status(200).json({
+//             status: "success",
+//             first_name: dbData[0].first_name,
+//             last_name: dbData[0].last_name,
+//             email: dbData[0].email,
+//             md5: dbData[0].email_md5,
+//             alias: dbData[0].alias,
+//             domain: dbData[0].domain,
+//         })
+//     }).catch((_error) => {
+//         res.status(404).json({
+//             error: "Not found.",
+//         })
+//     })
+// }
 
 
 // ...
@@ -134,9 +159,11 @@ function latestCurrency(req, res, next) {
 
 // ...
 module.exports = {
-  latestCurrency: latestCurrency,
-  user: user,
-  account: account,
-    emailMD5,
-    token,
+//   latestCurrency: latestCurrency,
+//   user: user,
+//   account: account,
+//     emailMD5,
+//     token,
+    getUser,
+    getAccount,
 }

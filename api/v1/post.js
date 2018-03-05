@@ -117,34 +117,33 @@ async function authenticateUser (req, res, _next) {
  */
 async function updateUserAttributes (req, res, _next) {
     const userId = await jws.getUserIdFromToken(req.params.token)
-    if (userId) {
-        try {
-            await db.tx(t => {
-                t.batch([
-                    (req.query.first_name !== undefined ?
-                        t.none("UPDATE users SET first_name = $1 WHERE id = $2",
-                            [req.query.first_name, userId,]) : null
-                    ),
-                    (req.query.last_name !== undefined ?
-                        t.none("UPDATE users SET last_name = $1 WHERE id = $2",
-                            [req.query.last_name, userId,]) : null
-                    ),
-                    t.none("UPDATE users SET updated_at = $1 WHERE id = $2",
-                        [new Date(), userId,]),
-                ])
-            })
-            res.status(204).json({
-                ok: true,
-            })
-        } catch (error) {
-            res.status(helpers.codeToHttpRet(error.code)).json({
-                error: error.message,
-                code: error.code,
-            })
-        }
-    } else {
-        res.status(403).json({
+    if (!userId) {
+        return res.status(403).json({
             error: "Forbidden. Invalid token.",
+        })
+    }
+    try {
+        await db.tx(t => {
+            t.batch([
+                (req.query.first_name !== undefined ?
+                    t.none("UPDATE users SET first_name = $1 WHERE id = $2",
+                        [req.query.first_name, userId,]) : null
+                ),
+                (req.query.last_name !== undefined ?
+                    t.none("UPDATE users SET last_name = $1 WHERE id = $2",
+                        [req.query.last_name, userId,]) : null
+                ),
+                t.none("UPDATE users SET updated_at = $1 WHERE id = $2",
+                    [new Date(), userId,]),
+            ])
+        })
+        res.status(204).json({
+            ok: true,
+        })
+    } catch (error) {
+        res.status(helpers.codeToHttpRet(error.code)).json({
+            error: error.message,
+            code: error.code,
         })
     }
 }

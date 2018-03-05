@@ -44,29 +44,48 @@ app.use((_req, res, next) => {
 
 
 /*
- *********************
- ***** GET CALLS *****
- *********************
+ ******************************************************************************
+ ********************************* GET CALLS **********************************
+ ******************************************************************************
 */
 
 /**
  * This call returns API version.
  * @returns {String} current API version.
- * @name GET.api/v1.1
- * @example https://stellarfox.net/api/v1.1
+ * @name GET.api/v1
+ * @example https://stellarfox.net/api/v1
  */
-app.get("/api/v1.1", (_req, res) => res.send({
+app.get("/api/v1", (_req, res) => res.send({
     name: "Deneb",
-    version: "1.1",
+    version: "1",
     jwt: true,
 }))
 
 
+/**
+ * This call issues JWT (JSON Web Token) based on user credentials.
+ * @param {String} token JSON Web Token (JWT) issued per user.
+ * @returns {Object} authorization JSON including JWT.
+ * @name GET.api/v1/user
+ * @example https://stellarfox.net/api/v1/user/xxx.yyy.zzz
+ */
+app.get("/api/v1/user/:token", GETAPI.getUser)
+
+
+/**
+ * This call issues JWT (JSON Web Token) based on user credentials.
+ * @param {String} token JSON Web Token (JWT) issued per user.
+ * @returns {Object} authorization JSON including JWT.
+ * @name GET.api/v1/account
+ * @example https://stellarfox.net/api/v1/account/xxx.yyy.zzz
+ */
+app.get("/api/v1/account/:token", GETAPI.getAccount)
+
 
 /*
- **********************
- ***** POST CALLS *****
- **********************
+ ******************************************************************************
+ ********************************* POST CALLS *********************************
+ ******************************************************************************
 */
 
 /**
@@ -85,7 +104,7 @@ app.post("/api/v1/auth/:email/:password", POSTAPI.authenticateUser)
  * The update will only happen if valid JWT is provided.
  * @param {String} token JSON Web Token (JWT) issued per user.
  * @name POST.api/v1/user/update
- * @example https://stellarfox.net/api/v1/user/update/eyJhbGciOiJIUzI1NiJ9.NzY.59Ui_VLRgTZaAAXyuTaPgktw9vuafW7qIZxsbyv2v20?first_name=Jane
+ * @example https://stellarfox.net/api/v1/user/update/xxx.yyy.zzz?first_name=Jane
  */
 app.post("/api/v1/user/update/:token",    POSTAPI.updateUserAttributes)
 
@@ -95,7 +114,7 @@ app.post("/api/v1/user/update/:token",    POSTAPI.updateUserAttributes)
  * The update will only happen if valid JWT is provided.
  * @param {String} token JSON Web Token (JWT) issued per user.
  * @name POST.api/v1/account/update
- * @example https://stellarfox.net/api/v1/account/update/eyJhbGciOiJIUzI1NiJ9.NzY.59Ui_VLRgTZaAAXyuTaPgktw9vuafW7qIZxsbyv2v20?alias=Jane&domain=example.com
+ * @example https://stellarfox.net/api/v1/account/update/xxx.yyy.zzz?alias=Jane&domain=example.com
  */
 app.post("/api/v1/account/update/:token", POSTAPI.updateAccountAttributes)
 
