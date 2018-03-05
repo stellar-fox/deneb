@@ -85,7 +85,7 @@ app.post("/api/v1/auth/:email/:password", POSTAPI.authenticateUser)
  * The update will only happen if valid JWT is provided.
  * @param {String} token JSON Web Token (JWT) issued per user.
  * @name POST.api/v1/user/update
- * @example https://stellarfox.net/api/v1/user/update/eyJhbGciOiJIUzI1NiJ9.NzY.59Ui_VLRgTZaAAXyuTaPgktw9vuafW7qIZxsbyv2v20?first_name="Jane"
+ * @example https://stellarfox.net/api/v1/user/update/eyJhbGciOiJIUzI1NiJ9.NzY.59Ui_VLRgTZaAAXyuTaPgktw9vuafW7qIZxsbyv2v20?first_name=Jane
  */
 app.post("/api/v1/user/update/:token",    POSTAPI.updateUserAttributes)
 
@@ -95,7 +95,7 @@ app.post("/api/v1/user/update/:token",    POSTAPI.updateUserAttributes)
  * The update will only happen if valid JWT is provided.
  * @param {String} token JSON Web Token (JWT) issued per user.
  * @name POST.api/v1/account/update
- * @example https://stellarfox.net/api/v1/account/update/eyJhbGciOiJIUzI1NiJ9.NzY.59Ui_VLRgTZaAAXyuTaPgktw9vuafW7qIZxsbyv2v20?alias="Jane"
+ * @example https://stellarfox.net/api/v1/account/update/eyJhbGciOiJIUzI1NiJ9.NzY.59Ui_VLRgTZaAAXyuTaPgktw9vuafW7qIZxsbyv2v20?alias=Jane&domain=example.com
  */
 app.post("/api/v1/account/update/:token", POSTAPI.updateAccountAttributes)
 
