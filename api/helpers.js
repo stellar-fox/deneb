@@ -93,91 +93,35 @@ const getFedDomain = (domain) => (
 )(domain.match(regexpDomainFormat))
 
 
-// const compare = (a,b) => (
-//     (b) => bcrypt.compareSync(a, b)
-// )(b)
-
-
-
-// ...
-// const errorMessageToRetCode = function (message) {
-//     let errorCode = null
-//     switch (true) {
-//         case (message.match(/duplicate key/) !== null):
-//             errorCode = 409
-//             break
-    
-//         default:
-//             errorCode = 500
-//             break
-//     }
-//     return errorCode
-// }
-
-// ...
+/**
+ * This function encodes ascii string into a base64 string.
+ * @param {String} bcryptHash contains the ascii result of bcrypt.hash() operation.
+ * @returns {String} base64 encoded input.
+ */
 const btoh = (bcryptHash) => (
-    new Buffer(bcryptHash, "ascii").toString("hex")
+    new Buffer(bcryptHash, "ascii").toString("base64")
 )
 
 
-// ...
+/**
+ * This function decodes base64 string into ascii.
+ * @param {String} hexString contains the base64 representation of bcrypt.hash() result.
+ * @returns {String} ascii representation of bcrypt.hash() result.
+ */
 const htob = (hexString) => (
-    new Buffer(hexString, "hex").toString("ascii")
+    new Buffer(hexString, "base64").toString("ascii")
 )
-
-
-// ...
-// const apiKeyValid = function (hashedApiKey) {
-//     return bcrypt.compareSync(config.attributes.apiKey, hashedApiKey)
-// }
-
-
-// ...
-// const fetchCMC = function (base='stellar', quot='eur') {
-//   return axios.get(`https://api.coinmarketcap.com/v1/ticker/${base}/?convert=${quot}`)
-//     .then((response) => {
-//       return {
-//         data: response.data[0],
-//       }
-//     })
-//     .catch((error) => {
-//       throw new Error(JSON.stringify({
-//         status: error.response.status,
-//         statusText: error.response.statusText,
-//       }))
-//     })
-// }
-
-
-// ...
-// const tokenIsValid = function(token, userId) {
-//   const tokenASCII = new Buffer(token, 'base64').toString('ascii')
-//   return bcrypt.compareSync(`${config.attributes.apiKey}${userId}`, tokenASCII)
-// }
-
-
-// ...
-// const getApiKey = function() {
-//   return config.attributes.apiKey
-// }
 
 
 // ...
 module.exports = {
-//   fetchCMC: fetchCMC,
-    // db: db,
-    // tokenIsValid: tokenIsValid,
-    // getApiKey: getApiKey,
-    // apiKeyValid,
     emailIsValid,
     passwordIsValid,
     btoh,
     htob,
-    // errorMessageToRetCode,
     codeToHttpRet,
     regexpFederationFormat,
     federationAddressIsValid,
     getFedAlias,
     getFedDomain,
-    // compare,
 }
