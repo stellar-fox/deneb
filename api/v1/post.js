@@ -2,7 +2,6 @@ const helpers = require("../helpers.js")
 const jws = require("../jws.js")
 const bcrypt = require("bcrypt")
 const db = require("../../lib/db.js")
-// const saltRounds = 10
 
 
 // ...
@@ -73,134 +72,6 @@ const db = require("../../lib/db.js")
 // }
 
 
-// ...
-// function updateUser(req, res, next) {
-//   if(!helpers.tokenIsValid(req.query.token, req.params.id)) {
-//     return res.status(403).json({
-//       error: "Forbidden",
-//     })
-//   }
-//   helpers.db.tx(t => {
-//     return t.batch([
-//       (req.query.first_name !== undefined ?
-//         t.none('UPDATE users SET first_name = $1 WHERE id = $2',
-//           [req.query.first_name, req.params.id]) : null
-//       ),
-//       (req.query.last_name !== undefined ?
-//         t.none('UPDATE users SET last_name = $1 WHERE id = $2',
-//           [req.query.last_name, req.params.id]) : null
-//       ),
-//       t.none('UPDATE users SET updated_at = $1 WHERE id = $2',
-//         [new Date(), req.params.id]),
-//     ])
-//   })
-//   .then(data => {
-//     res.status(204).json({
-//       status: 'success',
-//     })
-//   })
-//   .catch(error => {
-//     res.status(500).json({
-//       error: error.message,
-//     })
-//   })
-// }
-
-
-// ..
-// function updateAccount (req, res, _next) {
-//     if(!helpers.tokenIsValid(req.query.token, req.params.user_id)) {
-//         return res.status(403).json({
-//             error: "Forbidden",
-//         })
-//     }
-
-    
-    
-//     const federationCheck = new RegExp([
-//         /^([a-zA-Z\-0-9.@]+)\*/,
-//         /((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
-//     ].map(r => r.source).join(""))
-
-    
-//     let alias = null,
-//         domain = null
-        
-//     if (req.query.alias !== undefined) {
-//         const federationMatch = req.query.alias.match(federationCheck)
-//         alias = federationMatch ? federationMatch[1] : null,
-//         domain = federationMatch ? federationMatch[2] : null
-//     }
-
-//     helpers.db.tx(t => {
-//         return t.batch([
-//             (req.query.alias !== undefined ?
-//                 t.none("UPDATE accounts SET alias = $1, domain = $3 WHERE user_id = $2",
-//                     [alias, req.params.user_id, domain,]) : null
-//             ),
-//             (req.query.visible !== undefined ?
-//                 t.none("UPDATE accounts SET visible = ${visible} WHERE user_id = ${user_id}",
-//                     {
-//                         visible: () => {
-//                             return (req.query.visible == "false" ? false : true)
-//                         },
-//                         user_id: req.params.user_id,
-//                     }) : null
-//             ),
-//             (req.query.currency !== undefined ?
-//                 t.none("UPDATE accounts SET currency = $1 WHERE user_id = $2",
-//                     [req.query.currency, req.params.user_id,]) : null
-//             ),
-//             (req.query.precision !== undefined ?
-//                 t.none("UPDATE accounts SET precision = $1 WHERE user_id = $2",
-//                     [req.query.precision, req.params.user_id,]) : null
-//             ),
-//             t.none("UPDATE accounts SET updated_at = $1", [new Date(),]),
-//         ])
-//     }).then(_ => {
-//         res.status(204).json({
-//             status: "success",
-//         })
-//     }).catch(error => {
-//         if (/alias_domain/.test(error.message)) {
-//             res.status(409).json({
-//                 error: "This payment address is already reserved.",
-//             })    
-//         } else {
-//             res.status(500).json({
-//                 error: error.message,
-//             })
-//         }
-//     })
-// }
-
-
-//  ...
-// function issueToken (req, res, _) {
-//     helpers.db.any("SELECT user_id FROM ACCOUNTS WHERE pubkey = ${pubkey} AND path = ${path}", {
-//         pubkey: req.params.pubkey,
-//         path: req.params.path,
-//     }).then((dbData) => {
-//         bcrypt.hash(`${helpers.getApiKey()}${dbData[0].user_id}`, saltRounds, (_, hash) => {
-//             // authenticated
-//             res.status(200).json({
-//                 authenticated: true,
-//                 user_id: dbData[0].user_id,
-//                 token: new Buffer(hash).toString("base64"),
-//             })
-//         })
-//     }).catch((_) => {
-//         res.status(401).json({
-//             authenticated: false,
-//             user_id: null,
-//             token: null,
-//         })
-//     })
-// }
-
-
-
-
 /**
  * This function authenticates user with username/password combination and
  * returns signed Json Web Token (JWT) for future interaction with the API.
@@ -237,28 +108,15 @@ async function authenticateUser (req, res, _next) {
 }
 
 
-// ...
-// async function updateUserJws (req, res, _next) {
-//     const userId = await jws.tokenIsValid(req.params.token)
-//     userId ? 
-//         res.status(200).json({
-//             ok: `User ${userId} Authorized To Perform Action`,
-//         }) :
-//         res.status(403).json({
-//             error: "Invalid token.",
-//         })
-// }
-
-
 /**
  * This function updates the user table based on the query parameters provided
- * as well as validity of Jason Web Token (JWT)
+ * as well as validity of Jason Web Token (JWT).
  * @param {Object} req Express.js request object.
  * @param {Object} res Express.js response object.
  * @param {function} _next Express.js next function in request-response cycle.
  */
 async function updateUserAttributes (req, res, _next) {
-    const userId = await jws.tokenIsValid(req.params.token)
+    const userId = await jws.getUserIdFromToken(req.params.token)
     if (userId) {
         try {
             await db.tx(t => {
@@ -292,72 +150,71 @@ async function updateUserAttributes (req, res, _next) {
 }
 
 
+/**
+ * This function updates the account table based on the query parameters
+ * provided as well as validity of Jason Web Token (JWT).
+ * @param {Object} req Express.js request object.
+ * @param {Object} res Express.js response object.
+ * @param {function} _next Express.js next function in request-response cycle.
+ */
+async function updateAccountAttributes (req, res, _next) {
+    const userId = await jws.getUserIdFromToken(req.params.token)
+    if (!userId) {
+        return res.status(403).json({
+            error: "Forbidden. Invalid token.",
+        })
+    }
+    try {
+        await db.tx(t => {
+            t.batch([
+                // alias and domain
+                (req.query.alias !== undefined && req.query.domain !== undefined ?
+                    t.none("UPDATE accounts SET alias = $1, domain = $2 WHERE user_id = $3",
+                        [
+                            helpers.getFedAlias(req.query.alias),
+                            helpers.getFedDomain(req.query.domain),
+                            userId,
+                        ])
+                    : null
+                ),
+                // account visibility
+                (req.query.visible !== undefined ?
+                    t.none("UPDATE accounts SET visible = ${visible} WHERE user_id = ${user_id}",
+                        {
+                            visible: () => {
+                                return (req.query.visible == "false" ? false : true)
+                            },
+                            user_id: userId,
+                        }) : null
+                ),
+                // default currency
+                (req.query.currency !== undefined ?
+                    t.none("UPDATE accounts SET currency = $1 WHERE user_id = $2",
+                        [req.query.currency, userId,]) : null
+                ),
+                // display precission
+                (req.query.precision !== undefined ?
+                    t.none("UPDATE accounts SET precision = $1 WHERE user_id = $2",
+                        [req.query.precision, userId,]) : null
+                ),
+                // always set updated_at date
+                t.none("UPDATE accounts SET updated_at = $1", [new Date(),]),
+            ])
+        })
+        res.status(204).json({
+            ok: true,
+        })
+    } catch (error) {
+        res.status(helpers.codeToHttpRet(error.code)).json({
+            error: error.message,
+            code: error.code,
+        })
+    }
+}
 
 
-
-
-// ...
-// function authenticate(req, res, next) {
-//   helpers.db.any('select * from users where email = ${email}', {email: req.params.email})
-//     .then((dbData) => {
-//       // user found
-//       if (dbData.length === 1) {
-//         bcrypt.compare(req.params.password, dbData[0].password_digest, (err, auth) => {
-//           if (auth) {
-//             helpers.db.one('select pubkey from accounts where user_id = ${user_id}', {
-//               user_id: dbData[0].id
-//             })
-//             .then((dbAccount) => {
-//               bcrypt.hash(`${helpers.getApiKey()}${dbData[0].id}`, saltRounds, (error, hash) => {
-//                 // authenticated
-//                 res.status(200).json({
-//                   authenticated: true,
-//                   user_id: dbData[0].id,
-//                   pubkey: dbAccount.pubkey,
-//                   token: new Buffer(hash).toString('base64'),
-//                 })
-//               })
-//             })
-//             .catch((error) => {
-//               console.log(next(error.message))
-//             })
-//           } else {
-//             // not authenticated
-//             res.status(401).json({
-//               authenticated: false,
-//               user_id: null,
-//               pubkey: null,
-//             })
-//           }
-//         })
-//       }
-//       // user not found in DB
-//       else {
-//         res.status(401).json({
-//           authenticated: false,
-//           user_id: null,
-//           pubkey: null,
-//         })
-//       }
-
-//     }).catch((error) => {
-//       console.log(error)
-//       res.status(500).json({
-//         error: error.message
-//       })
-//     })
-// }
-
-
-//...
 module.exports = {
-//   updateUser: updateUser,
-//   authenticate: authenticate,
-//   createAccount: createAccount,
-//   updateAccount: updateAccount,
-    // createUser,
-    // issueToken,
     authenticateUser,
-    // updateUserJws,
     updateUserAttributes,
+    updateAccountAttributes,
 }

@@ -74,7 +74,7 @@ app.get("/api/v1.1", (_req, res) => res.send({
  * @param {String} email matching valid email format
  * @param {String} password matching valid password format
  * @returns {Object} authorization JSON including JWT.
- * @name POST.api/v1.1/auth
+ * @name POST.api/v1/auth
  * @example https://stellarfox.net/api/v1/auth/user@example.com/P@33w0r$
  */
 app.post("/api/v1/auth/:email/:password", POSTAPI.authenticateUser)
@@ -84,12 +84,20 @@ app.post("/api/v1/auth/:email/:password", POSTAPI.authenticateUser)
  * This call updates user attributes passed as query string parameters.
  * The update will only happen if valid JWT is provided.
  * @param {String} token JSON Web Token (JWT) issued per user.
- * @name POST.api/v1.1/user/update
+ * @name POST.api/v1/user/update
  * @example https://stellarfox.net/api/v1/user/update/eyJhbGciOiJIUzI1NiJ9.NzY.59Ui_VLRgTZaAAXyuTaPgktw9vuafW7qIZxsbyv2v20?first_name="Jane"
  */
 app.post("/api/v1/user/update/:token",    POSTAPI.updateUserAttributes)
 
 
+/**
+ * This call updates account attributes passed as query string parameters.
+ * The update will only happen if valid JWT is provided.
+ * @param {String} token JSON Web Token (JWT) issued per user.
+ * @name POST.api/v1/account/update
+ * @example https://stellarfox.net/api/v1/account/update/eyJhbGciOiJIUzI1NiJ9.NzY.59Ui_VLRgTZaAAXyuTaPgktw9vuafW7qIZxsbyv2v20?alias="Jane"
+ */
+app.post("/api/v1/account/update/:token", POSTAPI.updateAccountAttributes)
 
 
 // eslint-disable-next-line no-console
