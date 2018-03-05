@@ -63,9 +63,9 @@ app.get("/api/v1", (_req, res) => res.send({
 
 
 /**
- * This call issues JWT (JSON Web Token) based on user credentials.
+ * This call returns user row from database as JSON object.
  * @param {String} token JSON Web Token (JWT) issued per user.
- * @returns {Object} authorization JSON including JWT.
+ * @returns {Object} User row from database.
  * @name GET.api/v1/user
  * @example https://stellarfox.net/api/v1/user/xxx.yyy.zzz
  */
@@ -73,13 +73,23 @@ app.get("/api/v1/user/:token", GETAPI.getUser)
 
 
 /**
- * This call issues JWT (JSON Web Token) based on user credentials.
+ * This call returns account row from database as JSON object.
  * @param {String} token JSON Web Token (JWT) issued per user.
- * @returns {Object} authorization JSON including JWT.
+ * @returns {Object} Account row from database.
  * @name GET.api/v1/account
  * @example https://stellarfox.net/api/v1/account/xxx.yyy.zzz
  */
 app.get("/api/v1/account/:token", GETAPI.getAccount)
+
+
+/**
+ * This call returns latest exchange rate against XLM and given currency.
+ * @param {String} currency lower-case ISO-9425 currency code.
+ * @returns {Object} Ticker exchange rate from database for given currency.
+ * @name GET.api/v1/fx
+ * @example https://stellarfox.net/api/v1/fx/eur
+ */
+app.get("/api/v1/fx/:currency", GETAPI.exchangeRate)
 
 
 /*
@@ -106,17 +116,38 @@ app.post("/api/v1/auth/:email/:password", POSTAPI.authenticateUser)
  * @name POST.api/v1/user/update
  * @example https://stellarfox.net/api/v1/user/update/xxx.yyy.zzz?first_name=Jane
  */
-app.post("/api/v1/user/update/:token",    POSTAPI.updateUserAttributes)
+app.post("/api/v1/user/update/:token", POSTAPI.updateUserAttributes)
 
 
 /**
  * This call updates account attributes passed as query string parameters.
- * The update will only happen if valid JWT is provided.
+ * The update will only happen if a valid JWT is provided.
  * @param {String} token JSON Web Token (JWT) issued per user.
  * @name POST.api/v1/account/update
  * @example https://stellarfox.net/api/v1/account/update/xxx.yyy.zzz?alias=Jane&domain=example.com
  */
 app.post("/api/v1/account/update/:token", POSTAPI.updateAccountAttributes)
+
+
+/**
+ * This call creates a new user in the database.
+ * @param {String} token JSON Web Token (JWT) issued per user.
+ * @name POST.api/v1/user/create
+ * @example https://stellarfox.net/api/v1/user/create/user@example.com/P@33w0r$
+ */
+app.post("/api/v1/user/create/:email/:password", POSTAPI.createUser)
+
+
+/**
+ * This call creates new account in the database.
+ * New account will only be created if a valid JWT is provided and required
+ * query parameters provided.
+ * @param {String} token JSON Web Token (JWT) issued per user.
+ * @name POST.api/v1/account/create
+ * @example https://stellarfox.net/api/v1/account/create/xxx.yyy.zzz?pubkey=GAZOFOR&path=0
+ */
+app.post("/api/v1/account/create/:token", POSTAPI.createAccount)
+
 
 
 // eslint-disable-next-line no-console

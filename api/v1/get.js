@@ -3,14 +3,6 @@ const jws = require("../jws.js")
 const db = require("../../lib/db.js")
 
 
-// function token (req, res, _next) {
-//     res.status(200).json({
-//         status: "success",
-//         sig: jws.signature(req.params.password),
-//     })
-// }
-
-
 /**
  * This function gets the user row from database based on verified signature
  * of Jason Web Token (JWT)
@@ -95,6 +87,13 @@ async function getAccount (req, res, _next) {
 // }
 
 
+async function exchangeRate (req, res, _next) {
+    res.status(200).json({
+        ok: true,
+        fx: {},
+    })
+}
+
 // ...
 function latestCurrency(req, res, next) {
   helpers.db.any('select * from ticker where currency = ${currency}', {currency: req.params.currency})
@@ -166,4 +165,5 @@ module.exports = {
 //     token,
     getUser,
     getAccount,
+    exchangeRate,
 }

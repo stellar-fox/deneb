@@ -26,6 +26,28 @@ const regexpDomainFormat = new RegExp(
 
 
 /**
+ * This function checks the validity of email address format.
+ * @param {String} email
+ * @returns {Boolean}
+ */
+const emailIsValid = (email) => !!(
+    new RegExp([
+        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))/,
+        /@/,
+        regexpDomainFormat,
+    ].map(r => r.source).join(""))
+).test(email)
+
+
+/**
+ * This function checks the validity of password.
+ * @param {String} email
+ * @returns {Boolean}
+ */
+const passwordIsValid = (password) => !!/^.{8,}$/.test(password)
+
+
+/**
  * This helper function converts numerical return code from database and
  * translates it to standard HTTP return code.
  * @param {Integer} dbRetCode 
@@ -34,6 +56,7 @@ const codeToHttpRet = (dbRetCode) => (
     (c) => c[Object.keys(c).filter((key) => key === dbRetCode.toString())] || 500
 )({
     "0": 401,
+    "23505": 409,
 })
 
 
@@ -42,9 +65,12 @@ const codeToHttpRet = (dbRetCode) => (
  * @param {String} address Stellar Federation address.
  * @returns {Boolean}
  */
-const federationAddressIsValid = (address) => (
-    address.match(regexpFederationFormat) ? true : false
-)
+const federationAddressIsValid = (address) => !!(
+    new RegExp([
+        /^[a-zA-Z\-0-9.@]+\*/,
+        regexpDomainFormat,
+    ].map(r => r.source).join(""))
+).test(address)
 
 
 /**
@@ -88,16 +114,16 @@ const getFedDomain = (domain) => (
 //     return errorCode
 // }
 
-// // ...
-// const btoh = function (bcryptHash) {
-//     return new Buffer(bcryptHash, "ascii").toString("hex")
-// }
+// ...
+const btoh = (bcryptHash) => (
+    new Buffer(bcryptHash, "ascii").toString("hex")
+)
 
 
-// // ...
-// const htob = function (hexString) {
-//     return new Buffer(hexString, "hex").toString("ascii")
-// }
+// ...
+const htob = (hexString) => (
+    new Buffer(hexString, "hex").toString("ascii")
+)
 
 
 // ...
@@ -143,8 +169,10 @@ module.exports = {
     // tokenIsValid: tokenIsValid,
     // getApiKey: getApiKey,
     // apiKeyValid,
-    // btoh,
-    // htob,
+    emailIsValid,
+    passwordIsValid,
+    btoh,
+    htob,
     // errorMessageToRetCode,
     codeToHttpRet,
     regexpFederationFormat,

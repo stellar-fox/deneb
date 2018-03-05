@@ -4,72 +4,85 @@ const bcrypt = require("bcrypt")
 const db = require("../../lib/db.js")
 
 
-// ...
-// function createUser (req, res, _) {
-//     bcrypt.hash(req.params.password, saltRounds, (_, hash) => {
-//         let now = new Date()
-//         helpers.db.one(
-//             "insert into users(email, password_digest, created_at, updated_at)\
-//             values(${email}, ${password_digest}, ${created_at}, ${updated_at})\
-//             RETURNING id", {
-//                 email: req.params.email,
-//                 password_digest: hash,
-//                 created_at: now,
-//                 updated_at: now,
-//             })
-//             .then((result) => {
-//                 res.status(201).json({
-//                     status: "success",
-//                     id: result.id,
-//                 })
-//             }).catch((error) => {
-//                 const retCode = helpers.errorMessageToRetCode(error.message)
-//                 res.status(retCode).json({
-//                     status: "failure",
-//                     id: error.message,
-//                     code: retCode,
-//                 })
-//             })
-//     })
-// }
+/**
+ * This function creates user entry in the database.
+ * @param {Object} req Express.js request object.
+ * @param {Object} res Express.js response object.
+ * @param {function} _next Express.js next function in request-response cycle.
+ */
+async function createUser (req, res, _next) {
+    if (!helpers.emailIsValid(req.params.email) ||
+        !helpers.passwordIsValid(req.params.password)) {
+        return res.status(403).json({ // WRONG CREDENTIALS FORMAT
+            authenticated: false,
+            error: "Invalid credentials format.",
+        })
+    }
+    const now = new Date()
+    const password_digest = helpers.btoh(bcrypt.hashSync(req.params.password, 10))
+    try {
+        const user = await db.one(
+            "INSERT INTO users (email, password_digest, created_at, updated_at) VALUES (${email}, ${password_digest}, ${created_at}, ${updated_at}) RETURNING *",
+            { email: req.params.email, password_digest, created_at: now, updated_at: now, }
+        )
+        return res.status(201).json({ // USER CREATED
+            authenticated: true,
+            token: jws.signature(JSON.stringify({
+                userId: user.id,
+                expires: new Date(new Date().getTime() + 20 * 60000).getTime(),
+            }), user.password_digest),
+        })    
+    } catch (error) {
+        return res.status(helpers.codeToHttpRet(error.code)).json({
+            error: error.message,
+            code: error.code,
+        })
+    }
+}
 
 
-// ...
-// function createAccount (req, res, _) {
-//     let now = new Date()
-//     helpers.db.one(
-//         "insert into accounts\
-//         (pubkey, path, alias, user_id, visible, created_at, updated_at, email_md5)\
-//         values (${pubkey}, ${path}, ${alias}, ${user_id}, ${visible}, ${created_at},\
-//         ${updated_at}, ${email_md5}) RETURNING id", {
-//             pubkey: req.params.pubkey,
-//             alias: (_) => {
-//                 return (req.query.alias !== undefined ? req.query.alias : null)
-//             },
-//             path: req.query.path,
-//             user_id: req.params.user_id,
-//             visible: (_) => {
-//                 return (req.query.visible == "false" ? false : true)
-//             },
-//             created_at: now,
-//             updated_at: now,
-//             email_md5: req.query.md5,
-//         })
-//         .then((result) => {
-//             res.status(201).json({
-//                 success: true,
-//                 account_id: result.id,
-//             })
-//         })
-//         .catch((error) => {
-//             const retCode = helpers.errorMessageToRetCode(error.message)
-//             res.status(retCode).json({
-//                 status: "failure",
-//                 id: error.message,
-//                 code: retCode,
-//             })
-//         })
-// }
+/**
+ * This function creates account entry in the database.
+ * @param {Object} req Express.js request object.
+ * @param {Object} res Express.js response object.
+ * @param {function} _next Express.js next function in request-response cycle.
+ */
+async function createAccount (req, res, _next) {
+    const userId = await jws.getUserIdFromToken(req.params.token)
+    if (!userId) {
+        return res.status(403).json({
+            error: "Forbidden. Invalid token.",
+        })
+    }
+    try {
+        const now = new Date()
+        const account = await db.one(
+            "INSERT INTO accounts (pubkey, path, alias, domain, user_id, email_md5, visible, created_at, updated_at) VALUES (${pubkey}, ${path}, ${alias}, ${domain}, ${user_id}, ${email_md5}, ${visible}, ${created_at}, ${updated_at}) RETURNING *",
+            {
+                pubkey: req.query.pubkey,
+                path: req.query.path,
+                alias: req.query.alias,
+                domain: req.query.domain,
+                user_id: userId,
+                email_md5: req.query.md5,
+                visible: (_) => {
+                    return (req.query.visible == "false" ? false : true)
+                },
+                created_at: now,
+                updated_at: now,
+            }
+        )
+        return res.status(201).json({ // ACCOUNT CREATED
+            ok: true,
+            id: account.id,
+        })    
+    } catch (error) {
+        return res.status(helpers.codeToHttpRet(error.code)).json({
+            error: error.message,
+            code: error.code,
+        })
+    }
+}
 
 
 /**
@@ -82,24 +95,26 @@ const db = require("../../lib/db.js")
  */
 async function authenticateUser (req, res, _next) {
     try {
-        const dbRow = await db.one("SELECT * FROM users WHERE email = ${email}",
-            {email: req.params.email,}
-        )    
-        bcrypt.compareSync(req.params.password, dbRow.password_digest) ?
-            res.status(200).json({ // SUCCESSFULLY AUTHENTICATED
-                authenticated: true,
-                token: jws.signature(JSON.stringify({
-                    userId: dbRow.id,
-                    expires: new Date(new Date().getTime() + 20 * 60000).getTime(),
-                }), dbRow.password_digest),
-            }) :
-            res.status(401).json({ // WRONG CREDENTIALS
+        const user = await db.one(
+            "SELECT userId FROM users WHERE email = ${email} AND password_digest = ${password_digest}",
+            {email: req.params.email, password_digest: req.params.password_digest,}
+        )
+        if (!user) {
+            return res.status(401).json({ // WRONG CREDENTIALS
                 authenticated: false,
                 error: "Wrong credentials.",
             })
+        }
+        return res.status(200).json({ // SUCCESSFULLY AUTHENTICATED
+            authenticated: true,
+            token: jws.signature(JSON.stringify({
+                userId: user.id,
+                expires: new Date(new Date().getTime() + 20 * 60000).getTime(),
+            }), user.password_digest),
+        })
     }
     catch (error){ // EMAIL NOT FOUND OR ANY OTHER ERROR
-        res.status(helpers.codeToHttpRet(error.code)).json({
+        return res.status(helpers.codeToHttpRet(error.code)).json({
             authenticated: false,
             error: error.message,
             code: error.code,
@@ -213,6 +228,8 @@ async function updateAccountAttributes (req, res, _next) {
 
 
 module.exports = {
+    createUser,
+    createAccount,
     authenticateUser,
     updateUserAttributes,
     updateAccountAttributes,
