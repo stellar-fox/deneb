@@ -1,5 +1,6 @@
 const helpers = require("../helpers.js")
 const jws = require("../jws.js")
+const ticker = require("../../lib/ticker.js")
 const db = require("../../lib/db.js")
 
 
@@ -87,82 +88,61 @@ async function getAccount (req, res, _next) {
 // }
 
 
+/**
+ * This is a throttle-like function that always returns an exchange rate based
+ * on the curency provided in parameters of a call. When the rate is missing
+ * or stale, then the rate is updated. Otherwise the current rate is returned
+ * directly from the database.
+ * @param {Object} req Express.js request object.
+ * @param {Object} res Express.js response object.
+ * @param {function} _next Express.js next function in request-response cycle.
+ */
 async function exchangeRate (req, res, _next) {
+    const rate = await ticker.getRate(req.params.currency)
+    // fx is missing
+    if (Object.keys(rate).length === 0) {
+        const rate = await db.one("INSERT INTO ticker (currency, data, updated_at) VALUES (${currency}, ${data}, ${updated_at}) RETURNING *",{
+            currency: req.params.currency,
+            data: (await ticker.fetchRate("stellar", req.params.currency)).data[0],
+            updated_at: new Date(),
+        })
+        return res.status(200).json({
+            ok: true,
+            fx: {
+                currency: req.params.currency,
+                rate,
+            },
+        })
+    }
+    // fx is stale
+    if (await ticker.fxIsStale(rate[0])) {
+        const rate = await db.one("UPDATE ticker SET data = ${data}, updated_at = ${updated_at} WHERE currency = ${currency} RETURNING *", {
+            currency: req.params.currency,
+            data: (await ticker.fetchRate("stellar", req.params.currency)).data[0],
+            updated_at: new Date(),
+        })
+        return res.status(200).json({
+            ok: true,
+            fx: {
+                currency: req.params.currency,
+                rate,
+            },
+        })
+    }
+    // all is good, so return current rate from database
     res.status(200).json({
         ok: true,
-        fx: {},
-    })
-}
-
-// ...
-function latestCurrency(req, res, next) {
-  helpers.db.any('select * from ticker where currency = ${currency}', {currency: req.params.currency})
-    .then((dbData) => {
-      // no data available - update
-      if (dbData.length === 0) {
-        return helpers.fetchCMC(undefined,req.params.currency)
-          .then((response) => {
-            helpers.db.none('insert into ticker(currency, data, updated_at) values(${currency}, ${data}, ${updated_at})', {
-              currency: req.params.currency,
-              data: response.data,
-              updated_at: (new Date())
-            })
-            .then((result) => {
-              res.status(200).json({
-                status: 'success',
-                data: response.data,
-              })
-            })
-            .catch((error) => {
-              return next(error.message)
-            })
-          })
-          .catch((error) => {
-            res.status(JSON.parse(error.message).status).json({
-              statusText: JSON.parse(error.message).statusText,
-            })
-          })
-      }
-      // data too stale - update
-      if (new Date(dbData[0].updated_at).getTime() < (new Date().getTime() - 1000 * 60)) {
-        return helpers.fetchCMC(undefined, req.params.currency)
-          .then((response) => {
-            helpers.db.none('update ticker SET data = $1, updated_at = $2 where currency = $3', [response.data, (new Date()), req.params.currency])
-              .then((result) => {
-                res.status(200).json({
-                  status: 'success',
-                  data: response.data,
-                })
-              })
-              .catch((error) => {
-                return next(error.message)
-              })
-          })
-          .catch((error) => {
-            res.status(JSON.parse(error.message).status).json({
-              statusText: JSON.parse(error.message).statusText,
-            })
-          })
-      }
-      // otherwise return stale data within 1 minute window
-      res.status(200).json({
-        status: 'success',
-        data: dbData[0].data,
-      })
-    })
-    .catch((error) => {
-      return next(error.message)
+        fx: {
+            currency: req.params.currency,
+            rate,
+        },
     })
 }
 
 
 // ...
 module.exports = {
-//   latestCurrency: latestCurrency,
-//   user: user,
-//   account: account,
 //     emailMD5,
-//     token,
     getUser,
     getAccount,
     exchangeRate,
