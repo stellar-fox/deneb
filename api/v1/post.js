@@ -19,12 +19,18 @@ async function createUser (req, res, _next) {
         })
     }
     const now = new Date()
-    const password_digest = helpers.btoh(bcrypt.hashSync(req.params.password, 10))
+    const password_digest = helpers.btoh(
+        bcrypt.hashSync(req.params.password, 10)
+    )
     try {
-        const user = await db.one(
-            "INSERT INTO users (email, password_digest, created_at, updated_at) VALUES (${email}, ${password_digest}, ${created_at}, ${updated_at}) RETURNING *",
-            { email: req.params.email, password_digest, created_at: now, updated_at: now, }
-        )
+        const user = await db.one("INSERT INTO users (email, password_digest,\
+            created_at, updated_at) VALUES (${email}, ${password_digest},\
+            ${created_at}, ${updated_at}) RETURNING *", {
+            email: req.params.email,
+            password_digest,
+            created_at: now,
+            updated_at: now,
+        })
         return res.status(201).json({ // USER CREATED
             authenticated: true,
             token: jws.signature(JSON.stringify({
@@ -57,7 +63,11 @@ async function createAccount (req, res, _next) {
     try {
         const now = new Date()
         const account = await db.one(
-            "INSERT INTO accounts (pubkey, path, alias, domain, user_id, email_md5, visible, created_at, updated_at) VALUES (${pubkey}, ${path}, ${alias}, ${domain}, ${user_id}, ${email_md5}, ${visible}, ${created_at}, ${updated_at}) RETURNING *",
+            "INSERT INTO accounts (pubkey, path, alias, domain, user_id,\
+                email_md5, visible, created_at, updated_at) VALUES\
+                (${pubkey}, ${path}, ${alias}, ${domain}, ${user_id},\
+                    ${email_md5}, ${visible}, ${created_at}, ${updated_at})\
+                    RETURNING *",
             {
                 pubkey: req.query.pubkey,
                 path: req.query.path,
@@ -95,10 +105,10 @@ async function createAccount (req, res, _next) {
  */
 async function authenticateUser (req, res, _next) {
     try {
-        const user = await db.one(
-            "SELECT userId FROM users WHERE email = ${email} AND password_digest = ${password_digest}",
-            {email: req.params.email, password_digest: req.params.password_digest,}
-        )
+        const user = await db.one("SELECT userId FROM users WHERE\
+            email = ${email} AND password_digest = ${password_digest}",{
+            email: req.params.email,
+            password_digest: req.params.password_digest,})
         if (!user) {
             return res.status(401).json({ // WRONG CREDENTIALS
                 authenticated: false,
@@ -183,33 +193,32 @@ async function updateAccountAttributes (req, res, _next) {
             t.batch([
                 // alias and domain
                 (req.query.alias !== undefined && req.query.domain !== undefined ?
-                    t.none("UPDATE accounts SET alias = $1, domain = $2 WHERE user_id = $3",
-                        [
-                            helpers.getFedAlias(req.query.alias),
-                            helpers.getFedDomain(req.query.domain),
-                            userId,
-                        ])
+                    t.none("UPDATE accounts SET alias = $1, domain = $2 WHERE\
+                    user_id = $3", [
+                        helpers.getFedAlias(req.query.alias),
+                        helpers.getFedDomain(req.query.domain),
+                        userId,
+                    ])
                     : null
                 ),
                 // account visibility
                 (req.query.visible !== undefined ?
-                    t.none("UPDATE accounts SET visible = ${visible} WHERE user_id = ${user_id}",
-                        {
-                            visible: () => {
-                                return (req.query.visible == "false" ? false : true)
-                            },
-                            user_id: userId,
-                        }) : null
+                    t.none("UPDATE accounts SET visible = ${visible} WHERE\
+                    user_id = ${user_id}", { visible: () => {
+                        return (req.query.visible == "false" ? false : true)
+                    },
+                    user_id: userId,
+                    }) : null
                 ),
                 // default currency
                 (req.query.currency !== undefined ?
-                    t.none("UPDATE accounts SET currency = $1 WHERE user_id = $2",
-                        [req.query.currency, userId,]) : null
+                    t.none("UPDATE accounts SET currency = $1 WHERE\
+                    user_id = $2", [req.query.currency, userId,]) : null
                 ),
                 // display precission
                 (req.query.precision !== undefined ?
-                    t.none("UPDATE accounts SET precision = $1 WHERE user_id = $2",
-                        [req.query.precision, userId,]) : null
+                    t.none("UPDATE accounts SET precision = $1 WHERE\
+                    user_id = $2", [req.query.precision, userId,]) : null
                 ),
                 // always set updated_at date
                 t.none("UPDATE accounts SET updated_at = $1", [new Date(),]),

@@ -19,7 +19,8 @@ async function getUser (req, res, _next) {
         })
     }
     try {
-        const user = await db.one("SELECT * FROM users WHERE id = ${id}", {id: userId,})
+        const user = await db.one("SELECT * FROM users WHERE id = ${id}", {
+            id: userId, })
         res.status(200).json({
             ok: true,
             user,
@@ -101,11 +102,13 @@ async function exchangeRate (req, res, _next) {
     const rate = await ticker.getRate(req.params.currency)
     // fx is missing
     if (Object.keys(rate).length === 0) {
-        const rate = await db.one("INSERT INTO ticker (currency, data, updated_at) VALUES (${currency}, ${data}, ${updated_at}) RETURNING *",{
-            currency: req.params.currency,
+        
+        const rate = await db.one("INSERT INTO ticker (currency, data,\
+            updated_at) VALUES (${currency}, ${data}, ${updated_at})\
+            RETURNING *",{ currency: req.params.currency,
             data: (await ticker.fetchRate("stellar", req.params.currency)).data[0],
-            updated_at: new Date(),
-        })
+            updated_at: new Date(), })
+
         return res.status(200).json({
             ok: true,
             fx: {
@@ -116,27 +119,22 @@ async function exchangeRate (req, res, _next) {
     }
     // fx is stale
     if (await ticker.fxIsStale(rate[0])) {
-        const rate = await db.one("UPDATE ticker SET data = ${data}, updated_at = ${updated_at} WHERE currency = ${currency} RETURNING *", {
-            currency: req.params.currency,
+        
+        const rate = await db.one("UPDATE ticker SET data = ${data},\
+            updated_at = ${updated_at} WHERE currency = ${currency}\
+            RETURNING *", { currency: req.params.currency,
             data: (await ticker.fetchRate("stellar", req.params.currency)).data[0],
-            updated_at: new Date(),
-        })
-        return res.status(200).json({
-            ok: true,
-            fx: {
-                currency: req.params.currency,
-                rate,
-            },
-        })
-    }
-    // all is good, so return current rate from database
-    res.status(200).json({
-        ok: true,
-        fx: {
+            updated_at: new Date(), })
+        
+        return res.status(200).json({ ok: true, fx: {
             currency: req.params.currency,
             rate,
-        },
-    })
+        }, })
+    }
+    // all is good, so return current rate from database
+    res.status(200).json({ ok: true, fx: { currency: req.params.currency,
+        rate,
+    }, })
 }
 
 
