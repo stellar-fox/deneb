@@ -105,26 +105,35 @@ async function createAccount (req, res, _next) {
  */
 async function authenticateUser (req, res, _next) {
     try {
-        const user = await db.one("SELECT userId FROM users WHERE\
-            email = ${email} AND password_digest = ${password_digest}",{
-            email: req.params.email,
-            password_digest: req.params.password_digest,})
-        if (!user) {
-            return res.status(401).json({ // WRONG CREDENTIALS
+        const user = await db.one("SELECT id, password_digest FROM users WHERE\
+            email = ${email}", { email: req.params.email, })
+
+        if (user && bcrypt.compareSync(req.params.password,
+            helpers.htob(user.password_digest),)) {
+            return res.status(200).json({ // SUCCESSFULLY AUTHENTICATED
+                authenticated: true,
+                token: jws.signature(JSON.stringify({
+                    userId: user.id,
+                    expires: new Date(
+                        new Date().getTime() + 20 * 60000
+                    ).getTime(),
+                }), user.password_digest),
+            })
+        }
+        // WRONG CREDENTIALS BUT EMAIL FOUND
+        throw ({code: 0,})
+    }
+    catch (error) {
+        const httpErrorCode = helpers.codeToHttpRet(error.code)
+        // WRONG CREDENTIALS BUT EMAIL FOUND
+        if (httpErrorCode === 401) {
+            return res.status(401).json({
                 authenticated: false,
                 error: "Wrong credentials.",
             })
         }
-        return res.status(200).json({ // SUCCESSFULLY AUTHENTICATED
-            authenticated: true,
-            token: jws.signature(JSON.stringify({
-                userId: user.id,
-                expires: new Date(new Date().getTime() + 20 * 60000).getTime(),
-            }), user.password_digest),
-        })
-    }
-    catch (error){ // EMAIL NOT FOUND OR ANY OTHER ERROR
-        return res.status(helpers.codeToHttpRet(error.code)).json({
+        // EMAIL NOT FOUND OR SOME OTHER ERROR
+        return res.status(httpErrorCode).json({
             authenticated: false,
             error: error.message,
             code: error.code,
