@@ -19,6 +19,7 @@
   "dependencies": {
     "axios": "^0.17.1",
     "bcrypt": "^1.0.3",
+    "body-parser": "^1.18.2",
     "eslint": "^4.17.0",
     "express": "^4.16.2",
     "pg-promise": "^7.4.1"
