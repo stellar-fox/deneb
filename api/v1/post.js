@@ -113,17 +113,17 @@ function updateAccount (req, res, _next) {
         })
     }
 
-    
-    
+
+
     const federationCheck = new RegExp([
         /^([a-zA-Z\-0-9.@]+)\*/,
         /((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
     ].map(r => r.source).join(""))
 
-    
+
     let alias = null,
         domain = null
-        
+
     if (req.query.alias !== undefined) {
         const federationMatch = req.query.alias.match(federationCheck)
         alias = federationMatch ? federationMatch[1] : null,
@@ -163,7 +163,7 @@ function updateAccount (req, res, _next) {
         if (/alias_domain/.test(error.message)) {
             res.status(409).json({
                 error: "This payment address is already reserved.",
-            })    
+            })
         } else {
             res.status(500).json({
                 error: error.message,
@@ -228,6 +228,7 @@ function authenticate(req, res, next) {
               authenticated: false,
               user_id: null,
               pubkey: null,
+              error: "Invalid credentials.",
             })
           }
         })
