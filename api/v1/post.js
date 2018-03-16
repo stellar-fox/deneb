@@ -5,13 +5,13 @@ const saltRounds = 10
 
 // ...
 function createUser (req, res, _) {
-    bcrypt.hash(req.params.password, saltRounds, (_, hash) => {
+    bcrypt.hash(req.body.password, saltRounds, (_, hash) => {
         let now = new Date()
         helpers.db.one(
             "insert into users(email, password_digest, created_at, updated_at)\
             values(${email}, ${password_digest}, ${created_at}, ${updated_at})\
             RETURNING id", {
-                email: req.params.email,
+                email: req.body.email,
                 password_digest: hash,
                 created_at: now,
                 updated_at: now,
@@ -199,11 +199,11 @@ function issueToken (req, res, _) {
 
 // ...
 function authenticate(req, res, next) {
-  helpers.db.any('select * from users where email = ${email}', {email: req.params.email})
+  helpers.db.any('select * from users where email = ${email}', {email: req.body.email})
     .then((dbData) => {
       // user found
       if (dbData.length === 1) {
-        bcrypt.compare(req.params.password, dbData[0].password_digest, (err, auth) => {
+        bcrypt.compare(req.body.password, dbData[0].password_digest, (err, auth) => {
           if (auth) {
             helpers.db.one('select pubkey from accounts where user_id = ${user_id}', {
               user_id: dbData[0].id
