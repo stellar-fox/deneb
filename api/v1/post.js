@@ -37,7 +37,7 @@ async function createUser (req, res, _next) {
                 userId: user.id,
                 expires: new Date(new Date().getTime() + 20 * 60000).getTime(),
             }), user.password_digest),
-        })    
+        })
     } catch (error) {
         return res.status(helpers.codeToHttpRet(error.code)).json({
             error: error.message,
@@ -85,7 +85,7 @@ async function createAccount (req, res, _next) {
         return res.status(201).json({ // ACCOUNT CREATED
             ok: true,
             id: account.id,
-        })    
+        })
     } catch (error) {
         return res.status(helpers.codeToHttpRet(error.code)).json({
             error: error.message,
@@ -101,14 +101,14 @@ async function createAccount (req, res, _next) {
  * @param {Object} req Express.js request object.
  * @param {Object} res Express.js response object.
  * @param {function} _next Express.js next function in request-response cycle.
- * 
+ *
  */
 async function authenticateUser (req, res, _next) {
     try {
         const user = await db.one("SELECT id, password_digest FROM users WHERE\
-            email = ${email}", { email: req.params.email, })
+            email = ${email}", { email: req.body.email, })
 
-        if (user && bcrypt.compareSync(req.params.password,
+        if (user && bcrypt.compareSync(req.body.password,
             helpers.htob(user.password_digest),)) {
             return res.status(200).json({ // SUCCESSFULLY AUTHENTICATED
                 authenticated: true,

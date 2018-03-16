@@ -3,9 +3,14 @@ const GETAPI = require("./api/v1/get.js")
 const POSTAPI = require("./api/v1/post.js")
 const express = require("express")
 const app = express()
-
+const bodyParser = require("body-parser")
+app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({
+    extended: true,
+}))
 
 app.use((_req, res, next) => {
+    express.json()
     res.header("Access-Control-Allow-Origin", "*")
     res.header(
         "Access-Control-Allow-Headers",
@@ -104,9 +109,9 @@ app.get("/api/v1/fx/:currency", GETAPI.exchangeRate)
  * @param {String} password matching valid password format
  * @returns {Object} authorization JSON including JWT.
  * @name POST.api/v1/auth
- * @example https://stellarfox.net/api/v1/auth/user@example.com/P@33w0r$
+ * @example https://stellarfox.net/api/v1/auth/
  */
-app.post("/api/v1/auth/:email/:password", POSTAPI.authenticateUser)
+app.post("/api/v1/auth/", POSTAPI.authenticateUser)
 
 
 /**

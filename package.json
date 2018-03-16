@@ -19,6 +19,7 @@
   "dependencies": {
     "axios": "^0.17.1",
     "bcrypt": "^1.0.3",
+    "body-parser": "^1.18.2",
     "express": "^4.16.2",
     "jws": "^3.1.4",
     "pg-promise": "^7.4.1"
