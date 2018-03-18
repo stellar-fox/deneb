@@ -205,7 +205,7 @@ function authenticate(req, res, next) {
       if (dbData.length === 1) {
         bcrypt.compare(req.body.password, dbData[0].password_digest, (err, auth) => {
           if (auth) {
-            helpers.db.one('select pubkey from accounts where user_id = ${user_id}', {
+            helpers.db.one('select pubkey, path from accounts where user_id = ${user_id}', {
               user_id: dbData[0].id
             })
             .then((dbAccount) => {
@@ -215,6 +215,7 @@ function authenticate(req, res, next) {
                   authenticated: true,
                   user_id: dbData[0].id,
                   pubkey: dbAccount.pubkey,
+                  bip32Path: dbAccount.path,
                   token: new Buffer(hash).toString('base64'),
                 })
               })
@@ -228,6 +229,7 @@ function authenticate(req, res, next) {
               authenticated: false,
               user_id: null,
               pubkey: null,
+              bip32Path: null,
               error: "Invalid credentials.",
             })
           }
@@ -239,6 +241,8 @@ function authenticate(req, res, next) {
           authenticated: false,
           user_id: null,
           pubkey: null,
+          bip32Path: null,
+          error: "Invalid credentials.",
         })
       }
 
