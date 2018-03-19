@@ -12,7 +12,7 @@ const errorMessageToRetCode = function (message) {
         case (message.match(/duplicate key/) !== null):
             errorCode = 409
             break
-    
+
         default:
             errorCode = 500
             break
