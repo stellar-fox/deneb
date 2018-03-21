@@ -54,9 +54,9 @@ function createAccount (req, res, _) {
             {
                 pubkey: req.params.pubkey,
                 alias: (_) => {
-                    return req.query.alias !== undefined
-                        ? req.query.alias
-                        : null
+                    return req.query.alias ?
+                        req.query.alias :
+                        null
                 },
                 path: req.query.path,
                 user_id: req.params.user_id,
@@ -97,18 +97,18 @@ function updateUser (req, res, _next) {
     helpers.db
         .tx((t) => {
             return t.batch([
-                req.query.first_name !== undefined
-                    ? t.none("UPDATE users SET first_name = $1 WHERE id = $2", [
+                req.query.first_name ?
+                    t.none("UPDATE users SET first_name = $1 WHERE id = $2", [
                         req.query.first_name,
                         req.params.id,
-                    ])
-                    : null,
-                req.query.last_name !== undefined
-                    ? t.none("UPDATE users SET last_name = $1 WHERE id = $2", [
+                    ]) :
+                    null,
+                req.query.last_name ?
+                    t.none("UPDATE users SET last_name = $1 WHERE id = $2", [
                         req.query.last_name,
                         req.params.id,
-                    ])
-                    : null,
+                    ]) :
+                    null,
                 t.none("UPDATE users SET updated_at = $1 WHERE id = $2", [
                     new Date(),
                     req.params.id,
@@ -150,23 +150,23 @@ function updateAccount (req, res, _next) {
     let alias = null,
         domain = null
 
-    if (req.query.alias !== undefined) {
+    if (req.query.alias) {
         const federationMatch = req.query.alias.match(federationCheck)
-        ;(alias = federationMatch ? federationMatch[1] : null),
-        (domain = federationMatch ? federationMatch[2] : null)
+        alias = federationMatch ? federationMatch[1] : null
+        domain = federationMatch ? federationMatch[2] : null
     }
 
     helpers.db
         .tx((t) => {
             return t.batch([
-                req.query.alias !== undefined
-                    ? t.none(
+                req.query.alias ?
+                    t.none(
                         "UPDATE accounts SET alias = $1, domain = $3 WHERE user_id = $2",
                         [alias, req.params.user_id, domain,]
-                    )
-                    : null,
-                req.query.visible !== undefined
-                    ? t.none(
+                    ) :
+                    null,
+                req.query.visible ?
+                    t.none(
                         "UPDATE accounts SET visible = ${visible} WHERE user_id = ${user_id}",
                         {
                             visible: () => {
@@ -176,20 +176,20 @@ function updateAccount (req, res, _next) {
                             },
                             user_id: req.params.user_id,
                         }
-                    )
-                    : null,
-                req.query.currency !== undefined
-                    ? t.none(
+                    ) :
+                    null,
+                req.query.currency ?
+                    t.none(
                         "UPDATE accounts SET currency = $1 WHERE user_id = $2",
                         [req.query.currency, req.params.user_id,]
-                    )
-                    : null,
-                req.query.precision !== undefined
-                    ? t.none(
+                    ) :
+                    null,
+                req.query.precision ?
+                    t.none(
                         "UPDATE accounts SET precision = $1 WHERE user_id = $2",
                         [req.query.precision, req.params.user_id,]
-                    )
-                    : null,
+                    ) :
+                    null,
                 t.none("UPDATE accounts SET updated_at = $1", [new Date(),]),
             ])
         })
