@@ -47,11 +47,18 @@ app.get("/api/v1/user/md5/:pubkey", GETAPI.emailMD5)
  ***** POST CALLS *****
  **********************
 */
+app.post("/api/v1/user/", POSTAPI.userData)
+app.post("/api/v1/user/update/", POSTAPI.updateUser)
 app.post("/api/v1/user/create/", POSTAPI.createUser)
-app.post("/api/v1/user/update/:id", POSTAPI.updateUser)
+
+app.post("/api/v1/account/", POSTAPI.accountData)
+app.post("/api/v1/account/update/", POSTAPI.updateAccount)
+
+
+
 app.post("/api/v1/user/authenticate/", POSTAPI.authenticate)
 app.post("/api/v1/account/create/:user_id/:pubkey", POSTAPI.createAccount)
-app.post("/api/v1/account/update/:user_id", POSTAPI.updateAccount)
+
 app.post("/api/v1/user/ledgerauth/:pubkey/:path", POSTAPI.issueToken)
 
 
