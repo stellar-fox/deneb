@@ -88,8 +88,58 @@ function createAccount (req, res, _) {
 
 
 // ...
+function userData (req, res, next) {
+    if (!helpers.tokenIsValid(req.body.token, req.body.id)) {
+        return res.status(403).json({
+            error: "Forbidden",
+        })
+    }
+    helpers.db
+        .one("SELECT * FROM users WHERE id = ${id}", {
+            id: req.body.id,
+        })
+        .then((dbData) => {
+            res.status(200).json({
+                status: "success",
+                data: dbData,
+            })
+        })
+        .catch((error) => {
+            return next(error.message)
+        })
+}
+
+
+
+
+// ...
+function accountData (req, res, next) {
+    if (!helpers.tokenIsValid(req.body.token, req.body.id)) {
+        return res.status(403).json({
+            error: "Forbidden",
+        })
+    }
+    helpers.db
+        .one("SELECT * FROM accounts WHERE user_id = ${user_id}", {
+            user_id: req.body.id,
+        })
+        .then((dbData) => {
+            res.status(200).json({
+                status: "success",
+                data: dbData,
+            })
+        })
+        .catch((error) => {
+            return next(error.message)
+        })
+}
+
+
+
+
+// ...
 function updateUser (req, res, _next) {
-    if (!helpers.tokenIsValid(req.query.token, req.params.id)) {
+    if (!helpers.tokenIsValid(req.body.token, req.body.id)) {
         return res.status(403).json({
             error: "Forbidden",
         })
@@ -97,21 +147,21 @@ function updateUser (req, res, _next) {
     helpers.db
         .tx((t) => {
             return t.batch([
-                req.query.first_name ?
+                req.body.first_name ?
                     t.none("UPDATE users SET first_name = $1 WHERE id = $2", [
-                        req.query.first_name,
-                        req.params.id,
+                        req.body.first_name,
+                        req.body.id,
                     ]) :
                     null,
-                req.query.last_name ?
+                req.body.last_name ?
                     t.none("UPDATE users SET last_name = $1 WHERE id = $2", [
-                        req.query.last_name,
-                        req.params.id,
+                        req.body.last_name,
+                        req.body.id,
                     ]) :
                     null,
                 t.none("UPDATE users SET updated_at = $1 WHERE id = $2", [
                     new Date(),
-                    req.params.id,
+                    req.body.id,
                 ]),
             ])
         })
@@ -132,7 +182,7 @@ function updateUser (req, res, _next) {
 
 // ..
 function updateAccount (req, res, _next) {
-    if (!helpers.tokenIsValid(req.query.token, req.params.user_id)) {
+    if (!helpers.tokenIsValid(req.body.token, req.body.id)) {
         return res.status(403).json({
             error: "Forbidden",
         })
@@ -150,8 +200,8 @@ function updateAccount (req, res, _next) {
     let alias = null,
         domain = null
 
-    if (req.query.alias) {
-        const federationMatch = req.query.alias.match(federationCheck)
+    if (req.body.alias) {
+        const federationMatch = req.body.alias.match(federationCheck)
         alias = federationMatch ? federationMatch[1] : null
         domain = federationMatch ? federationMatch[2] : null
     }
@@ -159,35 +209,35 @@ function updateAccount (req, res, _next) {
     helpers.db
         .tx((t) => {
             return t.batch([
-                req.query.alias ?
+                req.body.alias ?
                     t.none(
                         "UPDATE accounts SET alias = $1, domain = $3 WHERE user_id = $2",
-                        [alias, req.params.user_id, domain,]
+                        [alias, req.body.id, domain,]
                     ) :
                     null,
-                req.query.visible ?
+                req.body.visible ?
                     t.none(
                         "UPDATE accounts SET visible = ${visible} WHERE user_id = ${user_id}",
                         {
                             visible: () => {
-                                return req.query.visible == "false"
+                                return req.body.visible == "false"
                                     ? false
                                     : true
                             },
-                            user_id: req.params.user_id,
+                            user_id: req.body.id,
                         }
                     ) :
                     null,
-                req.query.currency ?
+                req.body.currency ?
                     t.none(
                         "UPDATE accounts SET currency = $1 WHERE user_id = $2",
-                        [req.query.currency, req.params.user_id,]
+                        [req.body.currency, req.body.id,]
                     ) :
                     null,
-                req.query.precision ?
+                req.body.precision ?
                     t.none(
                         "UPDATE accounts SET precision = $1 WHERE user_id = $2",
-                        [req.query.precision, req.params.user_id,]
+                        [req.body.precision, req.body.id,]
                     ) :
                     null,
                 t.none("UPDATE accounts SET updated_at = $1", [new Date(),]),
@@ -338,4 +388,6 @@ module.exports = {
     updateAccount: updateAccount,
     createUser,
     issueToken,
+    userData,
+    accountData,
 }
