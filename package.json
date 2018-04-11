@@ -3,7 +3,10 @@
     "version": "0.1.1",
     "description": "REST API for Stellar Fox.",
     "keywords": [
-        "stellar", "remittance", "bank", "backend"
+        "stellar",
+        "remittance",
+        "bank",
+        "backend"
     ],
     "homepage": "https://stellarfox.net/",
     "bugs": {
@@ -11,7 +14,10 @@
     },
     "license": "Apache-2.0",
     "private": true,
-    "contributors": ["syntaxval", "drmats"],
+    "contributors": [
+        "syntaxval",
+        "drmats"
+    ],
     "repository": {
         "type": "git",
         "url": "https://github.com/stellar-fox/deneb.git"
