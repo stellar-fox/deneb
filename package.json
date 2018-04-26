@@ -3,10 +3,10 @@
     "version": "0.1.1",
     "description": "REST API for Stellar Fox.",
     "keywords": [
-        "stellar",
-        "remittance",
+        "backend",
         "bank",
-        "backend"
+        "remittance",
+        "stellar"
     ],
     "homepage": "https://stellarfox.net/",
     "bugs": {
@@ -15,8 +15,16 @@
     "license": "Apache-2.0",
     "private": true,
     "contributors": [
-        "syntaxval",
-        "drmats"
+        {
+            "name": "syntaxval",
+            "email": "syntaxval@protonmail.com",
+            "url": "https://twitter.com/syntaxval/"
+        },
+        {
+            "name": "drmats",
+            "email": "xcmats@protonmail.com",
+            "url": "https://twitter.com/xcmats/"
+        }
     ],
     "repository": {
         "type": "git",
@@ -27,11 +35,13 @@
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "dependencies": {
-        "axios": "^0.17.1",
+        "axios": "^0.18.0",
         "bcrypt": "^1.0.3",
         "body-parser": "^1.18.2",
-        "eslint": "^4.17.0",
         "express": "^4.16.2",
         "pg-promise": "^7.4.1"
+    },
+    "devDependencies": {
+        "eslint": "^4.19.1"
     }
 }
