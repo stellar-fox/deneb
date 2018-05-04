@@ -104,3 +104,11 @@ ALTER TABLE public.accounts
 -- =============================================================================
 ALTER TABLE public.accounts
   ADD CONSTRAINT alias_domain UNIQUE (alias, domain);
+
+-- =============================================================================
+ALTER TABLE public.accounts
+  ADD COLUMN memo_type character varying;
+
+-- =============================================================================
+ALTER TABLE public.accounts
+  ADD COLUMN memo character varying;

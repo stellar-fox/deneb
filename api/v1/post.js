@@ -209,6 +209,10 @@ function updateAccount (req, res, _next) {
     helpers.db
         .tx((t) => {
             return t.batch([
+                t.none(
+                    "UPDATE accounts SET memo_type = $1, memo = $3 WHERE user_id = $2",
+                    [req.body.memo_type, req.body.id, req.body.memo,]
+                ),
                 req.body.alias ?
                     t.none(
                         "UPDATE accounts SET alias = $1, domain = $3 WHERE user_id = $2",
