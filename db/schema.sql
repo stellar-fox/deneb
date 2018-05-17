@@ -112,3 +112,9 @@ ALTER TABLE public.accounts
 -- =============================================================================
 ALTER TABLE public.accounts
   ADD COLUMN memo character varying;
+
+-- =============================================================================
+ALTER TABLE public.accounts ALTER COLUMN memo_type SET DEFAULT '';
+ALTER TABLE public.accounts ALTER COLUMN memo_type SET NOT NULL;
+ALTER TABLE public.accounts ALTER COLUMN memo SET DEFAULT '';
+ALTER TABLE public.accounts ALTER COLUMN memo SET NOT NULL;
