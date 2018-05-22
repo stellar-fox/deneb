@@ -498,6 +498,39 @@ function authenticate (req, res, next) {
 
 
 
+// ...
+function contacts (req, res, next) {
+    if (!helpers.tokenIsValid(req.body.token, req.body.user_id)) {
+        return res.status(403).json({
+            error: "Forbidden",
+        })
+    }
+
+    helpers.db
+        .any("SELECT contacts.user_id, contact_id, requested_by, status, \
+            accounts.pubkey, accounts.alias, accounts.domain, \
+            accounts.currency, accounts.memo_type, accounts.memo, \
+            accounts.email_md5, \
+            users.first_name, users.last_name \
+            FROM contacts INNER JOIN accounts ON \
+            contacts.contact_id = accounts.user_id \
+            INNER JOIN users ON contacts.contact_id = users.id \
+            WHERE contacts.user_id = ${user_id}", {
+            user_id: req.body.user_id,
+        })
+        .then((dbData) => {
+            res.status(200).json({
+                status: "success",
+                data: dbData,
+            })
+        })
+        .catch((error) => {
+            return next(error.message)
+        })
+}
+
+
+
 //...
 module.exports = {
     updateUser: updateUser,
@@ -511,4 +544,5 @@ module.exports = {
     createContact,
     updateContact,
     deleteContact,
+    contacts,
 }
