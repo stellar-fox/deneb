@@ -206,6 +206,11 @@ function updateAccount (req, res, _next) {
         domain = federationMatch ? federationMatch[2] : null
     }
 
+    !req.body.memo_type && (req.body.memo_type = "")
+
+    !req.body.memo && (req.body.memo = "")
+
+
     helpers.db
         .tx((t) => {
             return t.batch([
