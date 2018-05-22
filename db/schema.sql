@@ -118,3 +118,32 @@ ALTER TABLE public.accounts ALTER COLUMN memo_type SET DEFAULT '';
 ALTER TABLE public.accounts ALTER COLUMN memo_type SET NOT NULL;
 ALTER TABLE public.accounts ALTER COLUMN memo SET DEFAULT '';
 ALTER TABLE public.accounts ALTER COLUMN memo SET NOT NULL;
+
+-- =============================================================================
+CREATE SEQUENCE public.contacts_id_seq
+  INCREMENT 1
+  MINVALUE 1
+  MAXVALUE 9223372036854775807
+  START 1
+  CACHE 1;
+ALTER TABLE public.contacts_id_seq
+  OWNER TO aquila;
+
+
+CREATE TABLE public.contacts
+(
+  id bigint NOT NULL DEFAULT nextval('contacts_id_seq'::regclass),
+  user_id integer NOT NULL,
+  contact_id integer NOT NULL,
+  requested_by integer NOT NULL,
+  status integer NOT NULL DEFAULT 0,
+  created_at timestamp without time zone NOT NULL,
+  updated_at timestamp without time zone NOT NULL,
+  UNIQUE(user_id, contact_id),
+  CONSTRAINT contacts_pkey PRIMARY KEY (id)
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE public.contacts
+  OWNER TO aquila;

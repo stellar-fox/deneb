@@ -88,6 +88,49 @@ function createAccount (req, res, _) {
 
 
 // ...
+function createContact (req, res, _) {
+    if (!helpers.tokenIsValid(req.body.token, req.body.user_id)) {
+        return res.status(403).json({
+            error: "Forbidden",
+        })
+    }
+
+    let now = new Date()
+    helpers.db
+        .one(
+            "INSERT INTO " +
+                "contacts(user_id, contact_id, requested_by, status, created_at, updated_at) " +
+                "VALUES(${user_id}, ${contact_id}, ${requested_by}, ${status}, ${created_at}, ${updated_at}) " +
+            "RETURNING id",
+            {
+                user_id: req.body.user_id,
+                contact_id: req.body.contact_id,
+                requested_by: req.body.requested_by,
+                status: req.body.status,
+                created_at: now,
+                updated_at: now,
+            }
+        )
+        .then((result) => {
+            res.status(201).json({
+                success: true,
+                contact_id: result.id,
+            })
+        })
+        .catch((error) => {
+            const retCode = helpers.errorMessageToRetCode(error.message)
+            res.status(retCode).json({
+                status: "failure",
+                id: error.message,
+                code: retCode,
+            })
+        })
+}
+
+
+
+
+// ...
 function userData (req, res, next) {
     if (!helpers.tokenIsValid(req.body.token, req.body.id)) {
         return res.status(403).json({
@@ -162,6 +205,72 @@ function updateUser (req, res, _next) {
                 t.none("UPDATE users SET updated_at = $1 WHERE id = $2", [
                     new Date(),
                     req.body.id,
+                ]),
+            ])
+        })
+        .then((_data) => {
+            res.status(204).json({
+                status: "success",
+            })
+        })
+        .catch((error) => {
+            res.status(500).json({
+                error: error.message,
+            })
+        })
+}
+
+
+
+
+// ...
+function updateContact (req, res, _next) {
+    if (!helpers.tokenIsValid(req.body.token, req.body.user_id)) {
+        return res.status(403).json({
+            error: "Forbidden",
+        })
+    }
+    helpers.db
+        .tx((t) => {
+            return t.batch([
+                req.body.status ?
+                    t.none("UPDATE contacts SET status = $1, updated_at = $4 WHERE user_id = $2 AND contact_id = $3", [
+                        req.body.status,
+                        req.body.user_id,
+                        req.body.contact_id,
+                        new Date(),
+                    ]) :
+                    null,
+            ])
+        })
+        .then((_data) => {
+            res.status(204).json({
+                status: "success",
+            })
+        })
+        .catch((error) => {
+            res.status(500).json({
+                error: error.message,
+            })
+        })
+}
+
+
+
+
+// ...
+function deleteContact (req, res, _next) {
+    if (!helpers.tokenIsValid(req.body.token, req.body.user_id)) {
+        return res.status(403).json({
+            error: "Forbidden",
+        })
+    }
+    helpers.db
+        .tx((t) => {
+            return t.batch([
+                t.none("DELETE FROM contacts WHERE user_id = $1 and contact_id = $2", [
+                    req.body.user_id,
+                    req.body.contact_id,
                 ]),
             ])
         })
@@ -399,4 +508,7 @@ module.exports = {
     issueToken,
     userData,
     accountData,
+    createContact,
+    updateContact,
+    deleteContact,
 }
