@@ -17,14 +17,15 @@
     "dependencies": {
         "@xcmats/js-toolbox": "^0.3.0",
         "axios": "^0.18.0",
-        "bcrypt": "^1.0.3",
+        "bcrypt": "^2.0.1",
         "body-parser": "^1.18.2",
         "express": "^4.16.2",
         "pg-promise": "^7.4.1"
     },
     "description": "REST API for Stellar Fox.",
     "devDependencies": {
-        "eslint": "^4.19.1"
+        "eslint": "^4.19.1",
+        "rimraf": "^2.6.2"
     },
     "homepage": "https://stellarfox.net/",
     "keywords": [
@@ -42,7 +43,10 @@
         "url": "https://github.com/stellar-fox/deneb.git"
     },
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "clean_modules": "rimraf node_modules",
+        "lint": "eslint ./src/",
+        "start": "node ./app.js",
+        "test": "npm run lint  &&  echo \"Warning: no tests specified (yet)\""
     },
     "version": "0.1.1"
 }
