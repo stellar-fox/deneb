@@ -1,4 +1,6 @@
-const helpers = require("../helpers.js")
+const
+    helpers = require("../helpers.js"),
+    toolbox = require("@xcmats/js-toolbox")
 
 
 
@@ -64,12 +66,12 @@ function emailMD5 (req, res, _next) {
         .then((dbData) => {
             res.status(200).json({
                 status: "success",
-                first_name: dbData[0].first_name,
-                last_name: dbData[0].last_name,
-                email: dbData[0].email,
-                md5: dbData[0].email_md5,
-                alias: dbData[0].alias,
-                domain: dbData[0].domain,
+                first_name: toolbox.head(dbData).first_name,
+                last_name: toolbox.head(dbData).last_name,
+                email: toolbox.head(dbData).email,
+                md5: toolbox.head(dbData).email_md5,
+                alias: toolbox.head(dbData).alias,
+                domain: toolbox.head(dbData).domain,
             })
         })
         .catch((_error) => {
@@ -123,7 +125,7 @@ function latestCurrency (req, res, next) {
             }
             // data too stale - update
             if (
-                new Date(dbData[0].updated_at).getTime() <
+                new Date(toolbox.head(dbData).updated_at).getTime() <
                 new Date().getTime() - 1000 * 60
             ) {
                 return helpers
@@ -160,7 +162,7 @@ function latestCurrency (req, res, next) {
             // otherwise return stale data within 1 minute window
             res.status(200).json({
                 status: "success",
-                data: dbData[0].data,
+                data: toolbox.head(dbData).data,
             })
         })
         .catch((error) => {

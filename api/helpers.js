@@ -1,8 +1,19 @@
-const config = require("../config.js")
-const postgresp = require("pg-promise")({})
-const db = postgresp(config.attributes.connectionStr)
-const axios = require("axios")
-const bcrypt = require("bcrypt")
+// ...
+const
+    axios = require("axios"),
+    bcrypt = require("bcrypt"),
+    config = require("../config.js"),
+    postgresp = require("pg-promise")({}),
+    toolbox = require("@xcmats/js-toolbox")
+
+
+
+
+// ...
+let db = postgresp(config.attributes.connectionStr)
+
+
+
 
 
 // ...
@@ -20,10 +31,15 @@ const errorMessageToRetCode = function (message) {
     return errorCode
 }
 
+
+
+
 // ...
 const btoh = function (bcryptHash) {
     return new Buffer(bcryptHash, "ascii").toString("hex")
 }
+
+
 
 
 // ...
@@ -32,10 +48,14 @@ const htob = function (hexString) {
 }
 
 
+
+
 // ...
 const apiKeyValid = function (hashedApiKey) {
     return bcrypt.compareSync(config.attributes.apiKey, hashedApiKey)
 }
+
+
 
 
 // ...
@@ -43,7 +63,7 @@ const fetchCMC = function (base="stellar", quot="eur") {
     return axios.get(`https://api.coinmarketcap.com/v1/ticker/${base}/?convert=${quot}`)
         .then((response) => {
             return {
-                data: response.data[0],
+                data: toolbox.head(response.data),
             }
         })
         .catch((error) => {
@@ -55,6 +75,8 @@ const fetchCMC = function (base="stellar", quot="eur") {
 }
 
 
+
+
 // ...
 const tokenIsValid = function (token, userId) {
     const tokenASCII = new Buffer(token, "base64").toString("ascii")
@@ -62,10 +84,14 @@ const tokenIsValid = function (token, userId) {
 }
 
 
+
+
 // ...
 const getApiKey = function () {
     return config.attributes.apiKey
 }
+
+
 
 
 // ...

@@ -1,5 +1,13 @@
-const helpers = require("../helpers.js")
-const bcrypt = require("bcrypt")
+// ...
+const
+    bcrypt = require("bcrypt"),
+    helpers = require("../helpers.js"),
+    toolbox = require("@xcmats/js-toolbox")
+
+
+
+
+// ...
 const saltRounds = 10
 
 
@@ -60,9 +68,7 @@ function createAccount (req, res, _) {
                 },
                 path: req.query.path,
                 user_id: req.params.user_id,
-                visible: (_) => {
-                    return req.query.visible == "false" ? false : true
-                },
+                visible: () => req.query.visible != "false",
                 created_at: now,
                 updated_at: now,
                 email_md5: req.query.md5,
@@ -303,7 +309,7 @@ function updateAccount (req, res, _next) {
             /((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
         ]
             .map((r) => r.source)
-            .join("")
+            .join(toolbox.emptyString())
     )
 
     let alias = null,
@@ -315,9 +321,9 @@ function updateAccount (req, res, _next) {
         domain = federationMatch ? federationMatch[2] : null
     }
 
-    !req.body.memo_type && (req.body.memo_type = "")
+    !req.body.memo_type && (req.body.memo_type = toolbox.emptyString())
 
-    !req.body.memo && (req.body.memo = "")
+    !req.body.memo && (req.body.memo = toolbox.emptyString())
 
 
     helpers.db
