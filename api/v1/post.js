@@ -515,8 +515,10 @@ function contacts (req, res, next) {
             FROM contacts INNER JOIN accounts ON \
             contacts.contact_id = accounts.user_id \
             INNER JOIN users ON contacts.contact_id = users.id \
-            WHERE contacts.user_id = ${user_id}", {
+            WHERE contacts.user_id = ${user_id} \
+            AND contacts.status = ${status}", {
             user_id: req.body.user_id,
+            status: req.body.status,
         })
         .then((dbData) => {
             res.status(200).json({
