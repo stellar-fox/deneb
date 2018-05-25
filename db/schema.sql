@@ -147,3 +147,39 @@ WITH (
 );
 ALTER TABLE public.contacts
   OWNER TO aquila;
+
+-- =============================================================================
+CREATE SEQUENCE public.ext_contacts_id_seq
+  INCREMENT 1
+  MINVALUE 1
+  MAXVALUE 9223372036854775807
+  START 1
+  CACHE 1;
+ALTER TABLE public.ext_contacts_id_seq
+  OWNER TO aquila;
+
+
+CREATE TABLE public.ext_contacts
+(
+  id bigint NOT NULL DEFAULT nextval('ext_contacts_id_seq'::regclass),
+  pubkey character varying NOT NULL,
+  first_name character varying,
+  last_name character varying,
+  email character varying,
+  email_md5 character varying,
+  alias character varying,
+  domain character varying,
+  memo_type character varying NOT NULL DEFAULT ''::character varying,
+  memo character varying NOT NULL DEFAULT ''::character varying,
+  currency character varying NOT NULL DEFAULT 'eur'::character varying,
+  added_by integer NOT NULL,
+  created_at timestamp without time zone NOT NULL,
+  updated_at timestamp without time zone NOT NULL,
+  UNIQUE(added_by, alias, domain),
+  CONSTRAINT ext_contacts_pkey PRIMARY KEY (id)
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE public.ext_contacts
+  OWNER TO aquila;
