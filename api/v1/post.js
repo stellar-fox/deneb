@@ -91,6 +91,69 @@ function createAccount (req, res, _) {
 }
 
 
+// ...
+function requestContact (req, res, _) {
+    if (!helpers.tokenIsValid(req.body.token, req.body.user_id)) {
+        return res.status(403).json({
+            error: "Forbidden",
+        })
+    }
+
+    let now = new Date()
+
+    // search accounts table to see if the requested contact has an account
+    helpers.db
+        .one(
+            "SELECT user_id FROM accounts WHERE alias = ${alias} \
+             AND domain = ${domain}",
+            {
+                alias: req.body.alias,
+                domain: req.body.domain,
+            }
+        )
+        .then((result) => {
+            // use existing user's id for new pending contact entry
+            helpers.db
+                .one(
+                    "INSERT INTO \
+                    contacts(user_id, contact_id, requested_by, status, \
+                    created_at, updated_at) \
+                    VALUES(${user_id}, ${contact_id}, ${requested_by}, \
+                    ${status}, ${created_at}, ${updated_at}) \
+                    RETURNING id",
+                    {
+                        user_id: req.body.user_id,
+                        contact_id: result.user_id,
+                        requested_by: req.body.requested_by,
+                        status: 1,
+                        created_at: now,
+                        updated_at: now,
+                    }
+                )
+                .then((result) => {
+                    res.status(201).json({
+                        success: true,
+                        result,
+                    })
+                })
+                .catch((error) => {
+                    const retCode = helpers.errorMessageToRetCode(error.message)
+                    res.status(retCode).json({
+                        status: "failure",
+                        id: error.message,
+                        code: retCode,
+                    })
+                })
+        })
+        .catch((error) => {
+            const retCode = helpers.errorMessageToRetCode(error.message)
+            res.status(retCode).json({
+                status: "failure",
+                id: error.message,
+                code: retCode,
+            })
+        })
+}
 
 
 // ...
@@ -522,9 +585,8 @@ function contacts (req, res, next) {
             contacts.contact_id = accounts.user_id \
             INNER JOIN users ON contacts.contact_id = users.id \
             WHERE contacts.user_id = ${user_id} \
-            AND contacts.status = ${status}", {
+            AND contacts.status = 2", {
             user_id: req.body.user_id,
-            status: req.body.status,
         })
         .then((dbData) => {
             res.status(200).json({
@@ -536,6 +598,42 @@ function contacts (req, res, next) {
             return next(error.message)
         })
 }
+
+
+
+
+// ...
+function externalContacts (req, res, next) {
+    if (!helpers.tokenIsValid(req.body.token, req.body.user_id)) {
+        return res.status(403).json({
+            error: "Forbidden",
+        })
+    }
+
+    helpers.db
+        .any("SELECT contacts.user_id, contact_id, requested_by, status, \
+            accounts.pubkey, accounts.alias, accounts.domain, \
+            accounts.currency, accounts.memo_type, accounts.memo, \
+            accounts.email_md5, \
+            users.first_name, users.last_name \
+            FROM contacts INNER JOIN accounts ON \
+            contacts.contact_id = accounts.user_id \
+            INNER JOIN users ON contacts.contact_id = users.id \
+            WHERE contacts.user_id = ${user_id} \
+            AND contacts.status = 2", {
+            user_id: req.body.user_id,
+        })
+        .then((dbData) => {
+            res.status(200).json({
+                status: "success",
+                data: dbData,
+            })
+        })
+        .catch((error) => {
+            return next(error.message)
+        })
+}
+
 
 
 
@@ -553,4 +651,6 @@ module.exports = {
     updateContact,
     deleteContact,
     contacts,
+    externalContacts,
+    requestContact,
 }
