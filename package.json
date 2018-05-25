@@ -1,19 +1,7 @@
 {
-    "name": "deneb",
-    "version": "0.1.1",
-    "description": "REST API for Stellar Fox.",
-    "keywords": [
-        "backend",
-        "bank",
-        "remittance",
-        "stellar"
-    ],
-    "homepage": "https://stellarfox.net/",
     "bugs": {
         "url": "https://github.com/stellar-fox/deneb/issues"
     },
-    "license": "Apache-2.0",
-    "private": true,
     "contributors": [
         {
             "name": "syntaxval",
@@ -26,22 +14,39 @@
             "url": "https://twitter.com/xcmats/"
         }
     ],
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/stellar-fox/deneb.git"
-    },
-    "main": "app.js",
-    "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
-    },
     "dependencies": {
+        "@xcmats/js-toolbox": "^0.3.0",
         "axios": "^0.18.0",
-        "bcrypt": "^1.0.3",
+        "bcrypt": "^2.0.1",
         "body-parser": "^1.18.2",
         "express": "^4.16.2",
         "pg-promise": "^7.4.1"
     },
+    "description": "REST API for Stellar Fox.",
     "devDependencies": {
-        "eslint": "^4.19.1"
-    }
+        "eslint": "^4.19.1",
+        "rimraf": "^2.6.2"
+    },
+    "homepage": "https://stellarfox.net/",
+    "keywords": [
+        "backend",
+        "bank",
+        "remittance",
+        "stellar"
+    ],
+    "license": "Apache-2.0",
+    "main": "app.js",
+    "name": "deneb",
+    "private": true,
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/stellar-fox/deneb.git"
+    },
+    "scripts": {
+        "clean_modules": "rimraf node_modules",
+        "lint": "eslint ./src/",
+        "start": "node ./app.js",
+        "test": "npm run lint  &&  echo \"Warning: no tests specified (yet)\""
+    },
+    "version": "0.1.1"
 }

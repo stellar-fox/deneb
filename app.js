@@ -1,9 +1,19 @@
 #!/usr/bin/env node
-const GETAPI = require("./api/v1/get.js")
-const POSTAPI = require("./api/v1/post.js")
-const express = require("express")
-const app = express()
-const bodyParser = require("body-parser")
+
+
+
+// ...
+const
+    bodyParser = require("body-parser"),
+    express = require("express"),
+    GETAPI = require("./api/v1/get.js"),
+    POSTAPI = require("./api/v1/post.js")
+
+
+
+
+// ...
+let app = express()
 
 
 
