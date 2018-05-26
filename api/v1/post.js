@@ -145,13 +145,8 @@ function requestContact (req, res, _) {
                     })
                 })
         })
-        .catch((error) => {
-            const retCode = helpers.errorMessageToRetCode(error.message)
-            res.status(retCode).json({
-                status: "failure",
-                id: error.message,
-                code: retCode,
-            })
+        .catch((_error) => {
+            res.status(404).json({})
         })
 }
 
