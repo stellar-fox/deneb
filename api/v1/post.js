@@ -629,6 +629,40 @@ function externalContacts (req, res, next) {
 
 
 
+// ...
+function contactReqlist (req, res, next) {
+    if (!helpers.tokenIsValid(req.body.token, req.body.user_id)) {
+        return res.status(403).json({
+            error: "Forbidden",
+        })
+    }
+
+    helpers.db
+        .any("SELECT \
+            contacts.user_id, contacts.contact_id, contacts.requested_by, \
+            contacts.created_at, accounts.alias, accounts.domain, \
+            accounts.email_md5, \
+            users.first_name, users.last_name \
+            FROM contacts INNER JOIN accounts \
+            ON contacts.user_id = accounts.user_id \
+            INNER JOIN users ON contacts.user_id = users.id \
+            WHERE contacts.contact_id = ${user_id} \
+            AND contacts.status = 1", {
+            user_id: req.body.user_id,
+        })
+        .then((dbData) => {
+            res.status(200).json({
+                status: "success",
+                data: dbData,
+            })
+        })
+        .catch((error) => {
+            return next(error.message)
+        })
+}
+
+
+
 //...
 module.exports = {
     updateUser: updateUser,
@@ -645,4 +679,5 @@ module.exports = {
     contacts,
     externalContacts,
     requestContact,
+    contactReqlist,
 }
