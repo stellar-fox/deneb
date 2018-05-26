@@ -298,10 +298,10 @@ function updateContact (req, res, _next) {
         .tx((t) => {
             return t.batch([
                 req.body.status ?
-                    t.none("UPDATE contacts SET status = $1, updated_at = $4 WHERE user_id = $2 AND contact_id = $3", [
+                    t.none("UPDATE contacts SET status = $1, updated_at = $4 WHERE contact_id = $2 AND requested_by = $3", [
                         req.body.status,
-                        req.body.user_id,
                         req.body.contact_id,
+                        req.body.requested_by,
                         new Date(),
                     ]) :
                     null,
@@ -577,9 +577,9 @@ function contacts (req, res, next) {
             accounts.email_md5, \
             users.first_name, users.last_name \
             FROM contacts INNER JOIN accounts ON \
-            contacts.contact_id = accounts.user_id \
-            INNER JOIN users ON contacts.contact_id = users.id \
-            WHERE contacts.user_id = ${user_id} \
+            contacts.user_id = accounts.user_id \
+            INNER JOIN users ON contacts.user_id = users.id \
+            WHERE contacts.contact_id = ${user_id} \
             AND contacts.status = 2", {
             user_id: req.body.user_id,
         })
@@ -641,7 +641,7 @@ function contactReqlist (req, res, next) {
         .any("SELECT \
             contacts.user_id, contacts.contact_id, contacts.requested_by, \
             contacts.created_at, accounts.alias, accounts.domain, \
-            accounts.email_md5, \
+            accounts.pubkey, accounts.email_md5, \
             users.first_name, users.last_name \
             FROM contacts INNER JOIN accounts \
             ON contacts.user_id = accounts.user_id \
