@@ -296,15 +296,32 @@ function updateContact (req, res, _next) {
     }
     helpers.db
         .tx((t) => {
+            let now = new Date()
             return t.batch([
                 req.body.status ?
-                    t.none("UPDATE contacts SET status = $1, updated_at = $4 WHERE contact_id = $2 AND requested_by = $3", [
+                    t.none("UPDATE contacts SET status = $1, updated_at = $4 \
+                        WHERE contact_id = $2 AND requested_by = $3", [
                         req.body.status,
                         req.body.contact_id,
                         req.body.requested_by,
                         new Date(),
                     ]) :
                     null,
+                req.body.status === 2 ? // ACCEPTED - insert reciprocal accept
+                    t.one("INSERT INTO contacts(user_id, contact_id, \
+                        requested_by, status, created_at, updated_at) \
+                        VALUES(${user_id}, ${contact_id}, ${requested_by}, \
+                        ${status}, ${created_at}, ${updated_at}) " +
+                        "RETURNING id",
+                    {
+                        user_id: req.body.contact_id,
+                        contact_id: req.body.requested_by,
+                        requested_by: req.body.contact_id,
+                        status: 2,
+                        created_at: now,
+                        updated_at: now,
+                    }
+                    ) : null,
             ])
         })
         .then((_data) => {
