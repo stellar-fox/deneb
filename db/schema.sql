@@ -133,13 +133,12 @@ ALTER TABLE public.contacts_id_seq
 CREATE TABLE public.contacts
 (
   id bigint NOT NULL DEFAULT nextval('contacts_id_seq'::regclass),
-  user_id integer NOT NULL,
   contact_id integer NOT NULL,
   requested_by integer NOT NULL,
   status integer NOT NULL DEFAULT 0,
   created_at timestamp without time zone NOT NULL,
   updated_at timestamp without time zone NOT NULL,
-  UNIQUE(user_id, contact_id),
+  UNIQUE(contact_id, requested_by),
   CONSTRAINT contacts_pkey PRIMARY KEY (id)
 )
 WITH (
