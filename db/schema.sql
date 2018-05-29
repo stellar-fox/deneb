@@ -168,15 +168,15 @@ CREATE TABLE public.ext_contacts
   last_name character varying,
   email character varying,
   email_md5 character varying,
-  alias character varying,
-  domain character varying,
+  alias character varying NOT NULL DEFAULT ''::character varying,
+  domain character varying NOT NULL DEFAULT ''::character varying,
   memo_type character varying NOT NULL DEFAULT ''::character varying,
   memo character varying NOT NULL DEFAULT ''::character varying,
   currency character varying NOT NULL DEFAULT 'eur'::character varying,
   added_by integer NOT NULL,
   created_at timestamp without time zone NOT NULL,
   updated_at timestamp without time zone NOT NULL,
-  UNIQUE(added_by, alias, domain),
+  UNIQUE(added_by, alias, domain, pubkey),
   CONSTRAINT ext_contacts_pkey PRIMARY KEY (id)
 )
 WITH (
