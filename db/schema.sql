@@ -139,6 +139,8 @@ CREATE TABLE public.contacts
   created_at timestamp without time zone NOT NULL,
   updated_at timestamp without time zone NOT NULL,
   UNIQUE(contact_id, requested_by),
+  CONSTRAINT contact_id_and_requested_by_must_not_be_the_same
+  CHECK(contact_id <> requested_by),
   CONSTRAINT contacts_pkey PRIMARY KEY (id)
 )
 WITH (
