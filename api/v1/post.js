@@ -92,6 +92,49 @@ function createAccount (req, res, _) {
 
 
 // ...
+function addExtContact (req, res, _) {
+    if (!helpers.tokenIsValid(req.body.token, req.body.user_id)) {
+        return res.status(403).json({
+            error: "Forbidden",
+        })
+    }
+
+    let now = new Date()
+    helpers.db
+        .one(
+            "INSERT INTO \
+                    ext_contacts(pubkey, added_by, alias, \
+                    domain, created_at, updated_at) \
+                    VALUES(${pubkey}, ${added_by},\
+                    ${alias}, ${domain}, ${created_at}, ${updated_at}) \
+                    RETURNING id",
+            {
+                pubkey: req.body.pubkey,
+                added_by: req.body.added_by,
+                alias: req.body.alias,
+                domain: req.body.domain,
+                created_at: now,
+                updated_at: now,
+            }
+        )
+        .then((result) => {
+            res.status(201).json({
+                success: true,
+                result,
+            })
+        })
+        .catch((error) => {
+            const retCode = helpers.errorMessageToRetCode(error.message)
+            res.status(retCode).json({
+                status: "failure",
+                id: error.message,
+                code: retCode,
+            })
+        })
+}
+
+
+// ...
 function requestContact (req, res, _) {
     if (!helpers.tokenIsValid(req.body.token, req.body.user_id)) {
         return res.status(403).json({
@@ -697,4 +740,5 @@ module.exports = {
     externalContacts,
     requestContact,
     contactReqlist,
+    addExtContact,
 }
