@@ -110,7 +110,7 @@ function addExtContact (req, res, _) {
                     RETURNING id",
             {
                 pubkey: req.body.pubkey,
-                added_by: req.body.added_by,
+                added_by: req.body.user_id,
                 alias: req.body.alias,
                 domain: req.body.domain,
                 created_at: now,
@@ -130,6 +130,63 @@ function addExtContact (req, res, _) {
                 id: error.message,
                 code: retCode,
             })
+        })
+}
+
+
+// ...
+function requestContactByAccountNumber (req, res, _) {
+    if (!helpers.tokenIsValid(req.body.token, req.body.user_id)) {
+        return res.status(403).json({
+            error: "Forbidden",
+        })
+    }
+
+    let now = new Date()
+
+    // search accounts table to see if the requested contact has an account
+    helpers.db
+        .one(
+            "SELECT user_id FROM accounts WHERE pubkey = ${pubkey}",
+            {
+                pubkey: req.body.pubkey,
+            }
+        )
+        .then((result) => {
+            // use existing user's id for new pending contact entry
+            helpers.db
+                .one(
+                    "INSERT INTO \
+                    contacts(contact_id, requested_by, status, \
+                    created_at, updated_at) \
+                    VALUES(${contact_id}, ${requested_by}, \
+                    ${status}, ${created_at}, ${updated_at}) \
+                    RETURNING id",
+                    {
+                        contact_id: result.user_id,
+                        requested_by: req.body.user_id,
+                        status: 1,
+                        created_at: now,
+                        updated_at: now,
+                    }
+                )
+                .then((result) => {
+                    res.status(201).json({
+                        success: true,
+                        result,
+                    })
+                })
+                .catch((error) => {
+                    const retCode = helpers.errorMessageToRetCode(error.message)
+                    res.status(retCode).json({
+                        status: "failure",
+                        id: error.message,
+                        code: retCode,
+                    })
+                })
+        })
+        .catch((_error) => {
+            res.status(404).json({})
         })
 }
 
@@ -159,15 +216,14 @@ function requestContact (req, res, _) {
             helpers.db
                 .one(
                     "INSERT INTO \
-                    contacts(user_id, contact_id, requested_by, status, \
+                    contacts(contact_id, requested_by, status, \
                     created_at, updated_at) \
-                    VALUES(${user_id}, ${contact_id}, ${requested_by}, \
+                    VALUES(${contact_id}, ${requested_by}, \
                     ${status}, ${created_at}, ${updated_at}) \
                     RETURNING id",
                     {
-                        user_id: req.body.user_id,
                         contact_id: result.user_id,
-                        requested_by: req.body.requested_by,
+                        requested_by: req.body.user_id,
                         status: 1,
                         created_at: now,
                         updated_at: now,
@@ -190,47 +246,6 @@ function requestContact (req, res, _) {
         })
         .catch((_error) => {
             res.status(404).json({})
-        })
-}
-
-
-// ...
-function createContact (req, res, _) {
-    if (!helpers.tokenIsValid(req.body.token, req.body.user_id)) {
-        return res.status(403).json({
-            error: "Forbidden",
-        })
-    }
-
-    let now = new Date()
-    helpers.db
-        .one(
-            "INSERT INTO " +
-                "contacts(user_id, contact_id, requested_by, status, created_at, updated_at) " +
-                "VALUES(${user_id}, ${contact_id}, ${requested_by}, ${status}, ${created_at}, ${updated_at}) " +
-            "RETURNING id",
-            {
-                user_id: req.body.user_id,
-                contact_id: req.body.contact_id,
-                requested_by: req.body.requested_by,
-                status: req.body.status,
-                created_at: now,
-                updated_at: now,
-            }
-        )
-        .then((result) => {
-            res.status(201).json({
-                success: true,
-                contact_id: result.id,
-            })
-        })
-        .catch((error) => {
-            const retCode = helpers.errorMessageToRetCode(error.message)
-            res.status(retCode).json({
-                status: "failure",
-                id: error.message,
-                code: retCode,
-            })
         })
 }
 
@@ -351,13 +366,12 @@ function updateContact (req, res, _next) {
                     ]) :
                     null,
                 req.body.status === 2 ? // ACCEPTED - insert reciprocal accept
-                    t.one("INSERT INTO contacts(user_id, contact_id, \
+                    t.one("INSERT INTO contacts(contact_id, \
                         requested_by, status, created_at, updated_at) \
-                        VALUES(${user_id}, ${contact_id}, ${requested_by}, \
+                        VALUES(${contact_id}, ${requested_by}, \
                         ${status}, ${created_at}, ${updated_at}) " +
                         "RETURNING id",
                     {
-                        user_id: req.body.contact_id,
                         contact_id: req.body.requested_by,
                         requested_by: req.body.contact_id,
                         status: 2,
@@ -631,15 +645,15 @@ function contacts (req, res, next) {
     }
 
     helpers.db
-        .any("SELECT contacts.user_id, contact_id, requested_by, status, \
+        .any("SELECT contact_id, requested_by, status, \
             accounts.pubkey, accounts.alias, accounts.domain, \
             accounts.currency, accounts.memo_type, accounts.memo, \
             accounts.email_md5, \
             users.first_name, users.last_name \
             FROM contacts INNER JOIN accounts ON \
-            contacts.user_id = accounts.user_id \
-            INNER JOIN users ON contacts.user_id = users.id \
-            WHERE contacts.contact_id = ${user_id} \
+            contacts.contact_id = accounts.user_id \
+            INNER JOIN users ON contacts.contact_id = users.id \
+            WHERE contacts.requested_by = ${user_id} \
             AND contacts.status = 2", {
             user_id: req.body.user_id,
         })
@@ -699,13 +713,13 @@ function contactReqlist (req, res, next) {
 
     helpers.db
         .any("SELECT \
-            contacts.user_id, contacts.contact_id, contacts.requested_by, \
+            contacts.contact_id, contacts.requested_by, \
             contacts.created_at, accounts.alias, accounts.domain, \
             accounts.pubkey, accounts.email_md5, \
             users.first_name, users.last_name \
             FROM contacts INNER JOIN accounts \
-            ON contacts.user_id = accounts.user_id \
-            INNER JOIN users ON contacts.user_id = users.id \
+            ON contacts.requested_by = accounts.user_id \
+            INNER JOIN users ON contacts.requested_by = users.id \
             WHERE contacts.contact_id = ${user_id} \
             AND contacts.status = 1", {
             user_id: req.body.user_id,
@@ -733,7 +747,6 @@ module.exports = {
     issueToken,
     userData,
     accountData,
-    createContact,
     updateContact,
     deleteContact,
     contacts,
@@ -741,4 +754,5 @@ module.exports = {
     requestContact,
     contactReqlist,
     addExtContact,
+    requestContactByAccountNumber,
 }

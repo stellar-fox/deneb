@@ -63,10 +63,10 @@ app.post("/api/v1/user/create/", POSTAPI.createUser)
 
 app.post("/api/v1/contacts/", POSTAPI.contacts)
 app.post("/api/v1/contacts/external/", POSTAPI.externalContacts)
-app.post("/api/v1/contact/create/", POSTAPI.createContact)
 app.post("/api/v1/contact/update/", POSTAPI.updateContact)
 app.post("/api/v1/contact/delete/", POSTAPI.deleteContact)
 app.post("/api/v1/contact/request/", POSTAPI.requestContact)
+app.post("/api/v1/contact/reqbyacct/", POSTAPI.requestContactByAccountNumber)
 app.post("/api/v1/contact/reqlist/", POSTAPI.contactReqlist)
 app.post("/api/v1/contact/addext/", POSTAPI.addExtContact)
 
