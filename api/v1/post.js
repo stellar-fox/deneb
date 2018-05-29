@@ -186,7 +186,40 @@ function requestContactByAccountNumber (req, res, _) {
                 })
         })
         .catch((_error) => {
-            res.status(404).json({})
+            /**
+             * In this case we should insert the public key contact to external
+             * contacts table as this is direct mapping of personal data to a
+             * public key lowest level address.
+             */
+            helpers.db
+                .one(
+                    "INSERT INTO \
+                    ext_contacts(pubkey, added_by, \
+                    created_at, updated_at) \
+                    VALUES(${pubkey}, ${added_by},\
+                    ${created_at}, ${updated_at}) \
+                    RETURNING id",
+                    {
+                        pubkey: req.body.pubkey,
+                        added_by: req.body.user_id,
+                        created_at: now,
+                        updated_at: now,
+                    }
+                )
+                .then((result) => {
+                    res.status(201).json({
+                        success: true,
+                        result,
+                    })
+                })
+                .catch((error) => {
+                    const retCode = helpers.errorMessageToRetCode(error.message)
+                    res.status(retCode).json({
+                        status: "failure",
+                        id: error.message,
+                        code: retCode,
+                    })
+                })
         })
 }
 
