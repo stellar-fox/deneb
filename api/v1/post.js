@@ -153,37 +153,86 @@ function requestContactByAccountNumber (req, res, _) {
             }
         )
         .then((result) => {
-            // use existing user's id for new pending contact entry
-            helpers.db
-                .one(
-                    "INSERT INTO \
-                    contacts(contact_id, requested_by, status, \
-                    created_at, updated_at) \
-                    VALUES(${contact_id}, ${requested_by}, \
-                    ${status}, ${created_at}, ${updated_at}) \
-                    RETURNING id",
-                    {
-                        contact_id: result.user_id,
-                        requested_by: req.body.user_id,
-                        status: 1,
-                        created_at: now,
-                        updated_at: now,
-                    }
-                )
-                .then((result) => {
-                    res.status(201).json({
-                        success: true,
-                        result,
-                    })
-                })
-                .catch((error) => {
-                    const retCode = helpers.errorMessageToRetCode(error.message)
-                    res.status(retCode).json({
-                        status: "failure",
-                        id: error.message,
-                        code: retCode,
-                    })
-                })
+            /**
+             * preemptive search in contacts in case status is set to
+             * "DELETED" (4)
+             */
+            helpers.db.oneOrNone(
+                "SELECT contact_id, requested_by, status FROM contacts \
+                WHERE contact_id = ${contact_id} \
+                AND requested_by = ${requested_by} AND status = ${status}", {
+                    contact_id: result.user_id,
+                    requested_by: req.body.user_id,
+                    status: 4,
+                },
+                e => e && e.contact_id
+            ).then((contact_id) => {
+                contact_id ?
+                    /**
+                     * this relation already exists in contacts table so update
+                     * status on the relation to "AWAITING APPROVAL" (1)
+                     */
+                    helpers.db
+                        .tx((t) => {
+                            return t.batch([
+                                t.none(
+                                    "UPDATE contacts SET status = 1 \
+                                    WHERE contact_id = ${contact_id} \
+                                    AND requested_by = ${requested_by}", {
+                                        contact_id,
+                                        requested_by: req.body.user_id,
+                                    }),
+                            ])
+                        })
+                        .then((result) => {
+                            res.status(201).json({
+                                success: true,
+                                result,
+                            })
+                        })
+                        .catch((error) => {
+                            const retCode = helpers.errorMessageToRetCode(error.message)
+                            res.status(retCode).json({
+                                status: "failure",
+                                id: error.message,
+                                code: retCode,
+                            })
+                        }) :
+
+                    /**
+                     * this is a new relation so insert new row to table
+                     */
+                    helpers.db
+                        .one(
+                            "INSERT INTO \
+                            contacts(contact_id, requested_by, status, \
+                            created_at, updated_at) \
+                            VALUES(${contact_id}, ${requested_by}, \
+                            ${status}, ${created_at}, ${updated_at}) \
+                            RETURNING id",
+                            {
+                                contact_id: result.user_id,
+                                requested_by: req.body.user_id,
+                                status: 1,
+                                created_at: now,
+                                updated_at: now,
+                            }
+                        )
+                        .then((result) => {
+                            res.status(201).json({
+                                success: true,
+                                result,
+                            })
+                        })
+                        .catch((error) => {
+                            const retCode = helpers.errorMessageToRetCode(error.message)
+                            res.status(retCode).json({
+                                status: "failure",
+                                id: error.message,
+                                code: retCode,
+                            })
+                        })
+            })
         })
         .catch((_error) => {
             /**
@@ -245,37 +294,89 @@ function requestContact (req, res, _) {
             }
         )
         .then((result) => {
-            // use existing user's id for new pending contact entry
-            helpers.db
-                .one(
-                    "INSERT INTO \
-                    contacts(contact_id, requested_by, status, \
-                    created_at, updated_at) \
-                    VALUES(${contact_id}, ${requested_by}, \
-                    ${status}, ${created_at}, ${updated_at}) \
-                    RETURNING id",
-                    {
-                        contact_id: result.user_id,
-                        requested_by: req.body.user_id,
-                        status: 1,
-                        created_at: now,
-                        updated_at: now,
-                    }
-                )
-                .then((result) => {
-                    res.status(201).json({
-                        success: true,
-                        result,
-                    })
-                })
-                .catch((error) => {
-                    const retCode = helpers.errorMessageToRetCode(error.message)
-                    res.status(retCode).json({
-                        status: "failure",
-                        id: error.message,
-                        code: retCode,
-                    })
-                })
+
+            /**
+             * preemptive search in contacts in case status is set to
+             * "DELETED" (4)
+             */
+            helpers.db.oneOrNone(
+                "SELECT contact_id, requested_by, status FROM contacts \
+                WHERE contact_id = ${contact_id} \
+                AND requested_by = ${requested_by} AND status = ${status}", {
+                    contact_id: result.user_id,
+                    requested_by: req.body.user_id,
+                    status: 4,
+                },
+                e => e && e.contact_id
+            ).then((contact_id) => {
+                contact_id ?
+                    /**
+                     * this relation already exists in contacts table so update
+                     * status on the relation to "AWAITING APPROVAL" (1)
+                     */
+                    helpers.db
+                        .tx((t) => {
+                            return t.batch([
+                                t.none(
+                                    "UPDATE contacts SET status = 1 \
+                                    WHERE contact_id = ${contact_id} \
+                                    AND requested_by = ${requested_by}", {
+                                        contact_id,
+                                        requested_by: req.body.user_id,
+                                    }),
+                            ])
+                        })
+                        .then((result) => {
+                            res.status(201).json({
+                                success: true,
+                                result,
+                            })
+                        })
+                        .catch((error) => {
+                            const retCode = helpers.errorMessageToRetCode(error.message)
+                            res.status(retCode).json({
+                                status: "failure",
+                                id: error.message,
+                                code: retCode,
+                            })
+                        }) :
+
+                    /**
+                     * this is a new relation so insert new row to table
+                     */
+                    helpers.db
+                        .one(
+                            "INSERT INTO \
+                            contacts(contact_id, requested_by, status, \
+                            created_at, updated_at) \
+                            VALUES(${contact_id}, ${requested_by}, \
+                            ${status}, ${created_at}, ${updated_at}) \
+                            RETURNING id",
+                            {
+                                contact_id: result.user_id,
+                                requested_by: req.body.user_id,
+                                status: 1,
+                                created_at: now,
+                                updated_at: now,
+                            }
+                        )
+                        .then((result) => {
+                            res.status(201).json({
+                                success: true,
+                                result,
+                            })
+                        })
+                        .catch((error) => {
+                            const retCode = helpers.errorMessageToRetCode(error.message)
+                            res.status(retCode).json({
+                                status: "failure",
+                                id: error.message,
+                                code: retCode,
+                            })
+                        })
+            })
+
+
         })
         .catch((_error) => {
             res.status(404).json({})
@@ -439,10 +540,12 @@ function deleteContact (req, res, _next) {
     helpers.db
         .tx((t) => {
             return t.batch([
-                t.none("DELETE FROM contacts WHERE user_id = $1 and contact_id = $2", [
-                    req.body.user_id,
-                    req.body.contact_id,
-                ]),
+                t.none(
+                    "UPDATE contacts SET status = 4 WHERE contact_id = $1 \
+                    AND requested_by = $2", [
+                        req.body.contact_id,
+                        req.body.requested_by,
+                    ]),
             ])
         })
         .then((_data) => {
