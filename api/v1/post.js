@@ -100,37 +100,94 @@ function addExtContact (req, res, _) {
     }
 
     let now = new Date()
-    helpers.db
-        .one(
-            "INSERT INTO \
+
+
+    /**
+     * preemptive search in contacts in case status is set to
+     * "DELETED" (4)
+     */
+    helpers.db.oneOrNone(
+        "SELECT id FROM ext_contacts \
+                WHERE pubkey = ${pubkey} AND alias = ${alias} \
+                AND domain = ${domain} \
+                AND added_by = ${added_by} AND status = ${status}", {
+            pubkey: req.body.pubkey,
+            alias: req.body.alias,
+            domain: req.body.domain,
+            added_by: req.body.user_id,
+            status: 4,
+        },
+        e => e && e.id
+    ).then((id) => {
+        id ?
+            /**
+             * this relation already exists in ext_contacts table so update
+             * status on the relation to "VISIBLE" (2)
+             */
+            helpers.db
+                .tx((t) => {
+                    return t.batch([
+                        t.none(
+                            "UPDATE ext_contacts SET status = 2 \
+                                    WHERE id = ${id} \
+                                    AND added_by = ${added_by}", {
+                                id,
+                                added_by: req.body.user_id,
+                            }),
+                    ])
+                })
+                .then((result) => {
+                    res.status(201).json({
+                        success: true,
+                        result,
+                    })
+                })
+                .catch((error) => {
+                    const retCode = helpers.errorMessageToRetCode(error.message)
+                    res.status(retCode).json({
+                        status: "failure",
+                        id: error.message,
+                        code: retCode,
+                    })
+                }) :
+
+            /**
+             * this is a new ext relation so insert new row to table with
+             * status "VISIBLE" (2)
+             */
+            helpers.db
+                .one(
+                    "INSERT INTO \
                     ext_contacts(pubkey, added_by, alias, \
-                    domain, created_at, updated_at) \
+                    domain, created_at, updated_at, status) \
                     VALUES(${pubkey}, ${added_by},\
-                    ${alias}, ${domain}, ${created_at}, ${updated_at}) \
-                    RETURNING id",
-            {
-                pubkey: req.body.pubkey,
-                added_by: req.body.user_id,
-                alias: req.body.alias,
-                domain: req.body.domain,
-                created_at: now,
-                updated_at: now,
-            }
-        )
-        .then((result) => {
-            res.status(201).json({
-                success: true,
-                result,
-            })
-        })
-        .catch((error) => {
-            const retCode = helpers.errorMessageToRetCode(error.message)
-            res.status(retCode).json({
-                status: "failure",
-                id: error.message,
-                code: retCode,
-            })
-        })
+                    ${alias}, ${domain}, ${created_at}, ${updated_at}, \
+                    ${status}) RETURNING id",
+                    {
+                        pubkey: req.body.pubkey,
+                        added_by: req.body.user_id,
+                        alias: req.body.alias,
+                        domain: req.body.domain,
+                        created_at: now,
+                        updated_at: now,
+                        status: 2,
+                    }
+                )
+                .then((result) => {
+                    res.status(201).json({
+                        success: true,
+                        result,
+                    })
+                })
+                .catch((error) => {
+                    const retCode = helpers.errorMessageToRetCode(error.message)
+                    res.status(retCode).json({
+                        status: "failure",
+                        id: error.message,
+                        code: retCode,
+                    })
+                })
+    })
 }
 
 
@@ -158,7 +215,7 @@ function requestContactByAccountNumber (req, res, _) {
              * "DELETED" (4)
              */
             helpers.db.oneOrNone(
-                "SELECT contact_id, requested_by, status FROM contacts \
+                "SELECT contact_id FROM contacts \
                 WHERE contact_id = ${contact_id} \
                 AND requested_by = ${requested_by} AND status = ${status}", {
                     contact_id: result.user_id,
@@ -563,6 +620,38 @@ function deleteContact (req, res, _next) {
 
 
 
+// ...
+function deleteExtContact (req, res, _next) {
+    if (!helpers.tokenIsValid(req.body.token, req.body.user_id)) {
+        return res.status(403).json({
+            error: "Forbidden",
+        })
+    }
+    helpers.db
+        .tx((t) => {
+            return t.batch([
+                t.none(
+                    "UPDATE ext_contacts SET status = 4 WHERE id = $1 \
+                    AND added_by = $2", [
+                        req.body.id,
+                        req.body.added_by,
+                    ]),
+            ])
+        })
+        .then((_data) => {
+            res.status(204).json({
+                status: "success",
+            })
+        })
+        .catch((error) => {
+            res.status(500).json({
+                error: error.message,
+            })
+        })
+}
+
+
+
 // ..
 function updateAccount (req, res, _next) {
     if (!helpers.tokenIsValid(req.body.token, req.body.id)) {
@@ -781,7 +870,7 @@ function contacts (req, res, next) {
     }
 
     helpers.db
-        .any("SELECT contact_id, requested_by, status, \
+        .any("SELECT contact_id, \
             accounts.pubkey, accounts.alias, accounts.domain, \
             accounts.currency, accounts.memo_type, accounts.memo, \
             accounts.email_md5, \
@@ -817,12 +906,13 @@ function externalContacts (req, res, next) {
 
     helpers.db
         .any("SELECT \
-            pubkey, alias, domain, \
+            id, pubkey, alias, domain, \
             currency, memo_type, memo, \
             email_md5, \
             first_name, last_name \
             FROM ext_contacts \
-            WHERE ext_contacts.added_by = ${user_id}", {
+            WHERE ext_contacts.added_by = ${user_id} \
+            AND status = 2", {
             user_id: req.body.user_id,
         })
         .then((dbData) => {
@@ -885,6 +975,7 @@ module.exports = {
     accountData,
     updateContact,
     deleteContact,
+    deleteExtContact,
     contacts,
     externalContacts,
     requestContact,

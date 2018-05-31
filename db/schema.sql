@@ -184,3 +184,7 @@ WITH (
 );
 ALTER TABLE public.ext_contacts
   OWNER TO aquila;
+
+-- =============================================================================
+ALTER TABLE public.ext_contacts
+  ADD COLUMN status integer NOT NULL DEFAULT 0;
