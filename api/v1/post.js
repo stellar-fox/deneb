@@ -129,8 +129,8 @@ function addExtContact (req, res, _) {
                     return t.batch([
                         t.none(
                             "UPDATE ext_contacts SET status = 2 \
-                                    WHERE id = ${id} \
-                                    AND added_by = ${added_by}", {
+                            WHERE id = ${id} \
+                            AND added_by = ${added_by}", {
                                 id,
                                 added_by: req.body.user_id,
                             }),
@@ -354,7 +354,7 @@ function requestContactByAccountNumber (req, res, _) {
                             ext_contacts(pubkey, added_by, \
                             created_at, updated_at, status) \
                             VALUES(${pubkey}, ${added_by},\
-                            ${created_at}, ${updated_at}), ${status} \
+                            ${created_at}, ${updated_at}, ${status}) \
                             RETURNING id",
                             {
                                 pubkey: req.body.pubkey,
