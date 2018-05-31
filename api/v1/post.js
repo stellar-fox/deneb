@@ -201,7 +201,12 @@ function requestContactByAccountNumber (req, res, _) {
 
     let now = new Date()
 
-    // search accounts table to see if the requested contact has an account
+    /**
+     * Search accounts table to determine if account number (public key) that
+     * was entered belongs to a registered user. If such user is found then
+     * add such user as a contact to internal contacts table. Otherwise, the
+     * contact will be considered external.
+     */
     helpers.db
         .one(
             "SELECT user_id FROM accounts WHERE pubkey = ${pubkey}",
@@ -293,40 +298,89 @@ function requestContactByAccountNumber (req, res, _) {
         })
         .catch((_error) => {
             /**
-             * In this case we should insert the public key contact to external
-             * contacts table as this is direct mapping of personal data to a
-             * public key lowest level address.
+             * preemptive search in contacts in case status is set to
+             * "DELETED" (4)
              */
-            helpers.db
-                .one(
-                    "INSERT INTO \
-                    ext_contacts(pubkey, added_by, \
-                    created_at, updated_at) \
-                    VALUES(${pubkey}, ${added_by},\
-                    ${created_at}, ${updated_at}) \
-                    RETURNING id",
-                    {
-                        pubkey: req.body.pubkey,
-                        added_by: req.body.user_id,
-                        created_at: now,
-                        updated_at: now,
-                    }
-                )
-                .then((result) => {
-                    res.status(201).json({
-                        success: true,
-                        result,
-                    })
-                })
-                .catch((error) => {
-                    const retCode = helpers.errorMessageToRetCode(error.message)
-                    res.status(retCode).json({
-                        status: "failure",
-                        id: error.message,
-                        code: retCode,
-                    })
-                })
+            helpers.db.oneOrNone(
+                "SELECT id FROM ext_contacts \
+                WHERE pubkey = ${pubkey} \
+                AND added_by = ${added_by} AND status = ${status}", {
+                    pubkey: req.body.pubkey,
+                    added_by: req.body.user_id,
+                    status: 4,
+                },
+                e => e && e.id
+            ).then((id) => {
+                id ?
+                    /**
+                     * this relation already exists in ext_contacts table so update
+                     * status on the relation to "VISIBLE" (2)
+                     */
+                    helpers.db
+                        .tx((t) => {
+                            return t.batch([
+                                t.none(
+                                    "UPDATE ext_contacts SET status = 2 \
+                                    WHERE id = ${id} \
+                                    AND added_by = ${added_by}", {
+                                        id,
+                                        added_by: req.body.user_id,
+                                    }),
+                            ])
+                        })
+                        .then((result) => {
+                            res.status(201).json({
+                                success: true,
+                                result,
+                            })
+                        })
+                        .catch((error) => {
+                            const retCode = helpers.errorMessageToRetCode(error.message)
+                            res.status(retCode).json({
+                                status: "failure",
+                                id: error.message,
+                                code: retCode,
+                            })
+                        }) :
+
+                    /**
+                     * In this case we should insert the public key contact to external
+                     * contacts table as this is direct mapping of personal data to a
+                     * public key lowest level address.
+                     */
+                    helpers.db
+                        .one(
+                            "INSERT INTO \
+                            ext_contacts(pubkey, added_by, \
+                            created_at, updated_at, status) \
+                            VALUES(${pubkey}, ${added_by},\
+                            ${created_at}, ${updated_at}), ${status} \
+                            RETURNING id",
+                            {
+                                pubkey: req.body.pubkey,
+                                added_by: req.body.user_id,
+                                created_at: now,
+                                updated_at: now,
+                                status: 2,
+                            }
+                        )
+                        .then((result) => {
+                            res.status(201).json({
+                                success: true,
+                                result,
+                            })
+                        })
+                        .catch((error) => {
+                            const retCode = helpers.errorMessageToRetCode(error.message)
+                            res.status(retCode).json({
+                                status: "failure",
+                                id: error.message,
+                                code: retCode,
+                            })
+                        })
+            })
         })
+
 }
 
 
