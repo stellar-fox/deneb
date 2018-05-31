@@ -163,6 +163,7 @@ ALTER TABLE public.ext_contacts_id_seq
 CREATE TABLE public.ext_contacts
 (
   id bigint NOT NULL DEFAULT nextval('ext_contacts_id_seq'::regclass),
+  status integer NOT NULL DEFAULT 0,
   pubkey character varying NOT NULL,
   first_name character varying,
   last_name character varying,
@@ -176,15 +177,12 @@ CREATE TABLE public.ext_contacts
   added_by integer NOT NULL,
   created_at timestamp without time zone NOT NULL,
   updated_at timestamp without time zone NOT NULL,
-  UNIQUE(added_by, alias, domain, pubkey),
-  CONSTRAINT ext_contacts_pkey PRIMARY KEY (id)
+  UNIQUE(added_by, pubkey),
+  CONSTRAINT ext_contacts_pkey PRIMARY KEY (id),
+  CONSTRAINT memo_col_len CHECK (length(memo) < 29)
 )
 WITH (
   OIDS=FALSE
 );
 ALTER TABLE public.ext_contacts
   OWNER TO aquila;
-
--- =============================================================================
-ALTER TABLE public.ext_contacts
-  ADD COLUMN status integer NOT NULL DEFAULT 0;
