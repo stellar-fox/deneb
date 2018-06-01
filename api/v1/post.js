@@ -591,6 +591,43 @@ function updateUser (req, res, _next) {
 
 
 // ...
+function updateExtContact (req, res, _next) {
+    if (!helpers.tokenIsValid(req.body.token, req.body.user_id)) {
+        return res.status(403).json({
+            error: "Forbidden",
+        })
+    }
+
+    helpers.db
+        .tx((t) => {
+            return t.batch([
+                req.body.currency ?
+                    t.none(
+                        "UPDATE ext_contacts SET currency = $1, \
+                        updated_at = $4 WHERE id = $2 AND added_by = $3", [
+                            req.body.currency,
+                            req.body.id,
+                            req.body.user_id,
+                            new Date(),
+                        ]) : null,
+
+            ])
+        })
+        .then((_data) => {
+            res.status(204).json({
+                status: "success",
+            })
+        })
+        .catch((error) => {
+            res.status(500).json({
+                error: error.message,
+            })
+        })
+}
+
+
+
+// ...
 function updateContact (req, res, _next) {
     if (!helpers.tokenIsValid(req.body.token, req.body.user_id)) {
         return res.status(403).json({
@@ -1028,6 +1065,7 @@ module.exports = {
     userData,
     accountData,
     updateContact,
+    updateExtContact,
     deleteContact,
     deleteExtContact,
     contacts,
