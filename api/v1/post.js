@@ -600,6 +600,7 @@ function updateExtContact (req, res, _next) {
 
     helpers.db
         .tx((t) => {
+            const date = new Date()
             return t.batch([
                 req.body.currency ?
                     t.none(
@@ -608,9 +609,51 @@ function updateExtContact (req, res, _next) {
                             req.body.currency,
                             req.body.id,
                             req.body.user_id,
-                            new Date(),
+                            date,
                         ]) : null,
-
+                req.body.memo ?
+                    t.none(
+                        "UPDATE ext_contacts SET memo = $1, \
+                        updated_at = $4 WHERE id = $2 AND added_by = $3", [
+                            req.body.memo,
+                            req.body.id,
+                            req.body.user_id,
+                            date,
+                        ]) : null,
+                req.body.first_name ?
+                    t.none(
+                        "UPDATE ext_contacts SET first_name = $1, \
+                        updated_at = $4 WHERE id = $2 AND added_by = $3", [
+                            req.body.first_name,
+                            req.body.id,
+                            req.body.user_id,
+                            date,
+                        ]) : null,
+                req.body.last_name ?
+                    t.none(
+                        "UPDATE ext_contacts SET last_name = $1, \
+                        updated_at = $4 WHERE id = $2 AND added_by = $3", [
+                            req.body.last_name,
+                            req.body.id,
+                            req.body.user_id,
+                            date,
+                        ]) : null,
+                t.none(
+                    "UPDATE ext_contacts SET alias = $1, \
+                    updated_at = $4 WHERE id = $2 AND added_by = $3", [
+                        req.body.alias || "",
+                        req.body.id,
+                        req.body.user_id,
+                        date,
+                    ]),
+                t.none(
+                    "UPDATE ext_contacts SET domain = $1, \
+                    updated_at = $4 WHERE id = $2 AND added_by = $3", [
+                        req.body.domain || "",
+                        req.body.id,
+                        req.body.user_id,
+                        date,
+                    ]),
             ])
         })
         .then((_data) => {
