@@ -691,19 +691,37 @@ function updateContact (req, res, _next) {
                     ]) :
                     null,
                 req.body.status === 2 ? // ACCEPTED - insert reciprocal accept
-                    t.one("INSERT INTO contacts(contact_id, \
-                        requested_by, status, created_at, updated_at) \
-                        VALUES(${contact_id}, ${requested_by}, \
-                        ${status}, ${created_at}, ${updated_at}) " +
-                        "RETURNING id",
-                    {
-                        contact_id: req.body.requested_by,
-                        requested_by: req.body.contact_id,
-                        status: 2,
-                        created_at: now,
-                        updated_at: now,
-                    }
-                    ) : null,
+                    (() => {
+                        /**
+                         * First check to see if the reciprocal contact already
+                         * exists with status 2 (ACCEPTED). If it does then
+                         * don't do anything.
+                         */
+                        helpers.db.oneOrNone("SELECT id FROM contacts \
+                        WHERE contact_id = ${contact_id} \
+                        AND requested_by = ${requested_by} \
+                        AND status = 2",
+                        {
+                            contact_id: req.body.requested_by,
+                            requested_by: req.body.contact_id,
+                        }).then((result) => {
+                            result ? null : (
+                                helpers.db.one("INSERT INTO contacts(contact_id, \
+                                requested_by, status, created_at, updated_at) \
+                                VALUES(${contact_id}, ${requested_by}, \
+                                ${status}, ${created_at}, ${updated_at}) " +
+                                "RETURNING id",
+                                {
+                                    contact_id: req.body.requested_by,
+                                    requested_by: req.body.contact_id,
+                                    status: 2,
+                                    created_at: now,
+                                    updated_at: now,
+                                }
+                                ))
+                        })
+
+                    })() : null,
             ])
         })
         .then((_data) => {
