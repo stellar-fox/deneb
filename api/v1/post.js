@@ -505,7 +505,11 @@ function userData (req, res, next) {
         })
     }
     helpers.db
-        .one("SELECT * FROM users WHERE id = ${id}", {
+        .one("SELECT users.first_name, users.last_name, users.email, \
+        accounts.alias, accounts.domain, accounts.currency, accounts.visible, \
+        accounts.email_md5, accounts.memo_type, accounts.memo FROM users \
+        INNER JOIN accounts ON users.id = accounts.user_id \
+        WHERE users.id = ${id}", {
             id: req.body.id,
         })
         .then((dbData) => {
