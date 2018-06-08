@@ -15,7 +15,7 @@
         }
     ],
     "dependencies": {
-        "@xcmats/js-toolbox": "^0.3.4",
+        "@xcmats/js-toolbox": "^0.3.5",
         "axios": "^0.18.0",
         "bcrypt": "^2.0.1",
         "body-parser": "^1.18.2",
