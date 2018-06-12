@@ -418,7 +418,7 @@ function requestContact (req, res, _) {
                     requested_by: req.body.user_id,
                     status: 4,
                 },
-                e => e && e.contact_id
+                (e) => e && e.contact_id
             ).then((contact_id) => {
                 contact_id ?
                     /**
@@ -856,11 +856,7 @@ function updateAccount (req, res, _next) {
                     t.none(
                         "UPDATE accounts SET visible = ${visible} WHERE user_id = ${user_id}",
                         {
-                            visible: () => {
-                                return req.body.visible == "false"
-                                    ? false
-                                    : true
-                            },
+                            visible: () => req.body.visible != "false",
                             user_id: req.body.id,
                         }
                     ) :
@@ -913,13 +909,13 @@ function issueToken (req, res, _) {
         )
         .then((dbData) => {
             bcrypt.hash(
-                `${helpers.getApiKey()}${dbData[0].user_id}`,
+                `${helpers.getApiKey()}${toolbox.head(dbData).user_id}`,
                 saltRounds,
                 (_, hash) => {
                     // authenticated
                     res.status(200).json({
                         authenticated: true,
-                        user_id: dbData[0].user_id,
+                        user_id: toolbox.head(dbData).user_id,
                         token: new Buffer(hash).toString("base64"),
                     })
                 }
@@ -948,7 +944,7 @@ function authenticate (req, res, next) {
             if (dbData.length === 1) {
                 bcrypt.compare(
                     req.body.password,
-                    dbData[0].password_digest,
+                    toolbox.head(dbData).password_digest,
                     (_err, auth) => {
                         if (auth) {
                             helpers.db
@@ -957,18 +953,18 @@ function authenticate (req, res, next) {
                                     "FROM accounts " +
                                     "WHERE user_id = ${user_id}",
                                     {
-                                        user_id: dbData[0].id,
+                                        user_id: toolbox.head(dbData).id,
                                     }
                                 )
                                 .then((dbAccount) => {
                                     bcrypt.hash(
-                                        `${helpers.getApiKey()}${dbData[0].id}`,
+                                        `${helpers.getApiKey()}${toolbox.head(dbData).id}`,
                                         saltRounds,
                                         (_error, hash) => {
                                             // authenticated
                                             res.status(200).json({
                                                 authenticated: true,
-                                                user_id: dbData[0].id,
+                                                user_id: toolbox.head(dbData).id,
                                                 pubkey: dbAccount.pubkey,
                                                 bip32Path: dbAccount.path,
                                                 token: new Buffer(
