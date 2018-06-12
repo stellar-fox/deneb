@@ -125,8 +125,8 @@ function latestCurrency (req, res, next) {
             }
             // data too stale - update
             if (
-                new Date(toolbox.head(dbData).updated_at).getTime() <
-                new Date().getTime() - 1000 * 60
+                (new Date(toolbox.head(dbData).updated_at)).getTime() <
+                Date.now() - toolbox.timeUnit.minute
             ) {
                 return helpers
                     .fetchCMC(undefined, req.params.currency)
