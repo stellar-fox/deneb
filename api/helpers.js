@@ -80,7 +80,9 @@ const fetchCMC = function (base="stellar", quot="eur") {
 // ...
 const tokenIsValid = function (token, userId) {
     const tokenASCII = new Buffer(token, "base64").toString("ascii")
-    return bcrypt.compareSync(`${config.attributes.apiKey}${userId}`, tokenASCII)
+    return bcrypt.compareSync(
+        `${config.attributes.apiKey}${userId}`, tokenASCII
+    )
 }
 
 

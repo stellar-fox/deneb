@@ -7,7 +7,9 @@ const
     bodyParser = require("body-parser"),
     express = require("express"),
     GETAPI = require("./api/v1/get.js"),
-    POSTAPI = require("./api/v1/post.js")
+    POSTAPI = require("./api/v1/post.js"),
+
+    ContactsRouter = require("./api/v2/contacts/router.js")
 
 
 
@@ -36,6 +38,7 @@ app.use(function (_req, res, next) {
 })
 
 
+ContactsRouter(app)
 
 
 /*
