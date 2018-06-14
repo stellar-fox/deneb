@@ -123,17 +123,17 @@ const removeInternal = (req, res, next) => {
                 "UPDATE contacts SET status = 4 WHERE contact_id = $1 \
                 AND requested_by = $2", [
                     req.body.contact_id,
-                    req.body.requested_by,
+                    req.body.user_id,
                 ]),
             t.none(
                 "UPDATE contacts SET status = 4 WHERE contact_id = $1 \
                 AND requested_by = $2", [
-                    req.body.requested_by,
+                    req.body.user_id,
                     req.body.contact_id,
                 ]),
         ])
     })
-        .then(() => res.status(204))
+        .then(() => res.status(204).json({}))
         .catch((error) => next(error.message))
 }
 
