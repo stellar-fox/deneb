@@ -67,7 +67,7 @@ const listRequested = (req, res, next) => {
         })
     }
     helpers.db.any(
-        "SELECT contacts.contact_id, contacts.requested_by, \
+        "SELECT 'request' as type, contacts.contact_id, contacts.requested_by, \
         contacts.created_at, accounts.alias, accounts.domain, \
         accounts.pubkey, accounts.email_md5, \
         users.first_name, users.last_name \
@@ -93,7 +93,7 @@ const listPending = (req, res, next) => {
         })
     }
     helpers.db.any(
-        "SELECT contacts.contact_id, contacts.requested_by, \
+        "SELECT 'pending' as type, contacts.contact_id, contacts.requested_by, \
         contacts.created_at, accounts.alias, accounts.domain, \
         accounts.pubkey, accounts.email_md5, \
         users.first_name, users.last_name \
