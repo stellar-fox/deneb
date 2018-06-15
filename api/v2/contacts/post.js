@@ -227,7 +227,107 @@ const removeInternal = (req, res, next) => {
 
 
 // ...
-const requestInternalByPaymentAddress = async (req, res, next) => {
+const requestByAccountNumber = async (req, res, _next) => {
+    if (!helpers.tokenIsValid(req.body.token, req.body.user_id)) {
+        return res.status(403).json({
+            error: "Forbidden",
+        })
+    }
+
+    let now = new Date()
+
+    const registeredAccount = await helpers.db.oneOrNone(
+        "SELECT user_id FROM accounts WHERE pubkey = ${pubkey}",
+        {
+            pubkey: req.body.pubkey,
+        }
+    )
+
+    if (registeredAccount) {
+        const contact_id = await helpers.db.oneOrNone(
+            "SELECT contact_id FROM contacts WHERE contact_id = ${contact_id} \
+            AND requested_by = ${requested_by} AND status = ${status}", {
+                contact_id: registeredAccount.user_id,
+                requested_by: req.body.user_id,
+                status: 4,
+            },
+            (e) => e && e.contact_id
+        )
+
+        if (contact_id) {
+            await helpers.db.tx((t) => {
+                return t.batch([
+                    t.none(
+                        "UPDATE contacts SET status = 1 \
+                        WHERE contact_id = ${contact_id} \
+                        AND requested_by = ${requested_by}", {
+                            contact_id,
+                            requested_by: req.body.user_id,
+                        }),
+                ])
+            })
+            return res.status(204).send()
+        } else {
+            await helpers.db.none(
+                "INSERT INTO contacts(contact_id, requested_by, status, \
+                created_at, updated_at) VALUES(${contact_id}, ${requested_by}, \
+                ${status}, ${created_at}, ${updated_at})",
+                {
+                    contact_id: registeredAccount.user_id,
+                    requested_by: req.body.user_id,
+                    status: 1,
+                    created_at: now,
+                    updated_at: now,
+                }
+            )
+            return res.status(201).send()
+        }
+    } else {
+        const federatedId = await helpers.db.oneOrNone(
+            "SELECT id FROM ext_contacts WHERE pubkey = ${pubkey} \
+            AND added_by = ${added_by} AND status = ${status}", {
+                pubkey: req.body.pubkey,
+                added_by: req.body.user_id,
+                status: 4,
+            },
+            (e) => e && e.id
+        )
+
+        if (federatedId) {
+            await helpers.db.tx((t) => {
+                return t.batch([
+                    t.none(
+                        "UPDATE ext_contacts SET status = 2 WHERE id = ${id} \
+                        AND added_by = ${added_by}", {
+                            federatedId,
+                            added_by: req.body.user_id,
+                        }),
+                ])
+            })
+            return res.status(204).send()
+        } else {
+            await helpers.db.none(
+                "INSERT INTO ext_contacts(pubkey, added_by, created_at, \
+                updated_at, status) VALUES(${pubkey}, ${added_by}, \
+                ${created_at}, ${updated_at}, ${status})",
+                {
+                    pubkey: req.body.pubkey,
+                    added_by: req.body.user_id,
+                    created_at: now,
+                    updated_at: now,
+                    status: 2,
+                }
+            )
+            return res.status(201).send()
+        }
+    }
+}
+
+
+
+
+// ...
+const requestByPaymentAddress = async (req, res, next) => {
     if (!helpers.tokenIsValid(req.body.token, req.body.user_id)) {
         return res.status(403).json({
             error: "Forbidden",
@@ -262,6 +362,54 @@ const requestInternalByPaymentAddress = async (req, res, next) => {
         } catch (error) {
             return next(error.message)
         }
+    } else {
+
+        const federatedId = helpers.db.oneOrNone(
+            "SELECT id FROM ext_contacts WHERE pubkey = ${pubkey} \
+            AND added_by = ${added_by} AND status = ${status}", {
+                pubkey: req.body.pubkey,
+                added_by: req.body.user_id,
+                status: 4,
+            },
+            (e) => e && e.id
+        )
+
+        if (federatedId) {
+            try {
+                await helpers.db.tx((t) => {
+                    return t.batch([
+                        t.none("UPDATE ext_contacts SET status = 2 \
+                               WHERE id = ${id} AND added_by = ${added_by}", {
+                            federatedId,
+                            added_by: req.body.user_id,
+                        }),
+                    ])
+                })
+                return res.status(204).send()
+            } catch (error) {
+                return next(error.message)
+            }
+
+        } else {
+            try {
+                await helpers.db.none(
+                    "INSERT INTO ext_contacts(pubkey, added_by, created_at, \
+                    updated_at, status) VALUES(${pubkey}, ${added_by},\
+                    ${created_at}, ${updated_at}, ${status})",
+                    {
+                        pubkey: req.body.pubkey,
+                        added_by: req.body.user_id,
+                        created_at: now,
+                        updated_at: now,
+                        status: 2,
+                    }
+                )
+                return res.status(201).send()
+            } catch (error) {
+                return next(error.message)
+            }
+
+        }
     }
 
     if (contactId) {
@@ -273,7 +421,7 @@ const requestInternalByPaymentAddress = async (req, res, next) => {
                     contactId,
                     requestedBy: req.body.user_id,
                 }),
-                t.none("UPDATE contacts SET status = 1 \
+                t.none("UPDATE contacts SET status = 5 \
                 WHERE contact_id = ${requestedBy} \
                 AND requested_by = ${contactId}", {
                     contactId,
@@ -281,6 +429,7 @@ const requestInternalByPaymentAddress = async (req, res, next) => {
                 }),
             ])
         })
+        return res.status(204).send()
     } else {
         try {
             await helpers.db.tx((t) => {
@@ -346,8 +495,9 @@ const updateFederated = (req, res, next) => {
                         ]) : null,
                 req.body.memo ?
                     t.none(
-                        "UPDATE ext_contacts SET memo = $1, \
-                        updated_at = $4 WHERE id = $2 AND added_by = $3", [
+                        "UPDATE ext_contacts SET memo_type = 'text', \
+                        memo = $1, updated_at = $4 WHERE id = $2 \
+                        AND added_by = $3", [
                             req.body.memo,
                             req.body.id,
                             req.body.user_id,
@@ -405,7 +555,8 @@ module.exports = {
     rejectInternal,
     removeFederated,
     removeInternal,
-    requestInternalByPaymentAddress,
+    requestByAccountNumber,
+    requestByPaymentAddress,
     root,
     updateFederated,
 }
