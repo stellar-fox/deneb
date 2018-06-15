@@ -173,6 +173,30 @@ const listPending = (req, res, next) => {
 
 
 // ...
+const removeFederated = (req, res, next) => {
+    if (!helpers.tokenIsValid(req.body.token, req.body.user_id)) {
+        return res.status(403).json({
+            error: "Forbidden",
+        })
+    }
+
+    helpers.db.tx((t) => {
+        return t.batch([
+            t.none(
+                "UPDATE ext_contacts SET status = 4 WHERE id = $1 \
+                AND added_by = $2", [
+                    req.body.id,
+                    req.body.added_by,
+                ]),
+        ])
+    })
+        .then(() => res.status(204).send())
+        .catch((error) => next(error.message))
+}
+
+
+
+// ...
 const removeInternal = (req, res, next) => {
     if (!helpers.tokenIsValid(req.body.token, req.body.user_id)) {
         return res.status(403).json({
@@ -300,6 +324,78 @@ const requestInternalByPaymentAddress = async (req, res, next) => {
 
 
 // ...
+const updateFederated = (req, res, next) => {
+    if (!helpers.tokenIsValid(req.body.token, req.body.user_id)) {
+        return res.status(403).json({
+            error: "Forbidden",
+        })
+    }
+
+    helpers.db
+        .tx((t) => {
+            const date = new Date()
+            return t.batch([
+                req.body.currency ?
+                    t.none(
+                        "UPDATE ext_contacts SET currency = $1, \
+                        updated_at = $4 WHERE id = $2 AND added_by = $3", [
+                            req.body.currency,
+                            req.body.id,
+                            req.body.user_id,
+                            date,
+                        ]) : null,
+                req.body.memo ?
+                    t.none(
+                        "UPDATE ext_contacts SET memo = $1, \
+                        updated_at = $4 WHERE id = $2 AND added_by = $3", [
+                            req.body.memo,
+                            req.body.id,
+                            req.body.user_id,
+                            date,
+                        ]) : null,
+                req.body.first_name ?
+                    t.none(
+                        "UPDATE ext_contacts SET first_name = $1, \
+                        updated_at = $4 WHERE id = $2 AND added_by = $3", [
+                            req.body.first_name,
+                            req.body.id,
+                            req.body.user_id,
+                            date,
+                        ]) : null,
+                req.body.last_name ?
+                    t.none(
+                        "UPDATE ext_contacts SET last_name = $1, \
+                        updated_at = $4 WHERE id = $2 AND added_by = $3", [
+                            req.body.last_name,
+                            req.body.id,
+                            req.body.user_id,
+                            date,
+                        ]) : null,
+                t.none(
+                    "UPDATE ext_contacts SET alias = $1, \
+                    updated_at = $4 WHERE id = $2 AND added_by = $3", [
+                        req.body.alias || "",
+                        req.body.id,
+                        req.body.user_id,
+                        date,
+                    ]),
+                t.none(
+                    "UPDATE ext_contacts SET domain = $1, \
+                    updated_at = $4 WHERE id = $2 AND added_by = $3", [
+                        req.body.domain || "",
+                        req.body.id,
+                        req.body.user_id,
+                        date,
+                    ]),
+            ])
+        })
+        .then(() => res.status(204).send())
+        .catch((error) => next(error.message))
+}
+
+
+
+// ...
 module.exports = {
     approveInternal,
     listFederated,
@@ -307,7 +403,9 @@ module.exports = {
     listPending,
     listRequested,
     rejectInternal,
+    removeFederated,
     removeInternal,
     requestInternalByPaymentAddress,
     root,
+    updateFederated,
 }

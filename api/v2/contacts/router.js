@@ -19,6 +19,8 @@ const router = function (app) {
 
     // federated
     app.post("/api/v2/contacts/list/federated/", POST.listFederated)
+    app.post("/api/v2/contact/update/federated/", POST.updateFederated)
+    app.post("/api/v2/contact/remove/federated/", POST.removeFederated)
 }
 
 
