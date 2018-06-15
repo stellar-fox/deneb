@@ -14,8 +14,8 @@ const router = function (app) {
         "/api/v2/contact/request/internal/by-payment-address/",
         POST.requestInternalByPaymentAddress
     )
-
-    // app.post("/api/v2/contact/approve/internal/", POST.approveInternal)
+    app.post("/api/v2/contact/approve/internal/", POST.approveInternal)
+    app.post("/api/v2/contact/reject/internal/", POST.rejectInternal)
 
     // federated
     app.post("/api/v2/contacts/list/federated/", POST.listFederated)

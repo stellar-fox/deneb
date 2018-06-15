@@ -2,6 +2,67 @@ const helpers = require("../../helpers")
 
 
 
+// ...
+const approveInternal = (req, res, next) => {
+    if (!helpers.tokenIsValid(req.body.token, req.body.user_id)) {
+        return res.status(403).json({
+            error: "Forbidden",
+        })
+    }
+
+    helpers.db.tx((t) => {
+        return t.batch([
+            t.none(
+                "UPDATE contacts SET status = 2 WHERE contact_id = $1 \
+                AND requested_by = $2", [
+                    req.body.contact_id,
+                    req.body.user_id,
+                ]),
+            t.none(
+                "UPDATE contacts SET status = 2 WHERE contact_id = $1 \
+                AND requested_by = $2", [
+                    req.body.user_id,
+                    req.body.contact_id,
+                ]),
+        ])
+    })
+        .then(() => res.status(204).send())
+        .catch((error) => next(error.message))
+}
+
+
+
+
+// ...
+const rejectInternal = (req, res, next) => {
+    if (!helpers.tokenIsValid(req.body.token, req.body.user_id)) {
+        return res.status(403).json({
+            error: "Forbidden",
+        })
+    }
+
+    helpers.db.tx((t) => {
+        return t.batch([
+            t.none(
+                "UPDATE contacts SET status = 3 WHERE contact_id = $1 \
+                AND requested_by = $2", [
+                    req.body.contact_id,
+                    req.body.user_id,
+                ]),
+            t.none(
+                "UPDATE contacts SET status = 3 WHERE contact_id = $1 \
+                AND requested_by = $2", [
+                    req.body.user_id,
+                    req.body.contact_id,
+                ]),
+        ])
+    })
+        .then(() => res.status(204).send())
+        .catch((error) => next(error.message))
+}
+
+
+
 
 // ...
 const root = (_req, res) =>
@@ -110,6 +171,7 @@ const listPending = (req, res, next) => {
 
 
 
+
 // ...
 const removeInternal = (req, res, next) => {
     if (!helpers.tokenIsValid(req.body.token, req.body.user_id)) {
@@ -133,7 +195,7 @@ const removeInternal = (req, res, next) => {
                 ]),
         ])
     })
-        .then(() => res.status(204).json({}))
+        .then(() => res.status(204).send())
         .catch((error) => next(error.message))
 }
 
@@ -227,22 +289,25 @@ const requestInternalByPaymentAddress = async (req, res, next) => {
                     ),
                 ])
             })
-            return res.status(201).json({})
+            return res.status(201).send()
         } catch (error) {
-            return res.status(409).json({})
+            return res.status(409).send()
         }
     }
 }
 
 
 
+
 // ...
 module.exports = {
-    root,
-    listInternal,
+    approveInternal,
     listFederated,
-    listRequested,
+    listInternal,
     listPending,
+    listRequested,
+    rejectInternal,
     removeInternal,
     requestInternalByPaymentAddress,
+    root,
 }
