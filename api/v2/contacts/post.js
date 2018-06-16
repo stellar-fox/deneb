@@ -1,4 +1,9 @@
-const helpers = require("../../helpers")
+const helpers = require("../../helpers"),
+    REQUESTED = 1,
+    APPROVED = 2,
+    BLOCKED = 3,
+    DELETED = 4,
+    PENDING = 5
 
 
 
@@ -7,14 +12,14 @@ const approveInternal = (req, res, next) => {
     helpers.db.tx((t) => {
         return t.batch([
             t.none(
-                "UPDATE contacts SET status = 2 WHERE contact_id = $1 \
-                AND requested_by = $2", [
+                `UPDATE contacts SET status = ${APPROVED} \
+                WHERE contact_id = $1 AND requested_by = $2`, [
                     req.body.contact_id,
                     req.body.user_id,
                 ]),
             t.none(
-                "UPDATE contacts SET status = 2 WHERE contact_id = $1 \
-                AND requested_by = $2", [
+                `UPDATE contacts SET status = ${APPROVED} \
+                WHERE contact_id = $1 AND requested_by = $2`, [
                     req.body.user_id,
                     req.body.contact_id,
                 ]),
@@ -32,14 +37,14 @@ const rejectInternal = (req, res, next) => {
     helpers.db.tx((t) => {
         return t.batch([
             t.none(
-                "UPDATE contacts SET status = 3 WHERE contact_id = $1 \
-                AND requested_by = $2", [
+                `UPDATE contacts SET status = ${BLOCKED} \
+                WHERE contact_id = $1 AND requested_by = $2`, [
                     req.body.contact_id,
                     req.body.user_id,
                 ]),
             t.none(
-                "UPDATE contacts SET status = 3 WHERE contact_id = $1 \
-                AND requested_by = $2", [
+                `UPDATE contacts SET status = ${BLOCKED} \
+                WHERE contact_id = $1 AND requested_by = $2`, [
                     req.body.user_id,
                     req.body.contact_id,
                 ]),
@@ -54,7 +59,7 @@ const rejectInternal = (req, res, next) => {
 
 // ...
 const root = (_req, res) =>
-    res.status(200).send("Stellar Fox API: MailChimp Contacts Management")
+    res.status(200).send("Stellar Fox API: Contacts Management")
 
 
 
@@ -62,7 +67,7 @@ const root = (_req, res) =>
 // ...
 const listInternal = (req, res, next) => {
     helpers.db.any(
-        "SELECT contacts.contact_id, contacts.status, contacts.created_at, \
+        `SELECT contacts.contact_id, contacts.status, contacts.created_at, \
         contacts.updated_at, COALESCE(users.first_name, '') AS first_name, \
         COALESCE(users.last_name, '') AS last_name, users.email, \
         accounts.pubkey, COALESCE(accounts.alias, '') AS alias, \
@@ -70,11 +75,9 @@ const listInternal = (req, res, next) => {
         accounts.precision, accounts.email_md5, accounts.memo_type, \
         accounts.memo FROM contacts INNER JOIN users ON \
         users.id = contacts.contact_id INNER JOIN accounts ON \
-        users.id = accounts.user_id WHERE contacts.status = 2 AND \
-        contacts.requested_by = ${user_id}",
-        {
-            user_id: req.body.user_id,
-        })
+        users.id = accounts.user_id WHERE contacts.status = ${APPROVED} AND \
+        contacts.requested_by = $1`,
+        [ req.body.user_id, ])
         .then((results) => res.status(200).send(results))
         .catch((error) => next(error.message))
 }
@@ -85,12 +88,10 @@ const listInternal = (req, res, next) => {
 // ...
 const listFederated = (req, res, next) => {
     helpers.db.any(
-        "SELECT id, pubkey, alias, domain, currency, memo_type, \
+        `SELECT id, pubkey, alias, domain, currency, memo_type, \
         memo, email_md5, first_name, last_name FROM ext_contacts \
-        WHERE status = 2 AND ext_contacts.added_by = ${user_id}",
-        {
-            user_id: req.body.user_id,
-        })
+        WHERE status = ${APPROVED} AND ext_contacts.added_by = $1`,
+        [ req.body.user_id, ])
         .then((results) => res.status(200).send(results))
         .catch((error) => next(error.message))
 }
@@ -101,17 +102,15 @@ const listFederated = (req, res, next) => {
 // ...
 const listRequested = (req, res, next) => {
     helpers.db.any(
-        "SELECT 'request' as type, contacts.contact_id, contacts.requested_by, \
+        `SELECT 'request' as type, contacts.contact_id, contacts.requested_by, \
         contacts.created_at, accounts.alias, accounts.domain, \
         accounts.pubkey, accounts.email_md5, \
         users.first_name, users.last_name \
         FROM contacts INNER JOIN accounts \
         ON contacts.requested_by = accounts.user_id \
         INNER JOIN users ON contacts.requested_by = users.id \
-        WHERE contacts.contact_id = ${user_id} \
-        AND contacts.status = 1", {
-            user_id: req.body.user_id,
-        })
+        WHERE contacts.contact_id = $1 \
+        AND contacts.status = ${REQUESTED}`, [ req.body.user_id, ])
         .then((results) => res.status(200).send(results))
         .catch((error) => next(error.message))
 }
@@ -122,17 +121,15 @@ const listRequested = (req, res, next) => {
 // ...
 const listPending = (req, res, next) => {
     helpers.db.any(
-        "SELECT 'pending' as type, contacts.contact_id, contacts.requested_by, \
+        `SELECT 'pending' as type, contacts.contact_id, contacts.requested_by, \
         contacts.created_at, accounts.alias, accounts.domain, \
         accounts.pubkey, accounts.email_md5, \
         users.first_name, users.last_name \
         FROM contacts INNER JOIN accounts \
         ON contacts.requested_by = accounts.user_id \
         INNER JOIN users ON contacts.requested_by = users.id \
-        WHERE contacts.contact_id = ${user_id} \
-        AND contacts.status = 5", {
-            user_id: req.body.user_id,
-        })
+        WHERE contacts.contact_id = $1 \
+        AND contacts.status = ${PENDING}`, [ req.body.user_id, ])
         .then((results) => res.status(200).send(results))
         .catch((error) => next(error.message))
 }
@@ -145,8 +142,8 @@ const removeFederated = (req, res, next) => {
     helpers.db.tx((t) => {
         return t.batch([
             t.none(
-                "UPDATE ext_contacts SET status = 4 WHERE id = $1 \
-                AND added_by = $2", [
+                `UPDATE ext_contacts SET status = ${DELETED} WHERE id = $1 \
+                AND added_by = $2`, [
                     req.body.id,
                     req.body.added_by,
                 ]),
@@ -164,14 +161,14 @@ const removeInternal = (req, res, next) => {
     helpers.db.tx((t) => {
         return t.batch([
             t.none(
-                "UPDATE contacts SET status = 4 WHERE contact_id = $1 \
-                AND requested_by = $2", [
+                `UPDATE contacts SET status = ${DELETED} \
+                WHERE contact_id = $1 AND requested_by = $2`, [
                     req.body.contact_id,
                     req.body.user_id,
                 ]),
             t.none(
-                "UPDATE contacts SET status = 4 WHERE contact_id = $1 \
-                AND requested_by = $2", [
+                `UPDATE contacts SET status = ${DELETED} \
+                WHERE contact_id = $1 AND requested_by = $2`, [
                     req.body.user_id,
                     req.body.contact_id,
                 ]),
@@ -201,7 +198,7 @@ const requestByAccountNumber = async (req, res, _next) => {
             AND requested_by = ${requested_by} AND status = ${status}", {
                 contact_id: registeredAccount.user_id,
                 requested_by: req.body.user_id,
-                status: 4,
+                status: DELETED,
             },
             (e) => e && e.contact_id
         )
@@ -210,11 +207,20 @@ const requestByAccountNumber = async (req, res, _next) => {
             await helpers.db.tx((t) => {
                 return t.batch([
                     t.none(
-                        "UPDATE contacts SET status = 1 \
+                        "UPDATE contacts SET status = ${status} \
                         WHERE contact_id = ${contact_id} \
                         AND requested_by = ${requested_by}", {
                             contact_id,
                             requested_by: req.body.user_id,
+                            status: REQUESTED,
+                        }),
+                    t.none(
+                        "UPDATE contacts SET status = ${status} \
+                        WHERE contact_id = ${requested_by} \
+                        AND requested_by = ${contact_id}", {
+                            contact_id,
+                            requested_by: req.body.user_id,
+                            status: PENDING,
                         }),
                 ])
             })
@@ -227,7 +233,7 @@ const requestByAccountNumber = async (req, res, _next) => {
                 {
                     contact_id: registeredAccount.user_id,
                     requested_by: req.body.user_id,
-                    status: 1,
+                    status: REQUESTED,
                     created_at: now,
                     updated_at: now,
                 }
@@ -240,7 +246,7 @@ const requestByAccountNumber = async (req, res, _next) => {
             AND added_by = ${added_by} AND status = ${status}", {
                 pubkey: req.body.pubkey,
                 added_by: req.body.user_id,
-                status: 4,
+                status: DELETED,
             },
             (e) => e && e.id
         )
@@ -249,10 +255,11 @@ const requestByAccountNumber = async (req, res, _next) => {
             await helpers.db.tx((t) => {
                 return t.batch([
                     t.none(
-                        "UPDATE ext_contacts SET status = 2 WHERE id = ${id} \
-                        AND added_by = ${added_by}", {
+                        "UPDATE ext_contacts SET status = ${status} \
+                        WHERE id = ${federatedId} AND added_by = ${added_by}", {
                             federatedId,
                             added_by: req.body.user_id,
+                            status: APPROVED,
                         }),
                 ])
             })
@@ -267,7 +274,7 @@ const requestByAccountNumber = async (req, res, _next) => {
                     added_by: req.body.user_id,
                     created_at: now,
                     updated_at: now,
-                    status: 2,
+                    status: APPROVED,
                 }
             )
             return res.status(201).send()
@@ -301,7 +308,7 @@ const requestByPaymentAddress = async (req, res, next) => {
                 AND requested_by = ${requestedBy} AND status = ${status}", {
                     contactId: registeredUser.user_id,
                     requestedBy: req.body.user_id,
-                    status: 4,
+                    status: DELETED,
                 },
                 (e) => e && e.contact_id
             )
@@ -315,7 +322,7 @@ const requestByPaymentAddress = async (req, res, next) => {
             AND added_by = ${added_by} AND status = ${status}", {
                 pubkey: req.body.pubkey,
                 added_by: req.body.user_id,
-                status: 4,
+                status: DELETED,
             },
             (e) => e && e.id
         )
@@ -324,10 +331,11 @@ const requestByPaymentAddress = async (req, res, next) => {
             try {
                 await helpers.db.tx((t) => {
                     return t.batch([
-                        t.none("UPDATE ext_contacts SET status = 2 \
-                               WHERE id = ${id} AND added_by = ${added_by}", {
+                        t.none("UPDATE ext_contacts SET status = ${status} \
+                               WHERE id = ${federatedId} AND added_by = ${added_by}", {
                             federatedId,
                             added_by: req.body.user_id,
+                            status: APPROVED,
                         }),
                     ])
                 })
@@ -347,7 +355,7 @@ const requestByPaymentAddress = async (req, res, next) => {
                         added_by: req.body.user_id,
                         created_at: now,
                         updated_at: now,
-                        status: 2,
+                        status: APPROVED,
                     }
                 )
                 return res.status(201).send()
@@ -361,17 +369,19 @@ const requestByPaymentAddress = async (req, res, next) => {
     if (contactId) {
         await helpers.db.tx((t) => {
             return t.batch([
-                t.none("UPDATE contacts SET status = 1 \
+                t.none("UPDATE contacts SET status = ${status} \
                 WHERE contact_id = ${contactId} \
                 AND requested_by = ${requestedBy}", {
                     contactId,
                     requestedBy: req.body.user_id,
+                    status: REQUESTED,
                 }),
-                t.none("UPDATE contacts SET status = 5 \
+                t.none("UPDATE contacts SET status = ${status} \
                 WHERE contact_id = ${requestedBy} \
                 AND requested_by = ${contactId}", {
                     contactId,
                     requestedBy: req.body.user_id,
+                    status: PENDING,
                 }),
             ])
         })
@@ -388,7 +398,7 @@ const requestByPaymentAddress = async (req, res, next) => {
                         {
                             contact_id: registeredUser.user_id,
                             requested_by: req.body.user_id,
-                            status: 1,
+                            status: REQUESTED,
                             created_at: now,
                             updated_at: now,
                         }
@@ -401,7 +411,7 @@ const requestByPaymentAddress = async (req, res, next) => {
                         {
                             contact_id: req.body.user_id,
                             requested_by: registeredUser.user_id,
-                            status: 5,
+                            status: PENDING,
                             created_at: now,
                             updated_at: now,
                         }
