@@ -4,12 +4,6 @@ const helpers = require("../../helpers")
 
 // ...
 const approveInternal = (req, res, next) => {
-    if (!helpers.tokenIsValid(req.body.token, req.body.user_id)) {
-        return res.status(403).json({
-            error: "Forbidden",
-        })
-    }
-
     helpers.db.tx((t) => {
         return t.batch([
             t.none(
@@ -35,12 +29,6 @@ const approveInternal = (req, res, next) => {
 
 // ...
 const rejectInternal = (req, res, next) => {
-    if (!helpers.tokenIsValid(req.body.token, req.body.user_id)) {
-        return res.status(403).json({
-            error: "Forbidden",
-        })
-    }
-
     helpers.db.tx((t) => {
         return t.batch([
             t.none(
@@ -73,11 +61,6 @@ const root = (_req, res) =>
 
 // ...
 const listInternal = (req, res, next) => {
-    if (!helpers.tokenIsValid(req.body.token, req.body.user_id)) {
-        return res.status(403).json({
-            error: "Forbidden",
-        })
-    }
     helpers.db.any(
         "SELECT contacts.contact_id, contacts.status, contacts.created_at, \
         contacts.updated_at, COALESCE(users.first_name, '') AS first_name, \
@@ -101,11 +84,6 @@ const listInternal = (req, res, next) => {
 
 // ...
 const listFederated = (req, res, next) => {
-    if (!helpers.tokenIsValid(req.body.token, req.body.user_id)) {
-        return res.status(403).json({
-            error: "Forbidden",
-        })
-    }
     helpers.db.any(
         "SELECT id, pubkey, alias, domain, currency, memo_type, \
         memo, email_md5, first_name, last_name FROM ext_contacts \
@@ -122,11 +100,6 @@ const listFederated = (req, res, next) => {
 
 // ...
 const listRequested = (req, res, next) => {
-    if (!helpers.tokenIsValid(req.body.token, req.body.user_id)) {
-        return res.status(403).json({
-            error: "Forbidden",
-        })
-    }
     helpers.db.any(
         "SELECT 'request' as type, contacts.contact_id, contacts.requested_by, \
         contacts.created_at, accounts.alias, accounts.domain, \
@@ -148,11 +121,6 @@ const listRequested = (req, res, next) => {
 
 // ...
 const listPending = (req, res, next) => {
-    if (!helpers.tokenIsValid(req.body.token, req.body.user_id)) {
-        return res.status(403).json({
-            error: "Forbidden",
-        })
-    }
     helpers.db.any(
         "SELECT 'pending' as type, contacts.contact_id, contacts.requested_by, \
         contacts.created_at, accounts.alias, accounts.domain, \
@@ -174,12 +142,6 @@ const listPending = (req, res, next) => {
 
 // ...
 const removeFederated = (req, res, next) => {
-    if (!helpers.tokenIsValid(req.body.token, req.body.user_id)) {
-        return res.status(403).json({
-            error: "Forbidden",
-        })
-    }
-
     helpers.db.tx((t) => {
         return t.batch([
             t.none(
@@ -196,13 +158,9 @@ const removeFederated = (req, res, next) => {
 
 
 
+
 // ...
 const removeInternal = (req, res, next) => {
-    if (!helpers.tokenIsValid(req.body.token, req.body.user_id)) {
-        return res.status(403).json({
-            error: "Forbidden",
-        })
-    }
     helpers.db.tx((t) => {
         return t.batch([
             t.none(
@@ -228,12 +186,6 @@ const removeInternal = (req, res, next) => {
 
 // ...
 const requestByAccountNumber = async (req, res, _next) => {
-    if (!helpers.tokenIsValid(req.body.token, req.body.user_id)) {
-        return res.status(403).json({
-            error: "Forbidden",
-        })
-    }
-
     let now = new Date()
 
     const registeredAccount = await helpers.db.oneOrNone(
@@ -328,12 +280,6 @@ const requestByAccountNumber = async (req, res, _next) => {
 
 // ...
 const requestByPaymentAddress = async (req, res, next) => {
-    if (!helpers.tokenIsValid(req.body.token, req.body.user_id)) {
-        return res.status(403).json({
-            error: "Forbidden",
-        })
-    }
-
     const
         now = new Date(),
         registeredUser = await helpers.db.one(
@@ -474,12 +420,6 @@ const requestByPaymentAddress = async (req, res, next) => {
 
 // ...
 const updateFederated = (req, res, next) => {
-    if (!helpers.tokenIsValid(req.body.token, req.body.user_id)) {
-        return res.status(403).json({
-            error: "Forbidden",
-        })
-    }
-
     helpers.db
         .tx((t) => {
             const date = new Date()
@@ -542,6 +482,7 @@ const updateFederated = (req, res, next) => {
         .then(() => res.status(204).send())
         .catch((error) => next(error.message))
 }
+
 
 
 
