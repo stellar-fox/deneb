@@ -29,6 +29,7 @@ const router = function (app) {
     app.post(`${apiRoot}contact/remove/internal/`, POST.removeInternal)
     app.post(`${apiRoot}contact/approve/internal/`, POST.approveInternal)
     app.post(`${apiRoot}contact/reject/internal/`, POST.rejectInternal)
+    app.post(`${apiRoot}contact/unblock/internal/`, POST.unblockInternal)
 
     // federated
     app.post(`${apiRoot}contacts/list/federated/`, POST.listFederated)

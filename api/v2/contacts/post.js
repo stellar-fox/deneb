@@ -39,12 +39,6 @@ const rejectInternal = (req, res, next) => {
             t.none(
                 `UPDATE contacts SET status = ${BLOCKED} \
                 WHERE contact_id = $1 AND requested_by = $2`, [
-                    req.body.contact_id,
-                    req.body.user_id,
-                ]),
-            t.none(
-                `UPDATE contacts SET status = ${BLOCKED} \
-                WHERE contact_id = $1 AND requested_by = $2`, [
                     req.body.user_id,
                     req.body.contact_id,
                 ]),
@@ -102,15 +96,18 @@ const listFederated = (req, res, next) => {
 // ...
 const listRequested = (req, res, next) => {
     helpers.db.any(
-        `SELECT 'request' as type, contacts.contact_id, contacts.requested_by, \
-        contacts.created_at, accounts.alias, accounts.domain, \
+        "SELECT contacts.contact_id, contacts.requested_by, \
+        contacts.created_at, contacts.status, accounts.alias, accounts.domain, \
         accounts.pubkey, accounts.email_md5, \
         users.first_name, users.last_name \
         FROM contacts INNER JOIN accounts \
         ON contacts.requested_by = accounts.user_id \
         INNER JOIN users ON contacts.requested_by = users.id \
         WHERE contacts.contact_id = $1 \
-        AND contacts.status = ${REQUESTED}`, [ req.body.user_id, ])
+        AND contacts.status IN ($2:csv)", [
+            req.body.user_id,
+            [ REQUESTED, ],
+        ])
         .then((results) => res.status(200).send(results))
         .catch((error) => next(error.message))
 }
@@ -121,15 +118,18 @@ const listRequested = (req, res, next) => {
 // ...
 const listPending = (req, res, next) => {
     helpers.db.any(
-        `SELECT 'pending' as type, contacts.contact_id, contacts.requested_by, \
-        contacts.created_at, accounts.alias, accounts.domain, \
+        "SELECT contacts.contact_id, contacts.requested_by, \
+        contacts.created_at, contacts.status, accounts.alias, accounts.domain, \
         accounts.pubkey, accounts.email_md5, \
         users.first_name, users.last_name \
         FROM contacts INNER JOIN accounts \
         ON contacts.requested_by = accounts.user_id \
         INNER JOIN users ON contacts.requested_by = users.id \
         WHERE contacts.contact_id = $1 \
-        AND contacts.status = ${PENDING}`, [ req.body.user_id, ])
+        AND contacts.status IN ($2:csv)", [
+            req.body.user_id,
+            [ PENDING, BLOCKED, ],
+        ])
         .then((results) => res.status(200).send(results))
         .catch((error) => next(error.message))
 }
@@ -182,7 +182,7 @@ const removeInternal = (req, res, next) => {
 
 
 // ...
-const requestByAccountNumber = async (req, res, _next) => {
+const requestByAccountNumber = async (req, res, next) => {
     let now = new Date()
 
     const registeredAccount = await helpers.db.oneOrNone(
@@ -204,41 +204,51 @@ const requestByAccountNumber = async (req, res, _next) => {
         )
 
         if (contact_id) {
-            await helpers.db.tx((t) => {
-                return t.batch([
-                    t.none(
-                        "UPDATE contacts SET status = ${status} \
+            try {
+                await helpers.db.tx((t) => {
+                    return t.batch([
+                        t.none(
+                            "UPDATE contacts SET status = ${status} \
                         WHERE contact_id = ${contact_id} \
                         AND requested_by = ${requested_by}", {
-                            contact_id,
-                            requested_by: req.body.user_id,
-                            status: REQUESTED,
-                        }),
-                    t.none(
-                        "UPDATE contacts SET status = ${status} \
+                                contact_id,
+                                requested_by: req.body.user_id,
+                                status: REQUESTED,
+                            }),
+                        t.none(
+                            "UPDATE contacts SET status = ${status} \
                         WHERE contact_id = ${requested_by} \
                         AND requested_by = ${contact_id}", {
-                            contact_id,
-                            requested_by: req.body.user_id,
-                            status: PENDING,
-                        }),
-                ])
-            })
-            return res.status(204).send()
+                                contact_id,
+                                requested_by: req.body.user_id,
+                                status: PENDING,
+                            }),
+                    ])
+                })
+                return res.status(204).send()
+            } catch (error) {
+                return next(error.message)
+            }
+
         } else {
-            await helpers.db.none(
-                "INSERT INTO contacts(contact_id, requested_by, status, \
+            try {
+                await helpers.db.none(
+                    "INSERT INTO contacts(contact_id, requested_by, status, \
                 created_at, updated_at) VALUES(${contact_id}, ${requested_by}, \
                 ${status}, ${created_at}, ${updated_at})",
-                {
-                    contact_id: registeredAccount.user_id,
-                    requested_by: req.body.user_id,
-                    status: REQUESTED,
-                    created_at: now,
-                    updated_at: now,
-                }
-            )
-            return res.status(201).send()
+                    {
+                        contact_id: registeredAccount.user_id,
+                        requested_by: req.body.user_id,
+                        status: REQUESTED,
+                        created_at: now,
+                        updated_at: now,
+                    }
+                )
+                return res.status(201).send()
+            } catch (error) {
+                return res.status(409).send()
+            }
+
         }
     } else {
         const federatedId = await helpers.db.oneOrNone(
@@ -252,32 +262,42 @@ const requestByAccountNumber = async (req, res, _next) => {
         )
 
         if (federatedId) {
-            await helpers.db.tx((t) => {
-                return t.batch([
-                    t.none(
-                        "UPDATE ext_contacts SET status = ${status} \
+            try {
+                await helpers.db.tx((t) => {
+                    return t.batch([
+                        t.none(
+                            "UPDATE ext_contacts SET status = ${status} \
                         WHERE id = ${federatedId} AND added_by = ${added_by}", {
-                            federatedId,
-                            added_by: req.body.user_id,
-                            status: APPROVED,
-                        }),
-                ])
-            })
-            return res.status(204).send()
+                                federatedId,
+                                added_by: req.body.user_id,
+                                status: APPROVED,
+                            }),
+                    ])
+                })
+                return res.status(204).send()
+            } catch (error) {
+                return next(error.message)
+            }
+
         } else {
-            await helpers.db.none(
-                "INSERT INTO ext_contacts(pubkey, added_by, created_at, \
+            try {
+                await helpers.db.none(
+                    "INSERT INTO ext_contacts(pubkey, added_by, created_at, \
                 updated_at, status) VALUES(${pubkey}, ${added_by}, \
                 ${created_at}, ${updated_at}, ${status})",
-                {
-                    pubkey: req.body.pubkey,
-                    added_by: req.body.user_id,
-                    created_at: now,
-                    updated_at: now,
-                    status: APPROVED,
-                }
-            )
-            return res.status(201).send()
+                    {
+                        pubkey: req.body.pubkey,
+                        added_by: req.body.user_id,
+                        created_at: now,
+                        updated_at: now,
+                        status: APPROVED,
+                    }
+                )
+                return res.status(201).send()
+            } catch (error) {
+                return next(error.message)
+            }
+
         }
     }
 }
@@ -429,6 +449,24 @@ const requestByPaymentAddress = async (req, res, next) => {
 
 
 // ...
+const unblockInternal = (req, res, next) => {
+    helpers.db.tx((t) => {
+        return t.batch([
+            t.none(
+                `UPDATE contacts SET status = ${REQUESTED} \
+                WHERE contact_id = $1 AND requested_by = $2`, [
+                    req.body.user_id,
+                    req.body.contact_id,
+                ]),
+        ])
+    })
+        .then(() => res.status(204).send())
+        .catch((error) => next(error.message))
+}
+
+
+
+// ...
 const updateFederated = (req, res, next) => {
     helpers.db
         .tx((t) => {
@@ -509,5 +547,6 @@ module.exports = {
     requestByAccountNumber,
     requestByPaymentAddress,
     root,
+    unblockInternal,
     updateFederated,
 }
