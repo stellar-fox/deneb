@@ -9,7 +9,7 @@ const POST = require("./post.js"),
 const router = function (app) {
 
     // internal
-    app.post(`${apiRoot}users/create/`, POST.create)
+    app.post(`${apiRoot}user/create/`, POST.create)
 }
 
 

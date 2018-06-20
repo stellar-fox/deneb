@@ -45,7 +45,7 @@ app.use(function (_req, res, next) {
 app.use((req, res, next) => {
     // disable this rule for v1 calls and v2 user create
     if (!req.originalUrl.match(/\/v1\//) &&
-        !req.originalUrl.match(/\/v2\/users\/create\//) &&
+        !req.originalUrl.match(/\/v2\/user\/create\//) &&
         !helpers.tokenIsValid(req.body.token, req.body.user_id)) {
         return res.status(403).json({
             error: "Forbidden",
