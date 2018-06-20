@@ -186,3 +186,7 @@ WITH (
 );
 ALTER TABLE public.ext_contacts
   OWNER TO aquila;
+
+-- =============================================================================
+ALTER TABLE public.users
+  ADD COLUMN uid character varying;
