@@ -15,6 +15,11 @@ let db = postgresp(config.attributes.connectionStr)
 
 
 
+// ...
+const apiRoot = "/api/v2/"
+
+
+
 
 // ...
 const errorMessageToRetCode = function (message) {
@@ -98,6 +103,7 @@ const getApiKey = function () {
 
 // ...
 module.exports = {
+    apiRoot,
     fetchCMC: fetchCMC,
     db: db,
     tokenIsValid: tokenIsValid,
