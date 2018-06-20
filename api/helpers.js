@@ -4,7 +4,22 @@ const
     bcrypt = require("bcrypt"),
     config = require("../config.js"),
     postgresp = require("pg-promise")({}),
-    toolbox = require("@xcmats/js-toolbox")
+    toolbox = require("@xcmats/js-toolbox"),
+    firebase = require("firebase/app"),
+    admin = require("firebase-admin")
+
+
+// add needed firebase modules
+require("firebase/auth")
+
+
+
+const firebaseApp = firebase.initializeApp(config.attributes.firebase)
+
+const firebaseAdmin = admin.initializeApp({
+    credential: admin.credential.cert(config.attributes.admin),
+    databaseURL: config.attributes.firebaseDB,
+})
 
 
 
@@ -112,4 +127,6 @@ module.exports = {
     btoh,
     htob,
     errorMessageToRetCode,
+    firebaseApp,
+    firebaseAdmin,
 }
