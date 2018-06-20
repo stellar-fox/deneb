@@ -8,8 +8,10 @@ const
     express = require("express"),
     GETAPI = require("./api/v1/get.js"),
     POSTAPI = require("./api/v1/post.js"),
+    helpers = require("./api/helpers"),
 
-    ContactsRouter = require("./api/v2/contacts/router.js")
+    ContactsRouter = require("./api/v2/contacts/router.js"),
+    UsersRouter = require("./api/v2/users/router.js")
 
 
 
@@ -37,8 +39,24 @@ app.use(function (_req, res, next) {
     next()
 })
 
+/**
+ * Check validity of token-userid pair on every API call.
+ */
+app.use((req, res, next) => {
+    // disable this rule for v1 calls and v2 user create
+    if (!req.originalUrl.match(/\/v1\//) &&
+        !req.originalUrl.match(/\/v2\/users\/create\//) &&
+        !helpers.tokenIsValid(req.body.token, req.body.user_id)) {
+        return res.status(403).json({
+            error: "Forbidden",
+        })
+    }
+    next()
+})
+
 
 ContactsRouter(app)
+UsersRouter(app)
 
 
 /*

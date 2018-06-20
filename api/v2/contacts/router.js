@@ -1,27 +1,12 @@
 const POST = require("./post.js"),
     helpers = require("../../helpers"),
-    apiRoot = "/api/v2/"
+    apiRoot = helpers.apiRoot
 
 
 
 
 // ...
 const router = function (app) {
-
-    /**
-     * Check validity of token-userid pair on every API call.
-     */
-    app.use((req, res, next) => {
-        // disable this rule for v1 calls
-        if (!req.originalUrl.match(/\/v1\//) &&
-            !helpers.tokenIsValid(req.body.token, req.body.user_id)) {
-            return res.status(403).json({
-                error: "Forbidden",
-            })
-        }
-        next()
-    })
-
     // internal
     app.post(`${apiRoot}contacts/list/internal/`, POST.listInternal)
     app.post(`${apiRoot}contacts/list/requested/`, POST.listRequested)
