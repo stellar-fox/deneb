@@ -1,12 +1,6 @@
 const
     bcrypt = require("bcrypt"),
-    helpers = require("../../helpers"),
-    config = require("../../../config"),
-    firebase = require("firebase/app")
-
-require("firebase/auth")
-
-const firebaseApp = firebase.initializeApp(config.attributes.firebase)
+    helpers = require("../../helpers")
 
 
 
@@ -16,15 +10,20 @@ const create = async (req, res, _next) => {
 
     const now = new Date()
     try {
+        const uid = (await helpers.firebaseAdmin.auth()
+            .verifyIdToken(req.body.token)).uid
 
-        await firebaseApp.auth().signInWithEmailAndPassword(
-            req.body.email,
-            req.body.password,
+        await helpers.firebaseApp.auth().signInWithEmailAndPassword(
+            req.body.email, req.body.password,
         )
+
+        if (uid !== helpers.firebaseApp.auth().currentUser.uid) {
+            return res.status(403).json({ error: "Forbidden.", })
+        }
 
         const userAlreadyExists = await helpers.db.oneOrNone(
             "SELECT uid FROM users WHERE uid = ${uid}", {
-                uid: firebaseApp.auth().currentUser.uid,
+                uid: helpers.firebaseApp.auth().currentUser.uid,
             }
         )
 
@@ -36,7 +35,7 @@ const create = async (req, res, _next) => {
                 ${created_at}, ${updated_at})",
                 {
                     email: req.body.email,
-                    uid: firebaseApp.auth().currentUser.uid,
+                    uid: helpers.firebaseApp.auth().currentUser.uid,
                     password_digest,
                     created_at: now,
                     updated_at: now,
