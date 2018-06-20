@@ -1,4 +1,5 @@
 const
+    bcrypt = require("bcrypt"),
     helpers = require("../../helpers"),
     config = require("../../../config"),
     firebase = require("firebase/app")
@@ -17,7 +18,7 @@ const create = async (req, res, _next) => {
     try {
 
         await firebaseApp.auth().signInWithEmailAndPassword(
-            req.body.username,
+            req.body.email,
             req.body.password,
         )
 
@@ -28,11 +29,15 @@ const create = async (req, res, _next) => {
         )
 
         if (!userAlreadyExists) {
+            const password_digest = await bcrypt.hash(req.body.password, 10)
             await helpers.db.none(
-                "INSERT INTO users(uid, created_at, updated_at) \
-                VALUES(${uid}, ${created_at}, ${updated_at})",
+                "INSERT INTO users(email, uid, password_digest, created_at, \
+                updated_at) VALUES(${email}, ${uid}, ${password_digest}, \
+                ${created_at}, ${updated_at})",
                 {
+                    email: req.body.email,
                     uid: firebaseApp.auth().currentUser.uid,
+                    password_digest,
                     created_at: now,
                     updated_at: now,
                 }
