@@ -15,14 +15,14 @@
         }
     ],
     "dependencies": {
-        "@xcmats/js-toolbox": "^0.3.6",
+        "@xcmats/js-toolbox": "^0.3.7",
         "axios": "^0.18.0",
         "bcrypt": "^2.0.1",
-        "body-parser": "^1.18.2",
+        "body-parser": "^1.18.3",
         "express": "^4.16.3",
         "firebase": "^5.0.4",
         "firebase-admin": "^5.12.1",
-        "pg-promise": "^7.4.1"
+        "pg-promise": "^8.4.4"
     },
     "description": "REST API for Stellar Fox.",
     "devDependencies": {
