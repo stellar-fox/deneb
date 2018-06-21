@@ -29,10 +29,10 @@ const create = async (req, res, _next) => {
 
         if (!userAlreadyExists) {
             const password_digest = await bcrypt.hash(req.body.password, 10)
-            await helpers.db.none(
+            const userid = await helpers.db.one(
                 "INSERT INTO users(email, uid, password_digest, created_at, \
                 updated_at) VALUES(${email}, ${uid}, ${password_digest}, \
-                ${created_at}, ${updated_at})",
+                ${created_at}, ${updated_at}) RETURNING id",
                 {
                     email: req.body.email,
                     uid: helpers.firebaseApp.auth().currentUser.uid,
@@ -41,7 +41,8 @@ const create = async (req, res, _next) => {
                     updated_at: now,
                 }
             )
-            return res.status(201).send()
+
+            return res.status(201).json({ userid, })
         }
         return res.status(204).send()
     } catch (error) {
