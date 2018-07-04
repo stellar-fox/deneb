@@ -29,7 +29,7 @@ const create = async (req, res, _next) => {
 
         if (!userAlreadyExists) {
             const password_digest = await bcrypt.hash(req.body.password, 10)
-            const userid = await helpers.db.one(
+            const userCreateResp = await helpers.db.one(
                 "INSERT INTO users(email, uid, password_digest, created_at, \
                 updated_at) VALUES(${email}, ${uid}, ${password_digest}, \
                 ${created_at}, ${updated_at}) RETURNING id",
@@ -42,7 +42,7 @@ const create = async (req, res, _next) => {
                 }
             )
 
-            return res.status(201).json({ userid, })
+            return res.status(201).json({ userid: userCreateResp.id, })
         }
         return res.status(204).send()
     } catch (error) {
