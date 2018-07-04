@@ -20,13 +20,13 @@
         "bcrypt": "^2.0.1",
         "body-parser": "^1.18.3",
         "express": "^4.16.3",
-        "firebase": "^5.0.4",
+        "firebase": "^5.2.0",
         "firebase-admin": "^5.12.1",
         "pg-promise": "^8.4.4"
     },
     "description": "REST API for Stellar Fox.",
     "devDependencies": {
-        "eslint": "^4.19.1",
+        "eslint": "^5.0.1",
         "rimraf": "^2.6.2"
     },
     "homepage": "https://stellarfox.net/",
