@@ -306,30 +306,121 @@ const requestByAccountNumber = async (req, res, next) => {
 
 
 // ...
-const requestByEmail = async (req, res, _next) => {
-    try {
-        const client = helpers.axios.create({
-            auth: {
-                username: helpers.config.mailchimp.username,
-                password: helpers.config.mailchimp.apiKey,
-            },
-            headers: {
-                "Content-Type": "application/json",
-            },
-        })
+const requestByEmail = async (req, res, next) => {
 
-        await client.post(`${helpers.config.mailchimp.api}lists/${
-            helpers.config.mailchimp.listId}/members/`, {
-            email_address: req.body.email,
-            status: "subscribed",
-        })
+    let now = new Date()
 
-        return res.status(201).send()
-    } catch (error) {
-        return res.status(error.response.data.status).json({
-            error: error.response.data.title,
-        })
+    const registeredUser = await helpers.db.oneOrNone(
+        "SELECT id FROM users WHERE email = ${email}",
+        { email: req.body.email, }
+    )
+
+    if (registeredUser) {
+        const contact_id = await helpers.db.oneOrNone(
+            "SELECT contact_id FROM contacts WHERE contact_id = ${contact_id} \
+            AND requested_by = ${requested_by} AND status = ${status}", {
+                contact_id: registeredUser.id,
+                requested_by: req.body.user_id,
+                status: DELETED,
+            },
+            (e) => e && e.contact_id
+        )
+
+        if (contact_id) {
+            try {
+                await helpers.db.tx((t) => {
+                    return t.batch([
+                        t.none(
+                            "UPDATE contacts SET status = ${status} \
+                        WHERE contact_id = ${contact_id} \
+                        AND requested_by = ${requested_by}", {
+                                contact_id,
+                                requested_by: req.body.user_id,
+                                status: REQUESTED,
+                            }),
+                        t.none(
+                            "UPDATE contacts SET status = ${status} \
+                        WHERE contact_id = ${requested_by} \
+                        AND requested_by = ${contact_id}", {
+                                contact_id,
+                                requested_by: req.body.user_id,
+                                status: PENDING,
+                            }),
+                    ])
+                })
+                return res.status(204).send()
+            } catch (error) {
+                return next(error.message)
+            }
+
+        } else {
+            try {
+                await helpers.db.tx((t) => {
+                    return t.batch([
+                        t.none(
+                            "INSERT INTO contacts(contact_id, requested_by, \
+                        status, created_at, updated_at) VALUES(${contact_id}, \
+                        ${requested_by}, ${status}, ${created_at}, \
+                        ${updated_at})",
+                            {
+                                contact_id: registeredUser.id,
+                                requested_by: req.body.user_id,
+                                status: REQUESTED,
+                                created_at: now,
+                                updated_at: now,
+                            }
+                        ),
+                        t.none(
+                            "INSERT INTO contacts(contact_id, requested_by, \
+                        status, created_at, updated_at) VALUES(${contact_id}, \
+                        ${requested_by}, ${status}, ${created_at}, \
+                        ${updated_at})",
+                            {
+                                contact_id: req.body.user_id,
+                                requested_by: registeredUser.id,
+                                status: PENDING,
+                                created_at: now,
+                                updated_at: now,
+                            }
+                        ),
+                    ])
+                })
+                // return res.status(201).send()
+            } catch (error) {
+                return res.status(409).send()
+            }
+
+            try {
+                const client = helpers.axios.create({
+                    auth: {
+                        username: helpers.config.mailchimp.username,
+                        password: helpers.config.mailchimp.apiKey,
+                    },
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                })
+
+                await client.post(`${helpers.config.mailchimp.api}lists/${
+                    helpers.config.mailchimp.listId}/members/`, {
+                    email_address: req.body.email,
+                    status: "subscribed",
+                })
+
+                return res.status(201).send()
+
+            } catch (error) {
+                return res.status(error.response.data.status).json({
+                    error: error.response.data.title,
+                })
+            }
+
+        }
     }
+
+
+
+
 }
 
 
