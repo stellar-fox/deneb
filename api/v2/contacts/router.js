@@ -23,6 +23,10 @@ const router = function (app) {
 
     // common
     app.post(
+        `${apiRoot}contact/request/by-email/`,
+        POST.requestByEmail
+    )
+    app.post(
         `${apiRoot}contact/request/by-payment-address/`,
         POST.requestByPaymentAddress
     )

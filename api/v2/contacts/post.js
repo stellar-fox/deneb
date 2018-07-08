@@ -306,6 +306,35 @@ const requestByAccountNumber = async (req, res, next) => {
 
 
 // ...
+const requestByEmail = async (req, res, _next) => {
+    try {
+        const client = helpers.axios.create({
+            auth: {
+                username: helpers.config.mailchimp.username,
+                password: helpers.config.mailchimp.apiKey,
+            },
+            headers: {
+                "Content-Type": "application/json",
+            },
+        })
+
+        await client.post(`${helpers.config.mailchimp.api}lists/${
+            helpers.config.mailchimp.listId}/members/`, {
+            email_address: req.body.email,
+            status: "subscribed",
+        })
+
+        return res.status(201).send()
+    } catch (error) {
+        return res.status(error.response.data.status).json({
+            error: error.response.data.title,
+        })
+    }
+}
+
+
+
+// ...
 const requestByPaymentAddress = async (req, res, next) => {
     const
         now = new Date(),
@@ -545,6 +574,7 @@ module.exports = {
     removeFederated,
     removeInternal,
     requestByAccountNumber,
+    requestByEmail,
     requestByPaymentAddress,
     root,
     unblockInternal,
