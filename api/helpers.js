@@ -118,7 +118,9 @@ const getApiKey = function () {
 
 // ...
 module.exports = {
+    axios,
     apiRoot,
+    config: config.attributes,
     fetchCMC: fetchCMC,
     db: db,
     tokenIsValid: tokenIsValid,
