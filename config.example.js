@@ -22,4 +22,10 @@ exports.attributes = {
         "client_x509_cert_url": "<client_x509_cert_url>",
     },
     firebaseDB: "<firebase_db>",
+    mailchimp: {
+        api: "https://<your_data_center>.api.mailchimp.com/3.0/",
+        listId: "<list_id>",
+        username: "<mailchimp_username>",
+        apiKey: "<mailchimp_api_key>",
+    },
 }
