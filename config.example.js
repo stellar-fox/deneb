@@ -1,4 +1,25 @@
 exports.attributes = {
     connectionStr: "postgres://user:password@host:port/database",
-    apiKey: "03565689-061b-4b7e-8ae3-e6ac69837958",
+    apiKey: "<node api key>",
+    firebase: {
+        apiKey: "<firebase_api_key>",
+        authDomain: "<firebase_auth_domain>",
+        databaseURL: "<firebase_db_url>",
+        projectId: "<firebase_project_id>",
+        storageBucket: "<firebase_project_storage_bucket>",
+        messagingSenderId: "<project_sender_id>",
+    },
+    admin: {
+        "type": "service_account",
+        "project_id": "<firebase_project_id>",
+        "private_key_id": "<firebase_private_key_id>",
+        "private_key": "<firebase_privaete_key>",
+        "client_email": "<firebase_client_email>",
+        "client_id": "<firebase_client_id>",
+        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+        "token_uri": "https://accounts.google.com/o/oauth2/token",
+        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+        "client_x509_cert_url": "<client_x509_cert_url>",
+    },
+    firebaseDB: "<firebase_db>",
 }
