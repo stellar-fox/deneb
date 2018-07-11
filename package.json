@@ -17,16 +17,16 @@
     "dependencies": {
         "@xcmats/js-toolbox": "^0.3.7",
         "axios": "^0.18.0",
-        "bcrypt": "^2.0.1",
+        "bcrypt": "^3.0.0",
         "body-parser": "^1.18.3",
         "express": "^4.16.3",
         "firebase": "^5.2.0",
         "firebase-admin": "^5.12.1",
-        "pg-promise": "^8.4.4"
+        "pg-promise": "^8.4.5"
     },
     "description": "REST API for Stellar Fox.",
     "devDependencies": {
-        "eslint": "^5.0.1",
+        "eslint": "^5.1.0",
         "rimraf": "^2.6.2"
     },
     "homepage": "https://stellarfox.net/",
