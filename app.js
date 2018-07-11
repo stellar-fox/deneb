@@ -11,7 +11,8 @@ const
     helpers = require("./api/helpers"),
 
     ContactsRouter = require("./api/v2/contacts/router.js"),
-    UsersRouter = require("./api/v2/users/router.js")
+    UsersRouter = require("./api/v2/users/router.js"),
+    AccountRouter = require("./api/v2/account/router.js")
 
 
 
@@ -57,6 +58,7 @@ app.use((req, res, next) => {
 
 ContactsRouter(app)
 UsersRouter(app)
+AccountRouter(app)
 
 
 /*
