@@ -28,4 +28,7 @@ exports.attributes = {
         username: "<mailchimp_username>",
         apiKey: "<mailchimp_api_key>",
     },
+    stripe: {
+        apiKey: "<stipe_api_key>",
+    },
 }
