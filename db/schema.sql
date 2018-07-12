@@ -190,3 +190,7 @@ ALTER TABLE public.ext_contacts
 -- =============================================================================
 ALTER TABLE public.users
   ADD COLUMN uid character varying;
+
+-- =============================================================================
+ALTER TABLE public.contacts
+  ADD COLUMN request_str character varying;
