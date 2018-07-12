@@ -119,7 +119,8 @@ const listRequested = (req, res, next) => {
 const listPending = (req, res, next) => {
     helpers.db.any(
         "SELECT contacts.contact_id, contacts.requested_by, \
-        contacts.created_at, contacts.status, accounts.alias, accounts.domain, \
+        contacts.created_at, contacts.status, contacts.request_str, \
+        accounts.alias, accounts.domain, \
         accounts.pubkey, accounts.email_md5, \
         users.first_name, users.last_name \
         FROM contacts INNER JOIN accounts \
@@ -359,9 +360,9 @@ const requestByEmail = async (req, res, next) => {
                     return t.batch([
                         t.none(
                             "INSERT INTO contacts(contact_id, requested_by, \
-                        status, created_at, updated_at) VALUES(${contact_id}, \
-                        ${requested_by}, ${status}, ${created_at}, \
-                        ${updated_at})",
+                        status, created_at, updated_at) \
+                        VALUES(${contact_id}, ${requested_by}, ${status}, \
+                        ${created_at}, ${updated_at})",
                             {
                                 contact_id: registeredUser.id,
                                 requested_by: req.body.user_id,
@@ -372,15 +373,16 @@ const requestByEmail = async (req, res, next) => {
                         ),
                         t.none(
                             "INSERT INTO contacts(contact_id, requested_by, \
-                        status, created_at, updated_at) VALUES(${contact_id}, \
-                        ${requested_by}, ${status}, ${created_at}, \
-                        ${updated_at})",
+                        status, created_at, updated_at, request_str) \
+                        VALUES(${contact_id}, ${requested_by}, ${status}, \
+                        ${created_at}, ${updated_at}, ${request_str})",
                             {
                                 contact_id: req.body.user_id,
                                 requested_by: registeredUser.id,
                                 status: PENDING,
                                 created_at: now,
                                 updated_at: now,
+                                request_str: req.body.email,
                             }
                         ),
                     ])
