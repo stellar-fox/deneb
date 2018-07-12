@@ -10,7 +10,7 @@ const fund = async (req, res, _next) => {
         let { status, } = await stripe.charges.create({
             amount: req.body.charge.amount,
             currency: req.body.charge.currency,
-            description: `Account Fund: ${req.body.charge.publicKey}`,
+            description: `Account Fund: ${req.body.charge.publicKeyAbbr}`,
             source: req.body.charge.token,
         })
 
