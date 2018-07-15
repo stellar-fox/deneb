@@ -31,4 +31,11 @@ exports.attributes = {
     stripe: {
         apiKey: "<stipe_api_key>",
     },
+    stellar: {
+        issuingPublic: "<issuing account public key>",
+        distributionSecret: "<distribution account secret key>",
+        horizon: "<horizon url>",
+        assetCode: "<asset code>",
+        distMemo: "<distribution memo>",
+    },
 }
