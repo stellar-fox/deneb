@@ -31,6 +31,11 @@ let db = postgresp(config.attributes.connectionStr)
 
 
 // ...
+let firestore = admin.firestore()
+
+
+
+// ...
 const apiRoot = "/api/v2/"
 
 
@@ -131,4 +136,5 @@ module.exports = {
     errorMessageToRetCode,
     firebaseApp,
     firebaseAdmin,
+    firestore,
 }
