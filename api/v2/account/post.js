@@ -5,7 +5,7 @@ const BigNumber = require("bignumber.js")
 
 
 // ...
-const sendAsset = (destinationId, amount) => {
+const sendAsset = (destinationId, amount, currency) => {
 
     StellarSdk.Network.useTestNetwork()
     const server = new StellarSdk.Server(helpers.config.stellar.horizon)
@@ -20,7 +20,7 @@ const sendAsset = (destinationId, amount) => {
                 .addOperation(StellarSdk.Operation.payment({
                     destination: destinationId,
                     asset: new StellarSdk.Asset(
-                        helpers.config.stellar.assetCode,
+                        currency.toUpperCase(),
                         helpers.config.stellar.issuingPublic
                     ),
                     amount,
@@ -57,7 +57,8 @@ const fund = async (req, res, _next) => {
 
         await sendAsset(req.body.charge.publicKey,
             (new BigNumber(req.body.charge.amount))
-                .dividedBy(100).toString()
+                .dividedBy(100).toString(),
+            req.body.charge.currency
         )
 
         return res.status(200).json({ status, })
