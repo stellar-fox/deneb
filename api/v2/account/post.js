@@ -34,8 +34,7 @@ const sendAsset = (destinationId, amount, currency, payToken) => {
             /**
              * Store transaction envelope that could not be submitted
              */
-            helpers.rtdb.ref(`failedTxs/${payToken}`).set({
-                owner: destinationId,
+            helpers.rtdb.ref(`failedTxs/${destinationId}/${payToken}`).set({
                 amount,
                 currency,
                 xdrBody: transaction.toEnvelope().toXDR().toString("base64"),
