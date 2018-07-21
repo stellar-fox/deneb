@@ -5,7 +5,7 @@ const BigNumber = require("bignumber.js")
 
 
 // ...
-const sendAsset = (destinationId, amount, currency) => {
+const sendAsset = (destinationId, amount, currency, payToken) => {
 
     StellarSdk.Network.useTestNetwork()
     const server = new StellarSdk.Server(helpers.config.stellar.horizon)
@@ -34,10 +34,16 @@ const sendAsset = (destinationId, amount, currency) => {
             /**
              * Store transaction envelope that could not be submitted
              */
-            helpers.firestore.collection("transactions").add({
+            helpers.rtdb.ref(`failedTxs/${payToken}`).set({
+                owner: destinationId,
+                amount,
+                currency,
                 xdrBody: transaction.toEnvelope().toXDR().toString("base64"),
                 submitted: false,
+                retries: 0,
+                lastAttempt: (new Date().getTime()),
             })
+
             // eslint-disable-next-line no-console
             console.log(error.response.data.extras.result_codes)
         })
@@ -58,7 +64,8 @@ const fund = async (req, res, _next) => {
         await sendAsset(req.body.charge.publicKey,
             (new BigNumber(req.body.charge.amount))
                 .dividedBy(100).toString(),
-            req.body.charge.currency
+            req.body.charge.currency,
+            req.body.charge.token
         )
 
         return res.status(200).json({ status, })

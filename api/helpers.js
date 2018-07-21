@@ -26,13 +26,7 @@ const firebaseAdmin = admin.initializeApp({
 
 // ...
 let db = postgresp(config.attributes.connectionStr)
-
-
-
-
-// ...
-let firestore = admin.firestore()
-
+let rtdb = admin.database()
 
 
 // ...
@@ -136,5 +130,5 @@ module.exports = {
     errorMessageToRetCode,
     firebaseApp,
     firebaseAdmin,
-    firestore,
+    rtdb,
 }
