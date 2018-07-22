@@ -41,6 +41,7 @@ const sendAsset = (destinationId, amount, currency, payToken) => {
                 submitted: false,
                 retries: 0,
                 lastAttempt: (new Date().getTime()),
+                reason: error.response.data.extras.result_codes,
             })
 
             // eslint-disable-next-line no-console
