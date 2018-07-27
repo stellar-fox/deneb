@@ -1,4 +1,6 @@
-const helpers = require("../../helpers"),
+const
+    helpers = require("../../helpers"),
+    toolbox = require("@xcmats/js-toolbox"),
     REQUESTED = 1,
     APPROVED = 2,
     BLOCKED = 3,
@@ -634,7 +636,7 @@ const updateFederated = (req, res, next) => {
                 t.none(
                     "UPDATE ext_contacts SET alias = $1, \
                     updated_at = $4 WHERE id = $2 AND added_by = $3", [
-                        req.body.alias || "",
+                        req.body.alias || toolbox.emptyString(),
                         req.body.id,
                         req.body.user_id,
                         date,
@@ -642,7 +644,7 @@ const updateFederated = (req, res, next) => {
                 t.none(
                     "UPDATE ext_contacts SET domain = $1, \
                     updated_at = $4 WHERE id = $2 AND added_by = $3", [
-                        req.body.domain || "",
+                        req.body.domain || toolbox.emptyString(),
                         req.body.id,
                         req.body.user_id,
                         date,
