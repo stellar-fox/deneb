@@ -8,6 +8,7 @@ const POST = require("./post.js"),
 // ...
 const router = function (app) {
     app.post(`${apiRoot}account/fund/`, POST.fund)
+    app.post(`${apiRoot}account/resubmit-fund/`, POST.resubmitFund)
 }
 
 

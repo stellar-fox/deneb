@@ -2,6 +2,7 @@ const helpers = require("../../helpers")
 const stripe = require("stripe")(helpers.config.stripe.apiKey)
 const StellarSdk = require("stellar-sdk")
 const BigNumber = require("bignumber.js")
+const toolbox = require("@xcmats/js-toolbox")
 
 
 // ...
@@ -79,6 +80,35 @@ const fund = async (req, res, _next) => {
 
 
 // ...
+const resubmitFund = async (req, res, _next) => {
+
+    try {
+        const prevTx = new StellarSdk.Transaction(req.body.chargeData.xdrBody)
+        const destinationId = toolbox.head(prevTx.operations).destination
+        const prevTxData = (await helpers.rtdb.ref(`failedTxs/${
+            destinationId}/${req.body.chargeData.id}`).once("value")).val()
+        const verifiedTx = new StellarSdk.Transaction(prevTxData.xdrBody)
+        const verifiedOp = toolbox.head(verifiedTx.operations)
+
+        await sendAsset(
+            verifiedOp.destination, verifiedOp.amount,
+            verifiedOp.asset.code, req.body.chargeData.id
+        )
+
+        await helpers.rtdb.ref(`failedTxs/${destinationId}/${
+            req.body.chargeData.id}`).remove()
+
+        return res.status(200).json({ ok: true, })
+    } catch (error) {
+        return res.status(500).json({ error: error.message, })
+    }
+
+}
+
+
+
+// ...
 module.exports = {
     fund,
+    resubmitFund,
 }
