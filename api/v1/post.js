@@ -60,18 +60,14 @@ function createAccount (req, res, _) {
                 "VALUES(${pubkey}, ${path}, ${alias}, ${user_id}, ${visible}, ${created_at}, ${updated_at}, ${email_md5}) " +
             "RETURNING id",
             {
-                pubkey: req.params.pubkey,
-                alias: (_) => {
-                    return req.query.alias ?
-                        req.query.alias :
-                        null
-                },
-                path: req.query.path,
-                user_id: req.params.user_id,
-                visible: () => req.query.visible != "false",
+                pubkey: req.body.pubkey,
+                alias: null,
+                path: req.body.path,
+                user_id: req.body.user_id,
+                visible: true,
                 created_at: now,
                 updated_at: now,
-                email_md5: req.query.md5,
+                email_md5: req.body.email_md5,
             }
         )
         .then((result) => {
@@ -93,11 +89,6 @@ function createAccount (req, res, _) {
 
 // ...
 function addExtContact (req, res, _) {
-    if (!helpers.tokenIsValid(req.body.token, req.body.user_id)) {
-        return res.status(403).json({
-            error: "Forbidden",
-        })
-    }
 
     let now = new Date()
 
@@ -193,11 +184,6 @@ function addExtContact (req, res, _) {
 
 // ...
 function requestContactByAccountNumber (req, res, _) {
-    if (!helpers.tokenIsValid(req.body.token, req.body.user_id)) {
-        return res.status(403).json({
-            error: "Forbidden",
-        })
-    }
 
     let now = new Date()
 
@@ -386,11 +372,6 @@ function requestContactByAccountNumber (req, res, _) {
 
 // ...
 function requestContact (req, res, _) {
-    if (!helpers.tokenIsValid(req.body.token, req.body.user_id)) {
-        return res.status(403).json({
-            error: "Forbidden",
-        })
-    }
 
     let now = new Date()
 
@@ -499,43 +480,13 @@ function requestContact (req, res, _) {
 
 // ...
 function userData (req, res, next) {
-    if (!helpers.tokenIsValid(req.body.token, req.body.id)) {
-        return res.status(403).json({
-            error: "Forbidden",
-        })
-    }
     helpers.db
         .one("SELECT users.first_name, users.last_name, users.email, \
         accounts.alias, accounts.domain, accounts.currency, accounts.visible, \
         accounts.email_md5, accounts.memo_type, accounts.memo FROM users \
         INNER JOIN accounts ON users.id = accounts.user_id \
         WHERE users.id = ${id}", {
-            id: req.body.id,
-        })
-        .then((dbData) => {
-            res.status(200).json({
-                status: "success",
-                data: dbData,
-            })
-        })
-        .catch((error) => {
-            return next(error.message)
-        })
-}
-
-
-
-
-// ...
-function accountData (req, res, next) {
-    if (!helpers.tokenIsValid(req.body.token, req.body.id)) {
-        return res.status(403).json({
-            error: "Forbidden",
-        })
-    }
-    helpers.db
-        .one("SELECT * FROM accounts WHERE user_id = ${user_id}", {
-            user_id: req.body.id,
+            id: req.body.user_id,
         })
         .then((dbData) => {
             res.status(200).json({
@@ -553,11 +504,7 @@ function accountData (req, res, next) {
 
 // ...
 function updateUser (req, res, _next) {
-    if (!helpers.tokenIsValid(req.body.token, req.body.id)) {
-        return res.status(403).json({
-            error: "Forbidden",
-        })
-    }
+
     helpers.db
         .tx((t) => {
             return t.batch([
@@ -596,11 +543,6 @@ function updateUser (req, res, _next) {
 
 // ...
 function updateExtContact (req, res, _next) {
-    if (!helpers.tokenIsValid(req.body.token, req.body.user_id)) {
-        return res.status(403).json({
-            error: "Forbidden",
-        })
-    }
 
     helpers.db
         .tx((t) => {
@@ -676,11 +618,7 @@ function updateExtContact (req, res, _next) {
 
 // ...
 function updateContact (req, res, _next) {
-    if (!helpers.tokenIsValid(req.body.token, req.body.user_id)) {
-        return res.status(403).json({
-            error: "Forbidden",
-        })
-    }
+
     helpers.db
         .tx((t) => {
             let now = new Date()
@@ -745,11 +683,7 @@ function updateContact (req, res, _next) {
 
 // ...
 function deleteContact (req, res, _next) {
-    if (!helpers.tokenIsValid(req.body.token, req.body.user_id)) {
-        return res.status(403).json({
-            error: "Forbidden",
-        })
-    }
+
     helpers.db
         .tx((t) => {
             return t.batch([
@@ -778,11 +712,7 @@ function deleteContact (req, res, _next) {
 
 // ...
 function deleteExtContact (req, res, _next) {
-    if (!helpers.tokenIsValid(req.body.token, req.body.user_id)) {
-        return res.status(403).json({
-            error: "Forbidden",
-        })
-    }
+
     helpers.db
         .tx((t) => {
             return t.batch([
@@ -810,11 +740,6 @@ function deleteExtContact (req, res, _next) {
 
 // ..
 function updateAccount (req, res, _next) {
-    if (!helpers.tokenIsValid(req.body.token, req.body.id)) {
-        return res.status(403).json({
-            error: "Forbidden",
-        })
-    }
 
     const federationCheck = new RegExp(
         [
@@ -844,12 +769,12 @@ function updateAccount (req, res, _next) {
             return t.batch([
                 t.none(
                     "UPDATE accounts SET memo_type = $1, memo = $3 WHERE user_id = $2",
-                    [req.body.memo_type, req.body.id, req.body.memo,]
+                    [req.body.memo_type, req.body.user_id, req.body.memo,]
                 ),
                 req.body.alias ?
                     t.none(
                         "UPDATE accounts SET alias = $1, domain = $3 WHERE user_id = $2",
-                        [alias, req.body.id, domain,]
+                        [alias, req.body.user_id, domain,]
                     ) :
                     null,
                 req.body.visible ?
@@ -857,20 +782,20 @@ function updateAccount (req, res, _next) {
                         "UPDATE accounts SET visible = ${visible} WHERE user_id = ${user_id}",
                         {
                             visible: () => req.body.visible != "false",
-                            user_id: req.body.id,
+                            user_id: req.body.user_id,
                         }
                     ) :
                     null,
                 req.body.currency ?
                     t.none(
                         "UPDATE accounts SET currency = $1 WHERE user_id = $2",
-                        [req.body.currency, req.body.id,]
+                        [req.body.currency, req.body.user_id,]
                     ) :
                     null,
                 req.body.precision ?
                     t.none(
                         "UPDATE accounts SET precision = $1 WHERE user_id = $2",
-                        [req.body.precision, req.body.id,]
+                        [req.body.precision, req.body.user_id,]
                     ) :
                     null,
                 t.none("UPDATE accounts SET updated_at = $1", [new Date(),]),
@@ -1015,11 +940,6 @@ function authenticate (req, res, next) {
 
 // ...
 function contacts (req, res, next) {
-    if (!helpers.tokenIsValid(req.body.token, req.body.user_id)) {
-        return res.status(403).json({
-            error: "Forbidden",
-        })
-    }
 
     helpers.db
         .any("SELECT contact_id, \
@@ -1050,11 +970,6 @@ function contacts (req, res, next) {
 
 // ...
 function externalContacts (req, res, next) {
-    if (!helpers.tokenIsValid(req.body.token, req.body.user_id)) {
-        return res.status(403).json({
-            error: "Forbidden",
-        })
-    }
 
     helpers.db
         .any("SELECT \
@@ -1083,11 +998,6 @@ function externalContacts (req, res, next) {
 
 // ...
 function contactReqlist (req, res, next) {
-    if (!helpers.tokenIsValid(req.body.token, req.body.user_id)) {
-        return res.status(403).json({
-            error: "Forbidden",
-        })
-    }
 
     helpers.db
         .any("SELECT \
@@ -1118,13 +1028,12 @@ function contactReqlist (req, res, next) {
 //...
 module.exports = {
     updateUser: updateUser,
-    authenticate: authenticate,
-    createAccount: createAccount,
+    authenticate,
+    createAccount,
     updateAccount: updateAccount,
     createUser,
     issueToken,
     userData,
-    accountData,
     updateContact,
     updateExtContact,
     deleteContact,

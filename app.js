@@ -14,10 +14,16 @@ const
     UsersRouter = require("./api/v2/users/router.js"),
     AccountRouter = require("./api/v2/account/router.js"),
     whiteList = [
-        "/api/",
-        "/api/v1/",
-        "/api/v2/",
-        "/api/v2/user/create/",
+        "^/$",
+        "^/api/?$",
+        "^/api/v1/?$",
+        "^/api/v2/?$",
+        "^/api/v2/user/create/?$",
+        "^/api/v1/account/create/?$",
+        "^/favicon.ico/?$",
+        "^/api/v1/user/authenticate/?$",
+        "^/api/v1/ticker/latest/[a-z]{3}/?$",
+        "^/api/v1/user/ledgerauth/[A-Z0-9]{56}/[0-9]{1,}/?$",
     ]
 
 
@@ -50,13 +56,19 @@ app.use(function (_req, res, next) {
  * Check validity of token-userid pair on every API call.
  */
 app.use((req, res, next) => {
-    if (!whiteList.find((path) => path !== req.originalUrl) &&
-        !helpers.tokenIsValid(req.body.token, req.body.user_id)) {
-        return res.status(403).json({
-            error: "Forbidden",
-        })
+    if (whiteList.find((path) => {
+        let re = new RegExp(path)
+        return re.test(req.originalUrl)
+    })) {
+        next()
+    } else {
+        if (!helpers.tokenIsValid(req.body.token, req.body.user_id)) {
+            return res.status(403).json({
+                error: "Forbidden",
+            })
+        }
+        next()
     }
-    next()
 })
 
 
@@ -86,9 +98,8 @@ app.get("/api/v1/user/md5/:pubkey/", GETAPI.emailMD5)
  ***** POST CALLS *****
  **********************
 */
-app.post("/api/v1/account/", POSTAPI.accountData)
 app.post("/api/v1/account/update/", POSTAPI.updateAccount)
-app.post("/api/v1/account/create/:user_id/:pubkey/", POSTAPI.createAccount)
+app.post("/api/v1/account/create/", POSTAPI.createAccount)
 
 app.post("/api/v1/contacts/", POSTAPI.contacts)
 app.post("/api/v1/contacts/external/", POSTAPI.externalContacts)
