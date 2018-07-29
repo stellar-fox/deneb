@@ -389,41 +389,36 @@ const requestByEmail = async (req, res, next) => {
                         ),
                     ])
                 })
-                // return res.status(201).send()
             } catch (error) {
                 return res.status(409).send()
             }
-
-            try {
-                const client = helpers.axios.create({
-                    auth: {
-                        username: helpers.config.mailchimp.username,
-                        password: helpers.config.mailchimp.apiKey,
-                    },
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                })
-
-                await client.post(`${helpers.config.mailchimp.api}lists/${
-                    helpers.config.mailchimp.listId}/members/`, {
-                    email_address: req.body.email,
-                    status: "subscribed",
-                })
-
-                return res.status(201).send()
-
-            } catch (error) {
-                return res.status(error.response.data.status).json({
-                    error: error.response.data.title,
-                })
-            }
-
         }
     }
 
+    try {
+        const client = helpers.axios.create({
+            auth: {
+                username: helpers.config.mailchimp.username,
+                password: helpers.config.mailchimp.apiKey,
+            },
+            headers: {
+                "Content-Type": "application/json",
+            },
+        })
 
+        await client.post(`${helpers.config.mailchimp.api}lists/${
+            helpers.config.mailchimp.listId}/members/`, {
+            email_address: req.body.email,
+            status: "subscribed",
+        })
 
+        return res.status(201).send()
+
+    } catch (error) {
+        return res.status(error.response.data.status).json({
+            error: error.response.data.title,
+        })
+    }
 
 }
 
