@@ -24,7 +24,10 @@ exports.attributes = {
     firebaseDB: "<firebase_db>",
     mailchimp: {
         api: "https://<your_data_center>.api.mailchimp.com/3.0/",
-        listId: "<list_id>",
+        lists: {
+            "listName1": "<list_id>",
+            "listNameN": "<list_id>",
+        },
         username: "<mailchimp_username>",
         apiKey: "<mailchimp_api_key>",
     },
