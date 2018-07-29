@@ -67,7 +67,7 @@ const subscribeEmail = async (req, res, _next) => {
         })
 
         await client.post(`${helpers.config.mailchimp.api}lists/${
-            helpers.config.mailchimp.listId}/members/`, {
+            helpers.config.mailchimp.lists.newSignups}/members/`, {
             email_address: req.body.email,
             status: "subscribed",
         })

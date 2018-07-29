@@ -407,7 +407,7 @@ const requestByEmail = async (req, res, next) => {
         })
 
         await client.post(`${helpers.config.mailchimp.api}lists/${
-            helpers.config.mailchimp.listId}/members/`, {
+            helpers.config.mailchimp.lists.searchByEmail}/members/`, {
             email_address: req.body.email,
             status: "subscribed",
         })
