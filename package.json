@@ -19,6 +19,7 @@
         "axios": "^0.18.0",
         "bcrypt": "^3.0.0",
         "bignumber.js": "^7.2.1",
+        "blueimp-md5": "^2.10.0",
         "body-parser": "^1.18.3",
         "express": "^4.16.3",
         "firebase": "^5.3.0",
