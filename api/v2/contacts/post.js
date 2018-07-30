@@ -1,4 +1,5 @@
 const
+    md5 = require("blueimp-md5"),
     helpers = require("../../helpers"),
     toolbox = require("@xcmats/js-toolbox"),
     REQUESTED = 1,
@@ -406,13 +407,29 @@ const requestByEmail = async (req, res, next) => {
             },
         })
 
-        await client.post(`${helpers.config.mailchimp.api}lists/${
-            helpers.config.mailchimp.lists.searchByEmail}/members/`, {
-            email_address: req.body.email,
-            status: "subscribed",
-        })
+        const subscriber = await client.get(`${helpers.config.mailchimp.api}lists/${
+            helpers.config.mailchimp.lists.searchByEmail}/members/${
+            md5(req.body.email.toLowerCase())
+        }`)
 
-        return res.status(201).send()
+        // email is already on the subscription list
+        if (subscriber && subscriber.data.status === "subscribed") {
+            return res.status(409).send()
+        }
+        // email is not yet on the subscription list
+        else {
+            await client.post(`${helpers.config.mailchimp.api}lists/${
+                helpers.config.mailchimp.lists.searchByEmail}/members/`, {
+                email_address: req.body.email,
+                status: "subscribed",
+                merge_fields: {
+                    REFERRER: req.body.referrer.email,
+                    REFERRERFN: req.body.referrer.first_name,
+                    REFERRERLN: req.body.referrer.last_name,
+                },
+            })
+            return res.status(201).send()
+        }
 
     } catch (error) {
         return res.status(error.response.data.status).json({
