@@ -841,7 +841,7 @@ function issueToken (req, res, _) {
                     res.status(200).json({
                         authenticated: true,
                         user_id: toolbox.head(dbData).user_id,
-                        token: new Buffer(hash).toString("base64"),
+                        token: Buffer.from(hash).toString("base64"),
                     })
                 }
             )
@@ -892,7 +892,7 @@ function authenticate (req, res, next) {
                                                 user_id: toolbox.head(dbData).id,
                                                 pubkey: dbAccount.pubkey,
                                                 bip32Path: dbAccount.path,
-                                                token: new Buffer(
+                                                token: Buffer.from(
                                                     hash
                                                 ).toString("base64"),
                                             })

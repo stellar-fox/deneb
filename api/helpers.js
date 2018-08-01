@@ -55,7 +55,7 @@ const errorMessageToRetCode = function (message) {
 
 // ...
 const btoh = function (bcryptHash) {
-    return new Buffer(bcryptHash, "ascii").toString("hex")
+    return Buffer.from(bcryptHash, "ascii").toString("hex")
 }
 
 
@@ -63,7 +63,7 @@ const btoh = function (bcryptHash) {
 
 // ...
 const htob = function (hexString) {
-    return new Buffer(hexString, "hex").toString("ascii")
+    return Buffer.from(hexString, "hex").toString("ascii")
 }
 
 
@@ -98,7 +98,7 @@ const fetchCMC = function (base="stellar", quot="eur") {
 
 // ...
 const tokenIsValid = function (token, userId) {
-    const tokenASCII = new Buffer(token, "base64").toString("ascii")
+    const tokenASCII = Buffer.from(token, "base64").toString("ascii")
     return bcrypt.compareSync(
         `${config.attributes.apiKey}${userId}`, tokenASCII
     )
