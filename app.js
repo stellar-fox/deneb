@@ -56,6 +56,12 @@ app.use(function (_req, res, next) {
  * Check validity of token-userid pair on every API call.
  */
 app.use((req, res, next) => {
+
+    if (req.method === "OPTIONS") {
+        next()
+        return
+    }
+
     if (whiteList.find((path) => {
         let re = new RegExp(path)
         return re.test(req.originalUrl)
