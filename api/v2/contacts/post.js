@@ -407,17 +407,23 @@ const requestByEmail = async (req, res, next) => {
             },
         })
 
-        const subscriber = await client.get(`${helpers.config.mailchimp.api}lists/${
-            helpers.config.mailchimp.lists.searchByEmail}/members/${
-            md5(req.body.email.toLowerCase())
-        }`)
+        try {
+            const subscriber = await client.get(`${helpers.config.mailchimp.api}lists/${
+                helpers.config.mailchimp.lists.searchByEmail}/members/${
+                md5(req.body.email.toLowerCase())
+            }`)
 
-        // email is already on the subscription list
-        if (subscriber && subscriber.data.status === "subscribed") {
+            // email is already on the subscription list
+            if (subscriber.data.status === "subscribed") {
+                return res.status(409).send()
+            }
+
+            // TODO: perhaps detect here different subscription states
+            // and return proper code along with message.
             return res.status(409).send()
-        }
-        // email is not yet on the subscription list
-        else {
+
+        } catch (_error) {
+            // email is not yet on the subscription list
             await client.post(`${helpers.config.mailchimp.api}lists/${
                 helpers.config.mailchimp.lists.searchByEmail}/members/`, {
                 email_address: req.body.email,
