@@ -90,13 +90,13 @@ const resubmitFund = async (req, res, _next) => {
         const verifiedTx = new StellarSdk.Transaction(prevTxData.xdrBody)
         const verifiedOp = toolbox.head(verifiedTx.operations)
 
+        await helpers.rtdb.ref(`failedTxs/${destinationId}/${
+            req.body.chargeData.id}`).remove()
+
         await sendAsset(
             verifiedOp.destination, verifiedOp.amount,
             verifiedOp.asset.code, req.body.chargeData.id
         )
-
-        await helpers.rtdb.ref(`failedTxs/${destinationId}/${
-            req.body.chargeData.id}`).remove()
 
         return res.status(200).json({ ok: true, })
     } catch (error) {
