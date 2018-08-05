@@ -623,16 +623,15 @@ const updateFederated = (req, res, next) => {
                             req.body.user_id,
                             date,
                         ]) : null,
-                req.body.memo ?
-                    t.none(
-                        "UPDATE ext_contacts SET memo_type = 'text', \
-                        memo = $1, updated_at = $4 WHERE id = $2 \
-                        AND added_by = $3", [
-                            req.body.memo,
-                            req.body.id,
-                            req.body.user_id,
-                            date,
-                        ]) : null,
+                t.none(
+                    "UPDATE ext_contacts SET memo_type = 'text', \
+                    memo = $1, updated_at = $4 WHERE id = $2 \
+                    AND added_by = $3", [
+                        req.body.memo || toolbox.emptyString(),
+                        req.body.id,
+                        req.body.user_id,
+                        date,
+                    ]),
                 req.body.first_name ?
                     t.none(
                         "UPDATE ext_contacts SET first_name = $1, \
