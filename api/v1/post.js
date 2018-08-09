@@ -511,18 +511,18 @@ function updateUser (req, res, _next) {
                 req.body.first_name ?
                     t.none("UPDATE users SET first_name = $1 WHERE id = $2", [
                         req.body.first_name,
-                        req.body.id,
+                        req.body.user_id,
                     ]) :
                     null,
                 req.body.last_name ?
                     t.none("UPDATE users SET last_name = $1 WHERE id = $2", [
                         req.body.last_name,
-                        req.body.id,
+                        req.body.user_id,
                     ]) :
                     null,
                 t.none("UPDATE users SET updated_at = $1 WHERE id = $2", [
                     new Date(),
-                    req.body.id,
+                    req.body.user_id,
                 ]),
             ])
         })
@@ -1027,10 +1027,10 @@ function contactReqlist (req, res, next) {
 
 //...
 module.exports = {
-    updateUser: updateUser,
+    updateUser,
     authenticate,
     createAccount,
-    updateAccount: updateAccount,
+    updateAccount,
     createUser,
     issueToken,
     userData,
