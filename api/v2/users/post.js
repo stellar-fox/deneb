@@ -1,6 +1,7 @@
 const
     bcrypt = require("bcrypt"),
-    helpers = require("../../helpers")
+    helpers = require("../../helpers"),
+    md5 = require("blueimp-md5")
 
 
 
@@ -85,7 +86,37 @@ const subscribeEmail = async (req, res, _next) => {
 
 
 // ...
+const unsubscribeEmail = async (req, res, _next) => {
+    try {
+        const client = helpers.axios.create({
+            auth: {
+                username: helpers.config.mailchimp.username,
+                password: helpers.config.mailchimp.apiKey,
+            },
+            headers: {
+                "Content-Type": "application/json",
+            },
+        })
+
+        await client.delete(`${helpers.config.mailchimp.api}lists/${
+            helpers.config.mailchimp.lists.newSignups}/members/${
+            md5(req.body.email.toLowerCase())}`)
+
+        return res.status(204).send()
+
+    } catch (error) {
+        return res.status(error.response.data.status).json({
+            error: error.response.data.title,
+        })
+    }
+}
+
+
+
+
+// ...
 module.exports = {
     create,
     subscribeEmail,
+    unsubscribeEmail,
 }
