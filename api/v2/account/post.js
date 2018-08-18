@@ -5,6 +5,37 @@ const BigNumber = require("bignumber.js")
 const toolbox = require("@xcmats/js-toolbox")
 
 
+
+
+// ...
+const implode = async (req, res, next) => {
+
+    try {
+        helpers.db.tx((t) => {
+            t.none(
+                "DELETE FROM contacts WHERE contact_id = $1 OR requested_by = $1",
+                [req.body.user_id,]
+            )
+            t.none(
+                "DELETE FROM ext_contacts WHERE added_by = $1",
+                [req.body.user_id,]
+            )
+            t.none(
+                "DELETE FROM accounts WHERE user_id = $1",
+                [req.body.user_id,]
+            )
+            t.none("DELETE FROM users where id = $1", [req.body.user_id,])
+        })
+
+        res.status(204).send()
+    } catch (error) {
+        next(error.message)
+    }
+}
+
+
+
+
 // ...
 const sendAsset = (destinationId, amount, currency, payToken) => {
 
@@ -110,5 +141,6 @@ const resubmitFund = async (req, res, _next) => {
 // ...
 module.exports = {
     fund,
+    implode,
     resubmitFund,
 }
