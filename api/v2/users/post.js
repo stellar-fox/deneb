@@ -56,6 +56,8 @@ const create = async (req, res, _next) => {
 
 // ...
 const subscribeEmail = async (req, res, _next) => {
+    let subscription
+
     try {
         const client = helpers.axios.create({
             auth: {
@@ -67,11 +69,42 @@ const subscribeEmail = async (req, res, _next) => {
             },
         })
 
-        await client.post(`${helpers.config.mailchimp.api}lists/${
-            helpers.config.mailchimp.lists.newSignups}/members/`, {
-            email_address: req.body.email,
-            status: "subscribed",
-        })
+        try {
+            subscription = (await client.get(
+                `${helpers.config.mailchimp.api}lists/${
+                    helpers.config.mailchimp.lists.newSignups}/members/${
+                    md5(req.body.email.toLowerCase())}`
+            )).data
+        } catch (error) {
+            /**
+             * User not found on the list. Proceed.
+             */
+        }
+
+
+        /**
+         * User was not found on the subscription list. Add to list.
+         */
+        if (!subscription) {
+            await client.post(`${helpers.config.mailchimp.api}lists/${
+                helpers.config.mailchimp.lists.newSignups}/members/`, {
+                email_address: req.body.email,
+                status: "subscribed",
+            })
+        }
+        /**
+         * User was found but status was not "subscribed". Subscribe.
+         */
+        else if (subscription.status !== "subscribed") {
+            await client.patch(
+                `${helpers.config.mailchimp.api}lists/${
+                    helpers.config.mailchimp.lists.newSignups}/members/${
+                    md5(req.body.email.toLowerCase())}`,
+                {
+                    status: "subscribed",
+                }
+            )
+        }
 
         return res.status(201).send()
 
