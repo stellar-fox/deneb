@@ -92,9 +92,6 @@ app.get("/api/", (_req, res, _next) => res.send("Deneb - API Service"))
 app.get("/api/v1/", (_req, res) => res.send("Deneb - REST API. v1"))
 app.get("/api/v2/", (_req, res) => res.send("Deneb - REST API. v2"))
 app.get("/api/v1/ticker/latest/:currency/", GETAPI.latestCurrency)
-app.get("/api/v1/user/:id/", GETAPI.user)
-app.get("/api/v1/account/:user_id/", GETAPI.account)
-app.get("/api/v1/user/md5/:pubkey/", GETAPI.emailMD5)
 
 
 
