@@ -15,22 +15,22 @@
         }
     ],
     "dependencies": {
-        "@xcmats/js-toolbox": "^0.4.0",
+        "@xcmats/js-toolbox": "^0.5.0",
         "axios": "^0.18.0",
-        "bcrypt": "^3.0.0",
+        "bcrypt": "^3.0.1",
         "bignumber.js": "^7.2.1",
         "blueimp-md5": "^2.10.0",
         "body-parser": "^1.18.3",
         "express": "^4.16.3",
-        "firebase": "^5.4.1",
+        "firebase": "^5.5.1",
         "firebase-admin": "^6.0.0",
         "pg-promise": "^8.4.6",
-        "stellar-sdk": "^0.10.3",
-        "stripe": "^6.8.0"
+        "stellar-sdk": "^0.11.0",
+        "stripe": "^6.12.1"
     },
     "description": "REST API for Stellar Fox.",
     "devDependencies": {
-        "eslint": "^5.4.0",
+        "eslint": "^5.6.0",
         "rimraf": "^2.6.2"
     },
     "homepage": "https://stellarfox.net/",
