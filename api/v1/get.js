@@ -46,7 +46,7 @@ function latestCurrency (req, res, next) {
             }
             // data too stale - update
             if (
-                (new Date(toolbox.head(dbData).updated_at)).getTime() <
+                (new Date(toolbox.array.head(dbData).updated_at)).getTime() <
                 Date.now() - toolbox.timeUnit.minute
             ) {
                 return helpers
@@ -83,7 +83,7 @@ function latestCurrency (req, res, next) {
             // otherwise return stale data within 1 minute window
             res.status(200).json({
                 status: "success",
-                data: toolbox.head(dbData).data,
+                data: toolbox.array.head(dbData).data,
             })
         })
         .catch((error) => {

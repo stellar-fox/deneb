@@ -115,11 +115,11 @@ const resubmitFund = async (req, res, _next) => {
 
     try {
         const prevTx = new StellarSdk.Transaction(req.body.chargeData.xdrBody)
-        const destinationId = toolbox.head(prevTx.operations).destination
+        const destinationId = toolbox.array.head(prevTx.operations).destination
         const prevTxData = (await helpers.rtdb.ref(`failedTxs/${
             destinationId}/${req.body.chargeData.id}`).once("value")).val()
         const verifiedTx = new StellarSdk.Transaction(prevTxData.xdrBody)
-        const verifiedOp = toolbox.head(verifiedTx.operations)
+        const verifiedOp = toolbox.array.head(verifiedTx.operations)
 
         await helpers.rtdb.ref(`failedTxs/${destinationId}/${
             req.body.chargeData.id}`).remove()

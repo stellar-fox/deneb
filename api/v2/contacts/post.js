@@ -627,7 +627,7 @@ const updateFederated = (req, res, next) => {
                     "UPDATE ext_contacts SET memo_type = 'text', \
                     memo = $1, updated_at = $4 WHERE id = $2 \
                     AND added_by = $3", [
-                        req.body.memo || toolbox.emptyString(),
+                        req.body.memo || toolbox.string.empty(),
                         req.body.id,
                         req.body.user_id,
                         date,
@@ -653,7 +653,7 @@ const updateFederated = (req, res, next) => {
                 t.none(
                     "UPDATE ext_contacts SET alias = $1, \
                     updated_at = $4 WHERE id = $2 AND added_by = $3", [
-                        req.body.alias || toolbox.emptyString(),
+                        req.body.alias || toolbox.string.empty(),
                         req.body.id,
                         req.body.user_id,
                         date,
@@ -661,7 +661,7 @@ const updateFederated = (req, res, next) => {
                 t.none(
                     "UPDATE ext_contacts SET domain = $1, \
                     updated_at = $4 WHERE id = $2 AND added_by = $3", [
-                        req.body.domain || toolbox.emptyString(),
+                        req.body.domain || toolbox.string.empty(),
                         req.body.id,
                         req.body.user_id,
                         date,

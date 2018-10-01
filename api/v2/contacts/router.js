@@ -1,4 +1,5 @@
-const POST = require("./post.js"),
+const
+    POST = require("./post.js"),
     helpers = require("../../helpers"),
     apiRoot = helpers.apiRoot
 

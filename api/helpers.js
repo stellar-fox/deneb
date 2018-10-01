@@ -82,7 +82,7 @@ const fetchCMC = function (base="stellar", quot="eur") {
     return axios.get(`https://api.coinmarketcap.com/v1/ticker/${base}/?convert=${quot}`)
         .then((response) => {
             return {
-                data: toolbox.head(response.data),
+                data: toolbox.array.head(response.data),
             }
         })
         .catch((error) => {

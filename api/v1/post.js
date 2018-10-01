@@ -587,7 +587,7 @@ function updateExtContact (req, res, _next) {
                 t.none(
                     "UPDATE ext_contacts SET alias = $1, \
                     updated_at = $4 WHERE id = $2 AND added_by = $3", [
-                        req.body.alias || toolbox.emptyString(),
+                        req.body.alias || toolbox.string.empty(),
                         req.body.id,
                         req.body.user_id,
                         date,
@@ -595,7 +595,7 @@ function updateExtContact (req, res, _next) {
                 t.none(
                     "UPDATE ext_contacts SET domain = $1, \
                     updated_at = $4 WHERE id = $2 AND added_by = $3", [
-                        req.body.domain || toolbox.emptyString(),
+                        req.body.domain || toolbox.string.empty(),
                         req.body.id,
                         req.body.user_id,
                         date,
@@ -747,7 +747,7 @@ function updateAccount (req, res, _next) {
             /((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
         ]
             .map((r) => r.source)
-            .join(toolbox.emptyString())
+            .join(toolbox.string.empty())
     )
 
     let alias = null,
@@ -759,9 +759,9 @@ function updateAccount (req, res, _next) {
         domain = federationMatch ? federationMatch[2] : null
     }
 
-    !req.body.memo_type && (req.body.memo_type = toolbox.emptyString())
+    !req.body.memo_type && (req.body.memo_type = toolbox.string.empty())
 
-    !req.body.memo && (req.body.memo = toolbox.emptyString())
+    !req.body.memo && (req.body.memo = toolbox.string.empty())
 
 
     helpers.db
@@ -834,13 +834,13 @@ function issueToken (req, res, _) {
         )
         .then((dbData) => {
             bcrypt.hash(
-                `${helpers.getApiKey()}${toolbox.head(dbData).user_id}`,
+                `${helpers.getApiKey()}${toolbox.array.head(dbData).user_id}`,
                 saltRounds,
                 (_, hash) => {
                     // authenticated
                     res.status(200).json({
                         authenticated: true,
-                        user_id: toolbox.head(dbData).user_id,
+                        user_id: toolbox.array.head(dbData).user_id,
                         token: Buffer.from(hash).toString("base64"),
                     })
                 }
@@ -869,7 +869,7 @@ function authenticate (req, res, next) {
             if (dbData.length === 1) {
                 bcrypt.compare(
                     req.body.password,
-                    toolbox.head(dbData).password_digest,
+                    toolbox.array.head(dbData).password_digest,
                     (_err, auth) => {
                         if (auth) {
                             helpers.db
@@ -878,18 +878,18 @@ function authenticate (req, res, next) {
                                     "FROM accounts " +
                                     "WHERE user_id = ${user_id}",
                                     {
-                                        user_id: toolbox.head(dbData).id,
+                                        user_id: toolbox.array.head(dbData).id,
                                     }
                                 )
                                 .then((dbAccount) => {
                                     bcrypt.hash(
-                                        `${helpers.getApiKey()}${toolbox.head(dbData).id}`,
+                                        `${helpers.getApiKey()}${toolbox.array.head(dbData).id}`,
                                         saltRounds,
                                         (_error, hash) => {
                                             // authenticated
                                             res.status(200).json({
                                                 authenticated: true,
-                                                user_id: toolbox.head(dbData).id,
+                                                user_id: toolbox.array.head(dbData).id,
                                                 pubkey: dbAccount.pubkey,
                                                 bip32Path: dbAccount.path,
                                                 token: Buffer.from(
