@@ -74,7 +74,7 @@ const listInternal = (req, res, next) => {
         users.id = contacts.contact_id INNER JOIN accounts ON \
         users.id = accounts.user_id WHERE contacts.status = ${APPROVED} AND \
         contacts.requested_by = $1`,
-        [ req.body.user_id, ])
+        [ req.body.user_id ])
         .then((results) => res.status(200).send(results))
         .catch((error) => next(error.message))
 }
@@ -88,7 +88,7 @@ const listFederated = (req, res, next) => {
         `SELECT id, pubkey, alias, domain, currency, memo_type, \
         memo, email_md5, first_name, last_name FROM ext_contacts \
         WHERE status = ${APPROVED} AND ext_contacts.added_by = $1`,
-        [ req.body.user_id, ])
+        [ req.body.user_id ])
         .then((results) => res.status(200).send(results))
         .catch((error) => next(error.message))
 }
@@ -109,7 +109,7 @@ const listRequested = (req, res, next) => {
         WHERE contacts.contact_id = $1 \
         AND contacts.status IN ($2:csv)", [
             req.body.user_id,
-            [ REQUESTED, ],
+            [ REQUESTED ],
         ])
         .then((results) => res.status(200).send(results))
         .catch((error) => next(error.message))
@@ -132,7 +132,7 @@ const listPending = (req, res, next) => {
         WHERE contacts.contact_id = $1 \
         AND contacts.status IN ($2:csv)", [
             req.body.user_id,
-            [ PENDING, BLOCKED, ],
+            [ PENDING, BLOCKED ],
         ])
         .then((results) => res.status(200).send(results))
         .catch((error) => next(error.message))
@@ -316,7 +316,7 @@ const requestByEmail = async (req, res, next) => {
 
     const registeredUser = await helpers.db.oneOrNone(
         "SELECT id FROM users WHERE email = ${email}",
-        { email: req.body.email, }
+        { email: req.body.email }
     )
 
     if (registeredUser) {

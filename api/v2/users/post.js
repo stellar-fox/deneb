@@ -19,7 +19,7 @@ const create = async (req, res, _next) => {
         )
 
         if (uid !== helpers.firebaseApp.auth().currentUser.uid) {
-            return res.status(403).json({ error: "Forbidden.", })
+            return res.status(403).json({ error: "Forbidden." })
         }
 
         const userAlreadyExists = await helpers.db.oneOrNone(
@@ -43,7 +43,7 @@ const create = async (req, res, _next) => {
                 }
             )
 
-            return res.status(201).json({ userid: userCreateResp.id, })
+            return res.status(201).json({ userid: userCreateResp.id })
         }
         return res.status(204).send()
     } catch (error) {

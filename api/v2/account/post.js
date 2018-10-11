@@ -14,17 +14,17 @@ const implode = async (req, res, next) => {
         helpers.db.tx((t) => {
             t.none(
                 "DELETE FROM contacts WHERE contact_id = $1 OR requested_by = $1",
-                [req.body.user_id,]
+                [req.body.user_id]
             )
             t.none(
                 "DELETE FROM ext_contacts WHERE added_by = $1",
-                [req.body.user_id,]
+                [req.body.user_id]
             )
             t.none(
                 "DELETE FROM accounts WHERE user_id = $1",
-                [req.body.user_id,]
+                [req.body.user_id]
             )
-            t.none("DELETE FROM users where id = $1", [req.body.user_id,])
+            t.none("DELETE FROM users where id = $1", [req.body.user_id])
         })
 
         res.status(204).send()
@@ -86,7 +86,7 @@ const sendAsset = (destinationId, amount, currency, payToken) => {
 // ...
 const fund = async (req, res, _next) => {
     try {
-        let { status, } = await stripe.charges.create({
+        let { status } = await stripe.charges.create({
             amount: req.body.charge.amount,
             currency: req.body.charge.currency,
             description: `Account Fund: ${req.body.charge.publicKeyAbbr}`,
@@ -100,10 +100,10 @@ const fund = async (req, res, _next) => {
             req.body.charge.token
         )
 
-        return res.status(200).json({ status, })
+        return res.status(200).json({ status })
 
     } catch (error) {
-        return res.status(500).json({ error: error.message, })
+        return res.status(500).json({ error: error.message })
     }
 }
 
@@ -129,9 +129,9 @@ const resubmitFund = async (req, res, _next) => {
             verifiedOp.asset.code, req.body.chargeData.id
         )
 
-        return res.status(200).json({ ok: true, })
+        return res.status(200).json({ ok: true })
     } catch (error) {
-        return res.status(500).json({ error: error.message, })
+        return res.status(500).json({ error: error.message })
     }
 
 }

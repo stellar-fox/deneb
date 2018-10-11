@@ -769,12 +769,12 @@ function updateAccount (req, res, _next) {
             return t.batch([
                 t.none(
                     "UPDATE accounts SET memo_type = $1, memo = $3 WHERE user_id = $2",
-                    [req.body.memo_type, req.body.user_id, req.body.memo,]
+                    [req.body.memo_type, req.body.user_id, req.body.memo]
                 ),
                 req.body.alias ?
                     t.none(
                         "UPDATE accounts SET alias = $1, domain = $3 WHERE user_id = $2",
-                        [alias, req.body.user_id, domain,]
+                        [alias, req.body.user_id, domain]
                     ) :
                     null,
                 req.body.visible ?
@@ -789,16 +789,16 @@ function updateAccount (req, res, _next) {
                 req.body.currency ?
                     t.none(
                         "UPDATE accounts SET currency = $1 WHERE user_id = $2",
-                        [req.body.currency, req.body.user_id,]
+                        [req.body.currency, req.body.user_id]
                     ) :
                     null,
                 req.body.precision ?
                     t.none(
                         "UPDATE accounts SET precision = $1 WHERE user_id = $2",
-                        [req.body.precision, req.body.user_id,]
+                        [req.body.precision, req.body.user_id]
                     ) :
                     null,
-                t.none("UPDATE accounts SET updated_at = $1", [new Date(),]),
+                t.none("UPDATE accounts SET updated_at = $1", [new Date()]),
             ])
         })
         .then((_) => {
