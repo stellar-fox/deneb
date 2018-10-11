@@ -15,16 +15,18 @@
         }
     ],
     "dependencies": {
-        "@xcmats/js-toolbox": "^0.6.2",
+        "@types/express": "^4.16.0",
+        "@types/stellar-sdk": "^0.10.2",
+        "@xcmats/js-toolbox": "^0.6.6",
         "axios": "^0.18.0",
         "bcrypt": "^3.0.1",
         "bignumber.js": "^7.2.1",
         "blueimp-md5": "^2.10.0",
         "body-parser": "^1.18.3",
-        "express": "^4.16.3",
+        "express": "^4.16.4",
         "firebase": "^5.5.2",
         "firebase-admin": "^6.0.0",
-        "pg-promise": "^8.4.6",
+        "pg-promise": "^8.5.0",
         "stellar-sdk": "^0.11.0",
         "stripe": "^6.12.1"
     },
