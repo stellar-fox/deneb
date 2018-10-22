@@ -31,6 +31,7 @@ let rtdb = admin.database()
 
 // ...
 const apiRoot = "/api/v2/"
+const apiVersion = "/api/v1/"
 
 
 
@@ -119,6 +120,7 @@ const getApiKey = function () {
 module.exports = {
     axios,
     apiRoot,
+    apiVersion,
     config: config.attributes,
     fetchCMC: fetchCMC,
     db: db,

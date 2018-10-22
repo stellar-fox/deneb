@@ -13,6 +13,7 @@ const
     ContactsRouter = require("./api/v2/contacts/router.js"),
     UsersRouter = require("./api/v2/users/router.js"),
     AccountRouter = require("./api/v2/account/router.js"),
+    UserRouter = require("./api/v1/user/router.js"),
     whiteList = [
         "^/$",
         "^/api/?$",
@@ -24,6 +25,8 @@ const
         "^/api/v1/user/authenticate/?$",
         "^/api/v1/ticker/latest/[a-z]{3}/?$",
         "^/api/v1/user/ledgerauth/[A-Z0-9]{56}/[0-9]{1,}/?$",
+
+        "^/api/v1/user/auth/?$",
     ]
 
 
@@ -81,7 +84,7 @@ app.use((req, res, next) => {
 ContactsRouter(app)
 UsersRouter(app)
 AccountRouter(app)
-
+UserRouter(app)
 
 /*
  *********************

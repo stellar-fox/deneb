@@ -194,3 +194,20 @@ ALTER TABLE public.users
 -- =============================================================================
 ALTER TABLE public.contacts
   ADD COLUMN request_str character varying;
+
+-- =============================================================================
+CREATE SEQUENCE public.destinations_id_seq
+  INCREMENT 1
+  MINVALUE 1
+  MAXVALUE 9223372036854775807
+  START 1
+  CACHE 1;
+ALTER TABLE public.destinations_id_seq
+  OWNER TO aquila;
+
+
+CREATE TABLE public.destinations (
+  id bigint NOT NULL DEFAULT nextval('destinations_id_seq'::regclass),
+  pubkey character varying NOT NULL,
+  data jsonb
+);
