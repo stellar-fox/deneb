@@ -59,12 +59,17 @@
         "@babel/plugin-transform-template-literals": "^7.0.0",
         "@babel/preset-env": "^7.1.0",
         "babel-eslint": "^10.0.1",
+        "babel-loader": "^8.0.4",
+        "babel-minify-webpack-plugin": "^0.3.1",
         "cross-env": "^5.2.0",
         "eslint": "^5.8.0",
         "jsdoc": "^3.5.5",
         "minami": "^1.2.3",
         "nodemon": "^1.18.5",
-        "rimraf": "^2.6.2"
+        "rimraf": "^2.6.2",
+        "webpack": "^4.23.1",
+        "webpack-cli": "^3.1.2",
+        "webpack-node-externals": "^1.7.2"
     },
     "homepage": "https://stellarfox.net/",
     "keywords": [
@@ -74,7 +79,7 @@
         "stellar"
     ],
     "license": "Apache-2.0",
-    "main": "src/index.js",
+    "main": "dist/deneb.js",
     "name": "deneb",
     "private": true,
     "repository": {
@@ -82,11 +87,15 @@
         "url": "https://github.com/stellar-fox/deneb.git"
     },
     "scripts": {
+        "build": "cross-env BABEL_ENV=production webpack -p --config=webpack.config.js",
         "build:jsdoc": "echo \"Generating jsdoc ...\" && jsdoc -c ./jsdoc.json -R ./README.md -r ./src/ -d ./jsdoc/",
+        "clean": "rimraf ./dist",
+        "clean:all": "npm run clean && npm run clean:jsdoc",
         "clean:jsdoc": "rimraf ./jsdoc",
         "clean:modules": "rimraf node_modules",
         "jsdoc": "npm run clean:jsdoc && npm run build:jsdoc",
         "lint": "eslint ./src/",
+        "production": "node ./dist/deneb.js",
         "start": "nodemon --watch ./src/ ./src/index.js --exec \"cross-env BABEL_ENV=development babel-node\"",
         "test": "npm run lint  &&  echo \"Warning: no tests specified (yet)\""
     },
