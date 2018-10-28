@@ -1,3 +1,15 @@
+/**
+ * Deneb.
+ *
+ * REST API (v1) - GET.
+ *
+ * @module api-v1-actions-get
+ * @license Apache-2.0
+ */
+
+
+
+
 import {
     array,
     timeUnit,
@@ -7,7 +19,11 @@ import { fetchCMC } from "../../lib/helpers"
 
 
 
-// ...
+/**
+ * ...
+ *
+ * @param {Object} sqlDatabase
+ */
 export default function getApiV1Actions (sqlDatabase) {
 
     // ...

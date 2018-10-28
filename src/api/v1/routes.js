@@ -1,3 +1,15 @@
+/**
+ * Deneb.
+ *
+ * REST API (v1) - route configuration.
+ *
+ * @module api-v1-routes
+ * @license Apache-2.0
+ */
+
+
+
+
 import { apiRootV1 } from "../../config/env"
 import getApiV1Actions from "./get"
 import postApiV1Actions from "./post"
@@ -5,9 +17,12 @@ import postApiV1Actions from "./post"
 
 
 
-//
-// getApiV1Routes
-//
+/**
+ * ...
+ *
+ * @param {Object} app
+ * @param {Object} db
+ */
 export const getApiV1Routes = (app, db) => {
 
     const GET = getApiV1Actions(db)
@@ -22,9 +37,12 @@ export const getApiV1Routes = (app, db) => {
 
 
 
-//
-// postApiV1Routes
-//
+/**
+ * ...
+ *
+ * @param {Object} app
+ * @param {Object} db
+ */
 export const postApiV1Routes = (app, db) => {
 
     const POST = postApiV1Actions(db)

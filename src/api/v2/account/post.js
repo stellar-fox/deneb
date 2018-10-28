@@ -1,3 +1,15 @@
+/**
+ * Deneb.
+ *
+ * REST API (v2) - Account.
+ *
+ * @module api-v2-actions-account
+ * @license Apache-2.0
+ */
+
+
+
+
 import StellarSdk from "stellar-sdk"
 import BigNumber from "bignumber.js"
 import { array } from "@xcmats/js-toolbox"
@@ -10,7 +22,12 @@ import {
 
 
 
-// ...
+/**
+ * ...
+ *
+ * @param {Object} sqlDatabase
+ * @param {Object} rtdb
+ */
 export default function accountActions (sqlDatabase, rtdb) {
 
     // ...

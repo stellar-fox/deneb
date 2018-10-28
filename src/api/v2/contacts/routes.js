@@ -1,19 +1,33 @@
+/**
+ * Deneb.
+ *
+ * REST API (v2) - Contacts route configuration.
+ *
+ * @module api-v2-routes-contact
+ * @license Apache-2.0
+ */
+
+
+
+
 import { apiRootV2 } from "../../../config/env"
 import contactsActions from "./post"
 
 
 
 
-//
-// contactsRoutes
-//
+/**
+ * ...
+ *
+ * @param {Object} app
+ * @param {Object} db
+ */
 export default function contactsRoutes (app, db) {
 
     const POST = contactsActions(db)
 
-    //
+
     // internal
-    //
     app.post(
         `${apiRootV2}contacts/list/internal/`,
         POST.listInternal
@@ -44,9 +58,7 @@ export default function contactsRoutes (app, db) {
     )
 
 
-    //
     // federated
-    //
     app.post(
         `${apiRootV2}contacts/list/federated/`,
         POST.listFederated
@@ -61,9 +73,7 @@ export default function contactsRoutes (app, db) {
     )
 
 
-    //
     // common
-    //
     app.post(
         `${apiRootV2}contact/request/by-email/`,
         POST.requestByEmail

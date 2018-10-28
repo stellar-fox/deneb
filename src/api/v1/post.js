@@ -1,3 +1,15 @@
+/**
+ * Deneb.
+ *
+ * REST API (v1) - POST.
+ *
+ * @module api-v1-actions-post
+ * @license Apache-2.0
+ */
+
+
+
+
 import {
     errorMessageToRetCode,
     getApiKey,
@@ -11,7 +23,11 @@ import bcrypt from "bcrypt"
 
 
 
-// ...
+/**
+ * ...
+ *
+ * @param {Object} sqlDatabase
+ */
 export default function postApiV1Actions (sqlDatabase) {
 
     // ...

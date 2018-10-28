@@ -1,3 +1,15 @@
+/**
+ * Deneb.
+ *
+ * REST API (v2) - Contacts.
+ *
+ * @module api-v2-actions-contacts
+ * @license Apache-2.0
+ */
+
+
+
+
 import axios from "axios"
 import { string } from "@xcmats/js-toolbox"
 import md5 from "blueimp-md5"
@@ -8,7 +20,11 @@ import {
 
 
 
-// ...
+/**
+ * ...
+ *
+ * @param {Object} sqlDatabase
+ */
 export default function contactsActions (sqlDatabase) {
 
     // ...

@@ -46,10 +46,10 @@ import "firebase/auth"
 import {
     getApiV1Routes,
     postApiV1Routes,
-} from "./api/v1/router"
-import contactsRoutes from "./api/v2/contacts/router"
-import usersRoutes from "./api/v2/users/router"
-import accountRoutes from "./api/v2/account/router"
+} from "./api/v1/routes"
+import contactsRoutes from "./api/v2/contacts/routes"
+import usersRoutes from "./api/v2/users/routes"
+import accountRoutes from "./api/v2/account/routes"
 
 
 
@@ -130,9 +130,7 @@ app.use((req, res, next) => {
 
 
 
-//
 // "hello world" routes
-//
 app.get("/api/", (_req, res) =>
     res.status(200)
         .send({ message: "Deneb - API Service" })
@@ -149,18 +147,14 @@ app.get("/api/v2/", (_req, res) =>
 
 
 
-//
 // API v1 routes
-//
 getApiV1Routes(app, db)
 postApiV1Routes(app, db)
 
 
 
 
-//
 // API v2 routes
-//
 contactsRoutes(app, db)
 usersRoutes(app, db, firebaseAdmin, firebaseApp)
 accountRoutes(app, db, rtdb)

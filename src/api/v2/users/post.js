@@ -1,3 +1,15 @@
+/**
+ * Deneb.
+ *
+ * REST API (v2) - Users.
+ *
+ * @module api-v2-actions-users
+ * @license Apache-2.0
+ */
+
+
+
+
 import axios from "axios"
 import bcrypt from "bcrypt"
 import md5 from "blueimp-md5"
@@ -8,7 +20,13 @@ import {
 
 
 
-// ...
+/**
+ * ...
+ *
+ * @param {Object} sqlDatabase
+ * @param {Object} firebaseAdmin
+ * @param {Object} firebaseApp
+ */
 export default function usersActions (
     sqlDatabase,
     firebaseAdmin,
