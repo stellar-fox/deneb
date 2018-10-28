@@ -47,8 +47,93 @@ Moving Value at the Speed of Light
 
 
 
+## build/run instructions
+
+* first, checkout the project
+
+    ```bash
+    $ git clone git@github.com:stellar-fox/deneb.git
+    Cloning into 'deneb'...
+    $ cd deneb
+    ```
+
+* install dependencies
+
+    ```bash
+    $ npm i
+    ```
+
+* prepare [configuration file][config]
+
+    ```bash
+    $ cp src/config/configuration.example.json src/config/configuration.json
+    $ vi src/config/configuration.json
+    ```
+
+* then, configure the database
+
+    ```
+    $ sudo -i
+    # su - postgres
+    $ dropdb stellarfox
+    $ createdb stellarfox --owner some_user
+    $ ^D
+    # ^D
+    $ psql stellarfox -U some_user -W -h 127.0.0.1 -f db/schema.sql
+    ```
+
+* run in development mode
+
+    ```bash
+    $ npm start
+    ```
+
+    > ```
+    > Compiling for 'development' ...
+    > [📠] deneb::4001 (v.0.2.0)
+    > ```
+
+* or build and run
+
+    ```bash
+    $ npm run build
+    ```
+
+    > ```
+    > Compiling for 'production' ...
+    > Hash: 373148fb7dbae3d35840
+    > Version: webpack 4.23.1
+    > Time: 3094ms
+    > Built at: 2018-10-29 00:20:41
+    > Asset      Size  Chunks             Chunk Names
+    > deneb.js  46.6 KiB       0  [emitted]  deneb
+    > Entrypoint deneb = deneb.js
+    > [0] ./src/config/configuration.json 3.54 KiB {0} [built]
+    > [1] external "@xcmats/js-toolbox" 42 bytes {0} [built]
+    > ...
+    >     + 3 hidden modules
+    > ```
+
+    ```bash
+    $ npm run production
+    ```
+
+    > ```
+    > [📠] deneb::4001 (v.0.2.0)
+    > ```
+
+<br />
+
+
+
+
 ## Support
 
 ```
 GAUWLOIHFR2E52DYNEYDO6ZADIDVWZKK3U77V7PMFBNOIOBNREQBHBRR
 ```
+
+
+
+
+[config]: src/config/configuration.example.json
