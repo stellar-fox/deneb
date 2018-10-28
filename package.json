@@ -19,6 +19,7 @@
         "@types/blueimp-md5": "^2.7.0",
         "@types/express": "^4.16.0",
         "@types/stellar-sdk": "^0.10.4",
+        "@types/stripe": "^6.0.3",
         "@xcmats/js-toolbox": "^0.6.8",
         "axios": "^0.18.0",
         "bcrypt": "^3.0.2",
