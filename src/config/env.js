@@ -33,3 +33,11 @@ export const whiteList = [
     "^/api/v1/ticker/latest/[a-z]{3}/?$",
     "^/api/v1/user/ledgerauth/[A-Z0-9]{56}/[0-9]{1,}/?$",
 ]
+
+
+
+
+/**
+ * @constant apiRoot Current API prefix (versioned).
+ */
+export const apiRoot = "/api/v2/"
