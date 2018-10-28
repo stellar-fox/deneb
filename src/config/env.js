@@ -38,6 +38,14 @@ export const whiteList = [
 
 
 /**
- * @constant apiRoot Current API prefix (versioned).
+ * @constant apiRootV1 Version 1 API path prefix.
  */
-export const apiRoot = "/api/v2/"
+export const apiRootV1 = "/api/v1/"
+
+
+
+
+/**
+ * @constant apiRootV2 Version 2 API path prefix.
+ */
+export const apiRootV2 = "/api/v2/"

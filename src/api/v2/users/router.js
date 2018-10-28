@@ -1,22 +1,30 @@
-const
-    POST = require("./post.js"),
-    helpers = require("../../../lib/helpers"),
-    apiRoot = helpers.apiRoot
+import { apiRootV2 } from "../../../config/env"
+import usersActions from "./post"
 
 
 
 
-// ...
-const router = function (app) {
+//
+// usersRoutes
+//
+export default function usersRoutes (app, db, firebaseAdmin, firebaseApp) {
 
+    const POST = usersActions(db, firebaseAdmin, firebaseApp)
+
+    //
     // internal
-    app.post(`${apiRoot}user/create/`, POST.create)
-    app.post(`${apiRoot}user/subscribe-email/`, POST.subscribeEmail)
-    app.post(`${apiRoot}user/unsubscribe-email/`, POST.unsubscribeEmail)
+    //
+    app.post(
+        `${apiRootV2}user/create/`,
+        POST.create
+    )
+    app.post(
+        `${apiRootV2}user/subscribe-email/`,
+        POST.subscribeEmail
+    )
+    app.post(
+        `${apiRootV2}user/unsubscribe-email/`,
+        POST.unsubscribeEmail
+    )
+
 }
-
-
-
-
-// ...
-module.exports = router

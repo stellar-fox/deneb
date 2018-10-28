@@ -1,49 +1,30 @@
-// ...
-const
-    axios = require("axios"),
-    bcrypt = require("bcrypt"),
-    config = require("../config/config.js"),
-    postgresp = require("pg-promise")({}),
-    { array } = require("@xcmats/js-toolbox"),
-    firebase = require("firebase/app"),
-    admin = require("firebase-admin")
+/**
+ * Deneb.
+ *
+ * Various helper functions.
+ *
+ * @module helpers
+ * @license Apache-2.0
+ */
 
 
 
 
-// add needed firebase modules
-require("firebase/auth")
+import axios from "axios"
+import bcrypt from "bcrypt"
+import { array } from "@xcmats/js-toolbox"
+import { apiKey } from "../config/configuration.json"
 
 
 
 
-// ...
-const
-    firebaseApp = firebase.initializeApp(config.attributes.firebase),
-    firebaseAdmin = admin.initializeApp({
-        credential: admin.credential.cert(config.attributes.admin),
-        databaseURL: config.attributes.firebaseDB,
-    })
-
-
-
-
-// ...
-let
-    db = postgresp(config.attributes.connectionStr),
-    rtdb = admin.database()
-
-
-
-
-// ...
-const apiRoot = "/api/v2/"
-
-
-
-
-// ...
-const errorMessageToRetCode = function (message) {
+/**
+ * ...
+ *
+ * @function errorMessageToRetCode
+ * @param {String} message
+ */
+export const errorMessageToRetCode = (message) => {
     let errorCode = null
     switch (true) {
         case (message.match(/duplicate key/) !== null):
@@ -60,33 +41,15 @@ const errorMessageToRetCode = function (message) {
 
 
 
-// ...
-const btoh = function (bcryptHash) {
-    return Buffer.from(bcryptHash, "ascii").toString("hex")
-}
-
-
-
-
-// ...
-const htob = function (hexString) {
-    return Buffer.from(hexString, "hex").toString("ascii")
-}
-
-
-
-
-// ...
-const apiKeyValid = function (hashedApiKey) {
-    return bcrypt.compareSync(config.attributes.apiKey, hashedApiKey)
-}
-
-
-
-
-// ...
-const fetchCMC = function (base="stellar", quot="eur") {
-    return axios.get(`https://api.coinmarketcap.com/v1/ticker/${base}/?convert=${quot}`)
+/**
+ * ...
+ *
+ * @async
+ * @param {*} base
+ * @param {*} quot
+ */
+export const fetchCMC = (base = "stellar", quot = "eur") =>
+    axios.get(`https://api.coinmarketcap.com/v1/ticker/${base}/?convert=${quot}`)
         .then((response) => {
             return {
                 data: array.head(response.data),
@@ -98,44 +61,26 @@ const fetchCMC = function (base="stellar", quot="eur") {
                 statusText: error.response.statusText,
             }))
         })
-}
 
 
 
 
-// ...
-const tokenIsValid = function (token, userId) {
-    const tokenASCII = Buffer.from(token, "base64").toString("ascii")
-    return bcrypt.compareSync(
-        `${config.attributes.apiKey}${userId}`, tokenASCII
+/**
+ * ...
+ */
+export const getApiKey = () => apiKey
+
+
+
+
+/**
+ * ...
+ *
+ * @param {*} token
+ * @param {*} userId
+ */
+export const tokenIsValid = (token, userId) =>
+    bcrypt.compareSync(
+        `${getApiKey()}${userId}`,
+        Buffer.from(token, "base64").toString("ascii")
     )
-}
-
-
-
-
-// ...
-const getApiKey = function () {
-    return config.attributes.apiKey
-}
-
-
-
-
-// ...
-module.exports = {
-    axios,
-    apiRoot,
-    config: config.attributes,
-    fetchCMC: fetchCMC,
-    db: db,
-    tokenIsValid: tokenIsValid,
-    getApiKey: getApiKey,
-    apiKeyValid,
-    btoh,
-    htob,
-    errorMessageToRetCode,
-    firebaseApp,
-    firebaseAdmin,
-    rtdb,
-}
