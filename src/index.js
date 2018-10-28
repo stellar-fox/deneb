@@ -1,11 +1,21 @@
-#!/usr/bin/env node
+/**
+ * Deneb.
+ *
+ * Backend server.
+ *
+ * @module deneb-server-app
+ * @license Apache-2.0
+ */
+
 
 
 
 // ...
 const
-    bodyParser = require("body-parser"),
     express = require("express"),
+    bodyParser = require("body-parser"),
+    chalk = require("chalk"),
+    { string } = require("@xcmats/js-toolbox"),
     GETAPI = require("./api/v1/get.js"),
     POSTAPI = require("./api/v1/post.js"),
     helpers = require("./api/helpers"),
@@ -30,7 +40,22 @@ const
 
 
 // ...
-let app = express()
+let
+    app = express(),
+    port = 4001
+
+
+
+
+// simple request logger
+app.use((req, _res, next) => {
+    // eslint-disable-next-line no-console
+    console.log(
+        chalk.gray(string.padLeft(req.method, 8)),
+        req.url
+    )
+    next()
+})
 
 
 
@@ -76,6 +101,7 @@ app.use((req, res, next) => {
         }
         next()
     }
+
 })
 
 
@@ -90,7 +116,7 @@ AccountRouter(app)
  *********************
  ***** GET CALLS *****
  *********************
-*/
+ */
 app.get("/api/", (_req, res, _next) => res.send("Deneb - API Service"))
 app.get("/api/v1/", (_req, res) => res.send("Deneb - REST API. v1"))
 app.get("/api/v2/", (_req, res) => res.send("Deneb - REST API. v2"))
@@ -103,7 +129,7 @@ app.get("/api/v1/ticker/latest/:currency/", GETAPI.latestCurrency)
  **********************
  ***** POST CALLS *****
  **********************
-*/
+ */
 app.post("/api/v1/account/update/", POSTAPI.updateAccount)
 app.post("/api/v1/account/create/", POSTAPI.createAccount)
 
@@ -129,7 +155,9 @@ app.post("/api/v1/user/ledgerauth/:pubkey/:path/", POSTAPI.issueToken)
 
 // ...
 app.listen(
-    4001,
+    port,
     // eslint-disable-next-line no-console
-    () => console.log("Deneb::4001")
+    () => console.info(
+        `[📠] deneb::${chalk.yellow(port)}`
+    )
 )
