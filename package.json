@@ -61,6 +61,8 @@
         "babel-eslint": "^10.0.1",
         "cross-env": "^5.2.0",
         "eslint": "^5.8.0",
+        "jsdoc": "^3.5.5",
+        "minami": "^1.2.3",
         "nodemon": "^1.18.5",
         "rimraf": "^2.6.2"
     },
@@ -80,7 +82,10 @@
         "url": "https://github.com/stellar-fox/deneb.git"
     },
     "scripts": {
+        "build:jsdoc": "echo \"Generating jsdoc ...\" && jsdoc -c ./jsdoc.json -R ./README.md -r ./src/ -d ./jsdoc/",
+        "clean:jsdoc": "rimraf ./jsdoc",
         "clean:modules": "rimraf node_modules",
+        "jsdoc": "npm run clean:jsdoc && npm run build:jsdoc",
         "lint": "eslint ./src/",
         "start": "nodemon --watch ./src/ ./src/index.js --exec \"cross-env BABEL_ENV=development babel-node\"",
         "test": "npm run lint  &&  echo \"Warning: no tests specified (yet)\""
