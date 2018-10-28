@@ -10,12 +10,26 @@
 
 
 
-// ...
+import express, {
+    json,
+    urlencoded,
+} from "express"
+import {
+    string,
+    toBool,
+} from "@xcmats/js-toolbox"
+import chalk from "chalk"
+import {
+    name as applicationName,
+    version,
+} from "../package.json"
+
+
+
+
+
+// CommonJS remainings...
 const
-    express = require("express"),
-    bodyParser = require("body-parser"),
-    chalk = require("chalk"),
-    { string } = require("@xcmats/js-toolbox"),
     GETAPI = require("./api/v1/get.js"),
     POSTAPI = require("./api/v1/post.js"),
     helpers = require("./api/helpers"),
@@ -41,6 +55,7 @@ const
 
 // ...
 const
+    // http server
     app = express(),
     port = 4001
 
@@ -60,51 +75,42 @@ app.use((req, _res, next) => {
 
 
 
-// ...
-app.use(bodyParser.json())
-app.use(
-    bodyParser.urlencoded({
-        extended: true,
+// basic express.js server config
+app.use(json())
+app.use(urlencoded({ extended: true }))
+app.use((_req, res, next) => {
+    res.header({
+        "Access-Control-Allow-Headers":
+            "Origin, X-Requested-With, Content-Type, Accept",
+        "Access-Control-Allow-Origin": "*",
+        "X-Powered-By": applicationName,
     })
-)
-app.use(function (_req, res, next) {
-    express.json()
-    res.header("Access-Control-Allow-Origin", "*")
-    res.header(
-        "Access-Control-Allow-Headers",
-        "Origin, X-Requested-With, Content-Type, Accept"
-    )
     next()
 })
 
 
-/**
- * Check validity of token-userid pair on every API call.
- */
+
+
+// token-userid pair validity-check
 app.use((req, res, next) => {
-
-    if (req.method === "OPTIONS") {
-        next()
-        return
+    if (
+        req.method !== "OPTIONS"  &&
+        !toBool(whiteList.find((path) => {
+            let re = new RegExp(path)
+            return re.test(req.originalUrl)
+        }))  &&
+        !helpers.tokenIsValid(req.body.token, req.body.user_id)
+    ) {
+        res.status(403)
+            .json({ error: "Forbidden" })
     }
-
-    if (whiteList.find((path) => {
-        let re = new RegExp(path)
-        return re.test(req.originalUrl)
-    })) {
-        next()
-    } else {
-        if (!helpers.tokenIsValid(req.body.token, req.body.user_id)) {
-            return res.status(403).json({
-                error: "Forbidden",
-            })
-        }
-        next()
-    }
-
+    next()
 })
 
 
+
+
+// routers
 ContactsRouter(app)
 UsersRouter(app)
 AccountRouter(app)
@@ -158,6 +164,7 @@ app.listen(
     port,
     // eslint-disable-next-line no-console
     () => console.info(
-        `[📠] deneb::${chalk.yellow(port)}`
+        `[📠] deneb::${chalk.yellow(port)}`,
+        `(${chalk.blueBright("v." + version)})`
     )
 )
