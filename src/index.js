@@ -40,7 +40,7 @@ const
 
 
 // ...
-let
+const
     app = express(),
     port = 4001
 
