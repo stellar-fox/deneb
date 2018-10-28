@@ -34,10 +34,9 @@ import {
 
 // CommonJS remainings...
 const
+    helpers = require("./lib/helpers"),
     GETAPI = require("./api/v1/get.js"),
     POSTAPI = require("./api/v1/post.js"),
-    helpers = require("./api/helpers"),
-
     ContactsRouter = require("./api/v2/contacts/router.js"),
     UsersRouter = require("./api/v2/users/router.js"),
     AccountRouter = require("./api/v2/account/router.js")

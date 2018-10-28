@@ -1,6 +1,6 @@
 const
     md5 = require("blueimp-md5"),
-    helpers = require("../../helpers"),
+    helpers = require("../../../lib/helpers"),
     toolbox = require("@xcmats/js-toolbox"),
     REQUESTED = 1,
     APPROVED = 2,

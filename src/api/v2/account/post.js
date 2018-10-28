@@ -1,4 +1,4 @@
-const helpers = require("../../helpers")
+const helpers = require("../../../lib/helpers")
 const stripe = require("stripe")(helpers.config.stripe.apiKey)
 const StellarSdk = require("stellar-sdk")
 const BigNumber = require("bignumber.js")

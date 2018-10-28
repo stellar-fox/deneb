@@ -1,6 +1,6 @@
 const
     bcrypt = require("bcrypt"),
-    helpers = require("../../helpers"),
+    helpers = require("../../../lib/helpers"),
     md5 = require("blueimp-md5")
 
 

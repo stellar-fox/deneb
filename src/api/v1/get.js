@@ -1,6 +1,6 @@
 const
-    helpers = require("../helpers.js"),
-    toolbox = require("@xcmats/js-toolbox")
+    helpers = require("../../lib/helpers"),
+    { array, timeUnit } = require("@xcmats/js-toolbox")
 
 
 
@@ -46,8 +46,8 @@ function latestCurrency (req, res, next) {
             }
             // data too stale - update
             if (
-                (new Date(toolbox.array.head(dbData).updated_at)).getTime() <
-                Date.now() - toolbox.timeUnit.minute
+                (new Date(array.head(dbData).updated_at)).getTime() <
+                Date.now() - timeUnit.minute
             ) {
                 return helpers
                     .fetchCMC(undefined, req.params.currency)
@@ -83,7 +83,7 @@ function latestCurrency (req, res, next) {
             // otherwise return stale data within 1 minute window
             res.status(200).json({
                 status: "success",
-                data: toolbox.array.head(dbData).data,
+                data: array.head(dbData).data,
             })
         })
         .catch((error) => {

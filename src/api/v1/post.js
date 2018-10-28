@@ -1,7 +1,7 @@
 // ...
 const
     bcrypt = require("bcrypt"),
-    helpers = require("../helpers.js"),
+    helpers = require("../../lib/helpers"),
     toolbox = require("@xcmats/js-toolbox")
 
 

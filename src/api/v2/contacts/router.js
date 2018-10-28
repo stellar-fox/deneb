@@ -1,6 +1,6 @@
 const
     POST = require("./post.js"),
-    helpers = require("../../helpers"),
+    helpers = require("../../../lib/helpers"),
     apiRoot = helpers.apiRoot
 
 
