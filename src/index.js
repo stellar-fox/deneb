@@ -20,6 +20,10 @@ import {
 } from "@xcmats/js-toolbox"
 import chalk from "chalk"
 import {
+    port,
+    whiteList,
+} from "./config/env"
+import {
     name as applicationName,
     version,
 } from "../package.json"
@@ -36,28 +40,13 @@ const
 
     ContactsRouter = require("./api/v2/contacts/router.js"),
     UsersRouter = require("./api/v2/users/router.js"),
-    AccountRouter = require("./api/v2/account/router.js"),
-    whiteList = [
-        "^/$",
-        "^/api/?$",
-        "^/api/v1/?$",
-        "^/api/v2/?$",
-        "^/api/v2/user/create/?$",
-        "^/api/v1/account/create/?$",
-        "^/favicon.ico/?$",
-        "^/api/v1/user/authenticate/?$",
-        "^/api/v1/ticker/latest/[a-z]{3}/?$",
-        "^/api/v1/user/ledgerauth/[A-Z0-9]{56}/[0-9]{1,}/?$",
-    ]
+    AccountRouter = require("./api/v2/account/router.js")
 
 
 
 
-// ...
-const
-    // http server
-    app = express(),
-    port = 4001
+// http server
+const app = express()
 
 
 
@@ -93,18 +82,28 @@ app.use((_req, res, next) => {
 
 // token-userid pair validity-check
 app.use((req, res, next) => {
+
+    // don't do anything ...
     if (
+        // ... if it's an `OPTIONS` request or ...
         req.method !== "OPTIONS"  &&
+
+        // ... if request URL points to whitelisted path or ...
         !toBool(whiteList.find((path) => {
             let re = new RegExp(path)
             return re.test(req.originalUrl)
         }))  &&
+
+        // ... if token is valid
         !helpers.tokenIsValid(req.body.token, req.body.user_id)
     ) {
+        // in other case prevent access
         res.status(403)
             .json({ error: "Forbidden" })
+    } else {
+        next()
     }
-    next()
+
 })
 
 
