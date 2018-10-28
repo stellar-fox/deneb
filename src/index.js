@@ -52,6 +52,7 @@ app.use(function (_req, res, next) {
     next()
 })
 
+
 /**
  * Check validity of token-userid pair on every API call.
  */
@@ -81,6 +82,8 @@ app.use((req, res, next) => {
 ContactsRouter(app)
 UsersRouter(app)
 AccountRouter(app)
+
+
 
 
 /*

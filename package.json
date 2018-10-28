@@ -44,7 +44,7 @@
         "stellar"
     ],
     "license": "Apache-2.0",
-    "main": "app.js",
+    "main": "src/index.js",
     "name": "deneb",
     "private": true,
     "repository": {
@@ -53,8 +53,8 @@
     },
     "scripts": {
         "clean:modules": "rimraf node_modules",
-        "lint": "eslint ./app.js ./api/",
-        "start": "node ./app.js",
+        "lint": "eslint ./src/",
+        "start": "node ./src/index.js",
         "test": "npm run lint  &&  echo \"Warning: no tests specified (yet)\""
     },
     "version": "0.1.1"

@@ -2,11 +2,13 @@
 const
     axios = require("axios"),
     bcrypt = require("bcrypt"),
-    config = require("../config.js"),
+    config = require("../config/config.js"),
     postgresp = require("pg-promise")({}),
-    toolbox = require("@xcmats/js-toolbox"),
+    { array } = require("@xcmats/js-toolbox"),
     firebase = require("firebase/app"),
     admin = require("firebase-admin")
+
+
 
 
 // add needed firebase modules
@@ -14,19 +16,24 @@ require("firebase/auth")
 
 
 
-const firebaseApp = firebase.initializeApp(config.attributes.firebase)
 
-const firebaseAdmin = admin.initializeApp({
-    credential: admin.credential.cert(config.attributes.admin),
-    databaseURL: config.attributes.firebaseDB,
-})
+// ...
+const
+    firebaseApp = firebase.initializeApp(config.attributes.firebase),
+    firebaseAdmin = admin.initializeApp({
+        credential: admin.credential.cert(config.attributes.admin),
+        databaseURL: config.attributes.firebaseDB,
+    })
 
 
 
 
 // ...
-let db = postgresp(config.attributes.connectionStr)
-let rtdb = admin.database()
+let
+    db = postgresp(config.attributes.connectionStr),
+    rtdb = admin.database()
+
+
 
 
 // ...
@@ -82,7 +89,7 @@ const fetchCMC = function (base="stellar", quot="eur") {
     return axios.get(`https://api.coinmarketcap.com/v1/ticker/${base}/?convert=${quot}`)
         .then((response) => {
             return {
-                data: toolbox.array.head(response.data),
+                data: array.head(response.data),
             }
         })
         .catch((error) => {
