@@ -54,6 +54,7 @@ export default function latestCurrency (sqlDatabase) {
                                         status: "success",
                                         data: response.data,
                                     })
+                                    next()
                                 })
                                 .catch((error) => {
                                     return next(error.message)
@@ -63,6 +64,7 @@ export default function latestCurrency (sqlDatabase) {
                             res.status(JSON.parse(error.message).status).json({
                                 statusText: JSON.parse(error.message).statusText,
                             })
+                            next()
                         })
                 }
                 // data too stale - update
@@ -83,6 +85,7 @@ export default function latestCurrency (sqlDatabase) {
                                         status: "success",
                                         data: response.data,
                                     })
+                                    next()
                                 })
                                 .catch((error) => {
                                     return next(error.message)
@@ -92,6 +95,7 @@ export default function latestCurrency (sqlDatabase) {
                             res.status(JSON.parse(error.message).status).json({
                                 statusText: JSON.parse(error.message).statusText,
                             })
+                            next()
                         })
                 }
                 // otherwise return stale data within 1 minute window
@@ -99,6 +103,7 @@ export default function latestCurrency (sqlDatabase) {
                     status: "success",
                     data: array.head(dbData).data,
                 })
+                next()
             })
             .catch((error) => {
                 return next(error.message)
