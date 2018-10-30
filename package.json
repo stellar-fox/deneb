@@ -80,7 +80,7 @@
     ],
     "license": "Apache-2.0",
     "main": "dist/deneb.js",
-    "name": "deneb",
+    "name": "@stellar-fox/deneb",
     "private": true,
     "repository": {
         "type": "git",

@@ -93,7 +93,7 @@ app.use((_req, res, next) => {
         "Access-Control-Allow-Headers":
             "Origin, X-Requested-With, Content-Type, Accept",
         "Access-Control-Allow-Origin": "*",
-        "X-Powered-By": applicationName,
+        "X-Powered-By": `${applicationName}/${version}`,
     })
     next()
 })
