@@ -68,7 +68,24 @@ module.exports = {
                 use: ["babel-loader"],
                 sideEffects: false,
             },
+            {
+                test: /\.sql$/,
+                use: [
+                    {
+                        loader: "file-loader",
+                        options: {
+                            name: "[hash].[ext]",
+                        },
+                    },
+                ],
+            },
         ],
+    },
+
+
+    node: {
+        __dirname: false,
+        __filename: false,
     },
 
 

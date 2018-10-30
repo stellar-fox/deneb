@@ -27,19 +27,19 @@ var
 
     // ES environment config
     esEnv = {
-        comments: false,
-        plugins: commonPlugins,
         presets: [
             [
                 "@babel/preset-env",
                 {
                     modules: false,
                     shippedProposals: true,
-                    forceAllTransforms: true
-                }
-            ]
-        ]
-    };
+                    forceAllTransforms: true,
+                },
+            ],
+        ],
+        plugins: commonPlugins,
+        comments: false,
+    }
 
 
 
@@ -47,7 +47,7 @@ var
 // configuration
 module.exports = function (api) {
     api.cache.using(() => process.env.BABEL_ENV);
-    console.log("Compiling for", "'" + api.env() + "'", "...");
+    console.log("Compiling for", "'" + api.env() + "'", "...")
 
     return {
 
@@ -58,21 +58,33 @@ module.exports = function (api) {
 
             // deneb environment for devApiServer
             development: {
-                comments: false,
-                plugins: commonPlugins.concat([
-                    "@babel/plugin-transform-modules-commonjs"
-                ]),
                 presets: [
                     [
                         "@babel/preset-env",
                         {
                             modules: "commonjs",
-                            shippedProposals: true
-                        }
-                    ]
-                ]
-            }
-        }
+                            shippedProposals: true,
+                        },
+                    ],
+                ],
+                plugins: commonPlugins.concat([
+                    "@babel/plugin-transform-modules-commonjs",
+                    [
+                        "file-loader",
+                        {
+                            "name": "[name].[ext]",
+                            "extensions": ["sql"],
+                            "publicPath": "./",
+                            "outputPath": null,
+                            "context": "",
+                            "limit": 0,
+                        },
+                    ],
+                ]),
+                comments: false,
+            },
 
-    };
-};
+        },
+
+    }
+}

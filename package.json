@@ -61,8 +61,10 @@
         "babel-eslint": "^10.0.1",
         "babel-loader": "^8.0.4",
         "babel-minify-webpack-plugin": "^0.3.1",
+        "babel-plugin-file-loader": "^1.1.1",
         "cross-env": "^5.2.0",
         "eslint": "^5.8.0",
+        "file-loader": "^2.0.0",
         "jsdoc": "^3.5.5",
         "minami": "^1.2.3",
         "nodemon": "^1.18.5",
@@ -96,7 +98,7 @@
         "jsdoc": "npm run clean:jsdoc && npm run build:jsdoc",
         "lint": "eslint ./src/",
         "production": "node ./dist/deneb.js",
-        "start": "nodemon --watch ./src/ ./src/index.js --exec \"cross-env BABEL_ENV=development babel-node\"",
+        "start": "nodemon -e js,sql --watch ./src/ ./src/index.js --exec \"cross-env BABEL_ENV=development babel-node\"",
         "test": "npm run lint  &&  echo \"Warning: no tests specified (yet)\""
     },
     "version": "0.2.0"
