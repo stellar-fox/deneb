@@ -14,7 +14,8 @@ import bcrypt from "bcrypt"
 import { array } from "@xcmats/js-toolbox"
 import { getApiKey } from "../../../lib/helpers"
 import { sql } from "../../../lib/utils"
-import authenticateSQL from "./authenticate.sql"
+import getUserByEmailSQL from "./get_user_by_email.sql"
+import getPubkeySQL from "./get_pubkey.sql"
 import { saltRounds } from "../../../config/env"
 
 
@@ -29,10 +30,10 @@ import { saltRounds } from "../../../config/env"
  */
 export default function authenticate (sqlDatabase) {
 
-    return async (req, res, next) => {
+    return (req, res, next) => {
 
         sqlDatabase
-            .any(sql(__dirname, authenticateSQL), {
+            .any(sql(__dirname, getUserByEmailSQL), {
                 email: req.body.email,
             })
             .then((dbData) => {
@@ -45,10 +46,7 @@ export default function authenticate (sqlDatabase) {
                             if (auth) {
                                 sqlDatabase
                                     .one(
-                                        "SELECT pubkey, path " +
-                                        "FROM accounts " +
-                                        "WHERE user_id = ${user_id}",
-                                        {
+                                        sql(__dirname, getPubkeySQL), {
                                             user_id: array.head(dbData).id,
                                         }
                                     )
