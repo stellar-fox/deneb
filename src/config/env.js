@@ -49,3 +49,11 @@ export const apiRootV1 = "/api/v1/"
  * @constant apiRootV2 Version 2 API path prefix.
  */
 export const apiRootV2 = "/api/v2/"
+
+
+
+
+/**
+ * @constant saltRounds global bcrypt-specific setting
+ */
+export const saltRounds = 10

@@ -11,6 +11,11 @@
 
 
 import { apiRootV1 } from "../../config/env"
+
+// new-school
+import authenticate from "./actions/authenticate"
+
+// old-style "bulk" imports
 import getApiV1Actions from "./get"
 import postApiV1Actions from "./post"
 
@@ -47,6 +52,13 @@ export const postApiV1Routes = (app, db) => {
 
     const POST = postApiV1Actions(db)
 
+    // new-school
+    app.post(
+        `${apiRootV1}user/authenticate/`,
+        authenticate(db)
+    )
+
+    // old-style
     app.post(
         `${apiRootV1}account/update/`,
         POST.updateAccount
@@ -106,10 +118,6 @@ export const postApiV1Routes = (app, db) => {
     app.post(
         `${apiRootV1}user/create/`,
         POST.createUser
-    )
-    app.post(
-        `${apiRootV1}user/authenticate/`,
-        POST.authenticate
     )
     app.post(
         `${apiRootV1}user/ledgerauth/:pubkey/:path/`,

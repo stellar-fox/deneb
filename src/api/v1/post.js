@@ -10,15 +10,16 @@
 
 
 
-import {
-    errorMessageToRetCode,
-    getApiKey,
-} from "../../lib/helpers"
+import bcrypt from "bcrypt"
 import {
     array,
     string,
 } from "@xcmats/js-toolbox"
-import bcrypt from "bcrypt"
+import {
+    errorMessageToRetCode,
+    getApiKey,
+} from "../../lib/helpers"
+import { saltRounds } from "../../config/env"
 
 
 
@@ -29,12 +30,6 @@ import bcrypt from "bcrypt"
  * @param {Object} sqlDatabase
  */
 export default function postApiV1Actions (sqlDatabase) {
-
-    // ...
-    const saltRounds = 10
-
-
-
 
     // ...
     const createUser = (req, res, _) => {
@@ -889,86 +884,6 @@ export default function postApiV1Actions (sqlDatabase) {
 
 
     // ...
-    const authenticate = (req, res, next) => {
-        sqlDatabase
-            .any("SELECT * FROM users WHERE email = ${email}", {
-                email: req.body.email,
-            })
-            .then((dbData) => {
-                // user found
-                if (dbData.length === 1) {
-                    bcrypt.compare(
-                        req.body.password,
-                        array.head(dbData).password_digest,
-                        (_err, auth) => {
-                            if (auth) {
-                                sqlDatabase
-                                    .one(
-                                        "SELECT pubkey, path " +
-                                        "FROM accounts " +
-                                        "WHERE user_id = ${user_id}",
-                                        {
-                                            user_id: array.head(dbData).id,
-                                        }
-                                    )
-                                    .then((dbAccount) => {
-                                        bcrypt.hash(
-                                            `${getApiKey()}${array.head(dbData).id}`,
-                                            saltRounds,
-                                            (_error, hash) => {
-                                                // authenticated
-                                                res.status(200).json({
-                                                    authenticated: true,
-                                                    user_id: array.head(dbData).id,
-                                                    pubkey: dbAccount.pubkey,
-                                                    bip32Path: dbAccount.path,
-                                                    token: Buffer.from(
-                                                        hash
-                                                    ).toString("base64"),
-                                                })
-                                            }
-                                        )
-                                    })
-                                    .catch((error) => {
-                                        // eslint-disable-next-line no-console
-                                        console.log(next(error.message))
-                                    })
-                            } else {
-                                // not authenticated
-                                res.status(401).json({
-                                    authenticated: false,
-                                    user_id: null,
-                                    pubkey: null,
-                                    bip32Path: null,
-                                    error: "Invalid credentials.",
-                                })
-                            }
-                        }
-                    )
-                } else {
-                    // user not found in DB
-                    res.status(401).json({
-                        authenticated: false,
-                        user_id: null,
-                        pubkey: null,
-                        bip32Path: null,
-                        error: "Invalid credentials.",
-                    })
-                }
-            })
-            .catch((error) => {
-                // eslint-disable-next-line no-console
-                console.log(error)
-                res.status(500).json({
-                    error: error.message,
-                })
-            })
-    }
-
-
-
-
-    // ...
     const contacts = (req, res, next) => {
 
         sqlDatabase
@@ -1058,7 +973,6 @@ export default function postApiV1Actions (sqlDatabase) {
 
     return {
         updateUser,
-        authenticate,
         createAccount,
         updateAccount,
         createUser,

@@ -155,9 +155,9 @@ postApiV1Routes(app, db)
 
 
 // API v2 routes
+accountRoutes(app, db, rtdb)
 contactsRoutes(app, db)
 usersRoutes(app, db, firebaseAdmin, firebaseApp)
-accountRoutes(app, db, rtdb)
 
 
 
