@@ -20,7 +20,7 @@ import {
     toBool,
 } from "@xcmats/js-toolbox"
 import chalk from "chalk"
-import firebaseLib from "firebase/app"
+import firebaseLib from "firebase"
 import firebaseAdminLib, {
     credential,
     database as realTimeDatabase,
@@ -40,8 +40,6 @@ import {
     name as applicationName,
     version,
 } from "../package.json"
-
-import "firebase/auth"
 
 import configureApiV1Routes from "./api/v1/routes"
 import contactsRoutes from "./api/v2/contacts/routes"
