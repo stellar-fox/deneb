@@ -14,6 +14,7 @@ import { apiRootV1 } from "../../config/env"
 
 // new-school
 import authenticate from "./actions/authenticate"
+import createAccount from "./actions/create_account"
 import latestCurrency from "./actions/latest_currency"
 
 // old-style "bulk" imports
@@ -43,6 +44,10 @@ export default function configureApiV1Routes (app, db) {
         `${apiRootV1}ticker/latest/:currency/`,
         latestCurrency(db)
     )
+    app.post(
+        `${apiRootV1}account/create/`,
+        createAccount(db)
+    ),
 
 
 
@@ -50,10 +55,6 @@ export default function configureApiV1Routes (app, db) {
     app.post(
         `${apiRootV1}account/update/`,
         POST.updateAccount
-    )
-    app.post(
-        `${apiRootV1}account/create/`,
-        POST.createAccount
     )
     app.post(
         `${apiRootV1}contacts/`,
