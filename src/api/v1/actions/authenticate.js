@@ -67,6 +67,7 @@ export default function authenticate (sqlDatabase) {
                                                         hash
                                                     ).toString("base64"),
                                                 })
+                                                next()
                                             }
                                         )
                                     })
@@ -83,6 +84,7 @@ export default function authenticate (sqlDatabase) {
                                     bip32Path: null,
                                     error: "Invalid credentials.",
                                 })
+                                next()
                             }
                         }
                     )
@@ -95,6 +97,7 @@ export default function authenticate (sqlDatabase) {
                         bip32Path: null,
                         error: "Invalid credentials.",
                     })
+                    next()
                 }
             })
             .catch((error) => {
@@ -103,6 +106,7 @@ export default function authenticate (sqlDatabase) {
                 res.status(500).json({
                     error: error.message,
                 })
+                next()
             })
 
     }
