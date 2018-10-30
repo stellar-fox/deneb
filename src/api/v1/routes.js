@@ -14,9 +14,9 @@ import { apiRootV1 } from "../../config/env"
 
 // new-school
 import authenticate from "./actions/authenticate"
+import latestCurrency from "./actions/latest_currency"
 
 // old-style "bulk" imports
-import getApiV1Actions from "./get"
 import postApiV1Actions from "./post"
 
 
@@ -31,9 +31,7 @@ import postApiV1Actions from "./post"
  */
 export default function configureApiV1Routes (app, db) {
 
-    const
-        GET = getApiV1Actions(db),
-        POST = postApiV1Actions(db)
+    const POST = postApiV1Actions(db)
 
 
     // new-school
@@ -41,13 +39,14 @@ export default function configureApiV1Routes (app, db) {
         `${apiRootV1}user/authenticate/`,
         authenticate(db)
     )
+    app.get(
+        `${apiRootV1}ticker/latest/:currency/`,
+        latestCurrency(db)
+    )
+
 
 
     // old-style
-    app.get(
-        `${apiRootV1}ticker/latest/:currency/`,
-        GET.latestCurrency
-    )
     app.post(
         `${apiRootV1}account/update/`,
         POST.updateAccount

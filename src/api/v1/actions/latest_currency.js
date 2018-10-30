@@ -1,9 +1,9 @@
 /**
  * Deneb.
  *
- * REST API (v1) - GET.
+ * 'Latest currency' action.
  *
- * @module api-v1-actions-get
+ * @module actions
  * @license Apache-2.0
  */
 
@@ -14,7 +14,11 @@ import {
     array,
     timeUnit,
 } from "@xcmats/js-toolbox"
-import { fetchCMC } from "../../lib/helpers"
+import { fetchCMC } from "../../../lib/helpers"
+import { sql } from "../../../lib/utils"
+import getExchangeRateSQL from "./get_exchange_rate.sql"
+import setExchangeRateSQL from "./set_exchange_rate.sql"
+import updateExchangeRateSQL from "./update_exchange_rate.sql"
 
 
 
@@ -22,14 +26,16 @@ import { fetchCMC } from "../../lib/helpers"
 /**
  * ...
  *
- * @param {Object} sqlDatabase
+ * @function latestCurrency
+ * @param {Object} sqlDatabase Database connection.
+ * @returns {Function} express.js action.
  */
-export default function getApiV1Actions (sqlDatabase) {
+export default function latestCurrency (sqlDatabase) {
 
-    // ...
-    const latestCurrency = (req, res, next) => {
+    return (req, res, next) => {
+
         sqlDatabase
-            .any("SELECT * FROM ticker WHERE currency = ${currency}", {
+            .any(sql(__dirname, getExchangeRateSQL), {
                 currency: req.params.currency,
             })
             .then((dbData) => {
@@ -38,16 +44,11 @@ export default function getApiV1Actions (sqlDatabase) {
                     return fetchCMC(undefined, req.params.currency)
                         .then((response) => {
                             sqlDatabase
-                                .none(
-                                    "INSERT INTO " +
-                                        "ticker(currency, data, updated_at) " +
-                                        "VALUES(${currency}, ${data}, ${updated_at})",
-                                    {
-                                        currency: req.params.currency,
-                                        data: response.data,
-                                        updated_at: new Date(),
-                                    }
-                                )
+                                .none(sql(__dirname, setExchangeRateSQL), {
+                                    currency: req.params.currency,
+                                    data: response.data,
+                                    updated_at: new Date(),
+                                })
                                 .then((_result) => {
                                     res.status(200).json({
                                         status: "success",
@@ -72,17 +73,11 @@ export default function getApiV1Actions (sqlDatabase) {
                     return fetchCMC(undefined, req.params.currency)
                         .then((response) => {
                             sqlDatabase
-                                .none(
-                                    "UPDATE ticker SET " +
-                                        "data = $1, " +
-                                        "updated_at = $2 " +
-                                    "WHERE currency = $3",
-                                    [
-                                        response.data,
-                                        new Date(),
-                                        req.params.currency,
-                                    ]
-                                )
+                                .none(sql(__dirname, updateExchangeRateSQL), {
+                                    data: response.data,
+                                    updated_at: new Date(),
+                                    currency: req.params.currency,
+                                })
                                 .then((_result) => {
                                     res.status(200).json({
                                         status: "success",
@@ -108,13 +103,7 @@ export default function getApiV1Actions (sqlDatabase) {
             .catch((error) => {
                 return next(error.message)
             })
-    }
 
-
-
-
-    return {
-        latestCurrency,
     }
 
 }
