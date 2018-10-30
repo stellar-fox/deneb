@@ -1,7 +1,7 @@
 /**
  * Deneb.
  *
- * Various helper functions.
+ * App-specific helper functions.
  *
  * @module helpers
  * @license Apache-2.0
@@ -45,15 +45,14 @@ export const errorMessageToRetCode = (message) => {
  * ...
  *
  * @async
+ * @function fetchCMC
  * @param {*} base
  * @param {*} quot
  */
 export const fetchCMC = (base = "stellar", quot = "eur") =>
     axios.get(`https://api.coinmarketcap.com/v1/ticker/${base}/?convert=${quot}`)
         .then((response) => {
-            return {
-                data: array.head(response.data),
-            }
+            return { data: array.head(response.data) }
         })
         .catch((error) => {
             throw new Error(JSON.stringify({
@@ -67,6 +66,8 @@ export const fetchCMC = (base = "stellar", quot = "eur") =>
 
 /**
  * ...
+ *
+ * @function getApiKey
  */
 export const getApiKey = () => apiKey
 
@@ -76,6 +77,7 @@ export const getApiKey = () => apiKey
 /**
  * ...
  *
+ * @function tokenIsValid
  * @param {*} token
  * @param {*} userId
  */
