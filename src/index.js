@@ -43,10 +43,7 @@ import {
 
 import "firebase/auth"
 
-import {
-    getApiV1Routes,
-    postApiV1Routes,
-} from "./api/v1/routes"
+import configureApiV1Routes from "./api/v1/routes"
 import contactsRoutes from "./api/v2/contacts/routes"
 import usersRoutes from "./api/v2/users/routes"
 import accountRoutes from "./api/v2/account/routes"
@@ -148,8 +145,7 @@ app.get("/api/v2/", (_req, res) =>
 
 
 // API v1 routes
-getApiV1Routes(app, db)
-postApiV1Routes(app, db)
+configureApiV1Routes(app, db)
 
 
 

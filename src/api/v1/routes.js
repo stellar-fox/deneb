@@ -23,34 +23,18 @@ import postApiV1Actions from "./post"
 
 
 /**
- * ...
+ * Deneb API (v1) configuration.
  *
+ * @function configureApiV1Routes
  * @param {Object} app
  * @param {Object} db
  */
-export const getApiV1Routes = (app, db) => {
+export default function configureApiV1Routes (app, db) {
 
-    const GET = getApiV1Actions(db)
+    const
+        GET = getApiV1Actions(db),
+        POST = postApiV1Actions(db)
 
-    app.get(
-        `${apiRootV1}ticker/latest/:currency/`,
-        GET.latestCurrency
-    )
-
-}
-
-
-
-
-/**
- * ...
- *
- * @param {Object} app
- * @param {Object} db
- */
-export const postApiV1Routes = (app, db) => {
-
-    const POST = postApiV1Actions(db)
 
     // new-school
     app.post(
@@ -58,7 +42,12 @@ export const postApiV1Routes = (app, db) => {
         authenticate(db)
     )
 
+
     // old-style
+    app.get(
+        `${apiRootV1}ticker/latest/:currency/`,
+        GET.latestCurrency
+    )
     app.post(
         `${apiRootV1}account/update/`,
         POST.updateAccount
