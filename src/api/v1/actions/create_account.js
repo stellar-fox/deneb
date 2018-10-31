@@ -12,7 +12,7 @@
 
 import { errorMessageToRetCode } from "../../../lib/helpers"
 import { sql } from "../../../lib/utils"
-import CreateAccountSQL from "./create_account.sql"
+import createAccountSQL from "./create_account.sql"
 
 
 
@@ -27,19 +27,19 @@ import CreateAccountSQL from "./create_account.sql"
 export default function createAccount (sqlDatabase) {
 
     return (req, res, next) => {
+
         let now = new Date()
-        sqlDatabase.one(sql(__dirname, CreateAccountSQL),
-            {
-                pubkey: req.body.pubkey,
-                alias: null,
-                path: req.body.path,
-                user_id: req.body.user_id,
-                visible: true,
-                created_at: now,
-                updated_at: now,
-                email_md5: req.body.email_md5,
-            }
-        ).then((result) => {
+
+        sqlDatabase.one(sql(__dirname, createAccountSQL), {
+            pubkey: req.body.pubkey,
+            alias: null,
+            path: req.body.path,
+            user_id: req.body.user_id,
+            visible: true,
+            created_at: now,
+            updated_at: now,
+            email_md5: req.body.email_md5,
+        }).then((result) => {
             res.status(201).json({
                 success: true,
                 account_id: result.id,
@@ -54,6 +54,7 @@ export default function createAccount (sqlDatabase) {
             })
             next()
         })
+
     }
 
 }
