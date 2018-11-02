@@ -11,18 +11,13 @@
 
 
 import { apiRootV1 } from "../../config/env"
-
-// new-school
 import authenticate from "./actions/authenticate"
 import createAccount from "./actions/create_account"
 import issueToken from "./actions/issue_token"
 import latestCurrency from "./actions/latest_currency"
 import addFederatedContact from "./actions/add_federated_contact"
 import updateAccount from "./actions/update_account"
-
-
-// old-style "bulk" imports
-import postApiV1Actions from "./post"
+import userData from "./actions/user_data"
 
 
 
@@ -36,10 +31,11 @@ import postApiV1Actions from "./post"
  */
 export default function configureApiV1Routes (app, db) {
 
-    const POST = postApiV1Actions(db)
-
-
     // user (v1)
+    app.post(
+        `${apiRootV1}user/`,
+        userData(db)
+    )
     app.post(
         `${apiRootV1}user/authenticate/`,
         authenticate(db)
@@ -69,22 +65,6 @@ export default function configureApiV1Routes (app, db) {
     app.post(
         `${apiRootV1}contact/addext/`,
         addFederatedContact(db)
-    )
-
-
-
-    // old school
-    app.post(
-        `${apiRootV1}user/`,
-        POST.userData
-    )
-    app.post(
-        `${apiRootV1}user/update/`,
-        POST.updateUser
-    )
-    app.post(
-        `${apiRootV1}user/create/`,
-        POST.createUser
     )
 
 }
