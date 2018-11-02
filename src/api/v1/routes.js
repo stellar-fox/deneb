@@ -16,7 +16,9 @@ import { apiRootV1 } from "../../config/env"
 import authenticate from "./actions/authenticate"
 import createAccount from "./actions/create_account"
 import latestCurrency from "./actions/latest_currency"
+import addFederatedContact from "./actions/add_federated_contact"
 import updateAccount from "./actions/update_account"
+
 
 // old-style "bulk" imports
 import postApiV1Actions from "./post"
@@ -36,7 +38,7 @@ export default function configureApiV1Routes (app, db) {
     const POST = postApiV1Actions(db)
 
 
-    // new-school
+    // new school
     app.post(
         `${apiRootV1}user/authenticate/`,
         authenticate(db)
@@ -53,50 +55,16 @@ export default function configureApiV1Routes (app, db) {
         `${apiRootV1}account/update/`,
         updateAccount(db)
     ),
-
-
-
-    // old-style
-    app.post(
-        `${apiRootV1}contacts/`,
-        POST.contacts
-    )
-    app.post(
-        `${apiRootV1}contacts/external/`,
-        POST.externalContacts
-    )
-    app.post(
-        `${apiRootV1}contact/update/`,
-        POST.updateContact
-    )
-    app.post(
-        `${apiRootV1}contact/delete/`,
-        POST.deleteContact
-    )
-    app.post(
-        `${apiRootV1}contact/extupdate/`,
-        POST.updateExtContact
-    )
-    app.post(
-        `${apiRootV1}contact/extdelete/`,
-        POST.deleteExtContact
-    )
-    app.post(
-        `${apiRootV1}contact/request/`,
-        POST.requestContact
-    )
-    app.post(
-        `${apiRootV1}contact/reqbyacct/`,
-        POST.requestContactByAccountNumber
-    )
-    app.post(
-        `${apiRootV1}contact/reqlist/`,
-        POST.contactReqlist
-    )
     app.post(
         `${apiRootV1}contact/addext/`,
-        POST.addExtContact
-    )
+        addFederatedContact(db)
+    ),
+
+    // old school
+    // app.post(
+    //     `${apiRootV1}contact/addext/`,
+    //     POST.addExtContact
+    // )
     app.post(
         `${apiRootV1}user/`,
         POST.userData
