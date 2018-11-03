@@ -13,7 +13,7 @@
 import { apiRootV2 } from "../../../config/env"
 import accountActions from "./post"
 
-
+import implodeAccount from "./actions/implode_account"
 
 
 /**
@@ -27,10 +27,14 @@ export default function accountRoutes (app, db, rtdb) {
 
     const POST = accountActions(db, rtdb)
 
+    // new-school
     app.post(
         `${apiRootV2}account/implode/`,
-        POST.implode
+        implodeAccount(db)
     )
+
+
+    // old-school
     app.post(
         `${apiRootV2}account/fund/`,
         POST.fund
