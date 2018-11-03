@@ -5,5 +5,6 @@
 
 SELECT user_id
 FROM accounts
-WHERE pubkey = $<pubkey>
-AND path = $<path>;
+WHERE
+    pubkey = $<pubkey> AND
+    path = $<path>;

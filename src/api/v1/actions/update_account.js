@@ -9,6 +9,7 @@
 
 
 
+
 import { string } from "@xcmats/js-toolbox"
 import { sql } from "../../../lib/utils"
 import updateCurrencyPrecisionSQL from "./update_currency_precision.sql"
