@@ -34,7 +34,7 @@ export default function accountRoutes (app, db, rtdb) {
     )
 
 
-    // old-school
+    // old-school but ok for now
     app.post(
         `${apiRootV2}account/fund/`,
         POST.fund

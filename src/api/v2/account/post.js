@@ -28,41 +28,10 @@ import {
  * @param {Object} sqlDatabase
  * @param {Object} rtdb
  */
-export default function accountActions (sqlDatabase, rtdb) {
+export default function accountActions (rtdb) {
 
     // ...
     const stripe = new Stripe(stripeConfig.apiKey)
-
-
-
-
-    // ...
-    const implode = async (req, res, next) => {
-
-        try {
-            sqlDatabase.tx((t) => {
-                t.none(
-                    "DELETE FROM contacts WHERE contact_id = $1 OR requested_by = $1",
-                    [req.body.user_id]
-                )
-                t.none(
-                    "DELETE FROM ext_contacts WHERE added_by = $1",
-                    [req.body.user_id]
-                )
-                t.none(
-                    "DELETE FROM accounts WHERE user_id = $1",
-                    [req.body.user_id]
-                )
-                t.none("DELETE FROM users where id = $1", [req.body.user_id])
-            })
-
-            res.status(204).send()
-        } catch (error) {
-            next(error.message)
-        }
-    }
-
-
 
 
     // ...
@@ -171,7 +140,6 @@ export default function accountActions (sqlDatabase, rtdb) {
 
     return {
         fund,
-        implode,
         resubmitFund,
     }
 
