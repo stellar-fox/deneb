@@ -21,8 +21,8 @@ import deleteUser from "./delete_user.sql"
 /**
  * ...
  *
- * @function addFederatedContact
- * @param {Object} implodeAccount Database connection.
+ * @function implodeAccount
+ * @param {Object} sqlDatabase Database connection.
  * @returns {Function} express.js action.
  */
 export default function implodeAccount (sqlDatabase) {
