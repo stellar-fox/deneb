@@ -11,7 +11,6 @@
 
 
 import axios from "axios"
-import bcrypt from "bcrypt"
 import md5 from "blueimp-md5"
 import {
     mailchimp as mailchimpConfig,
@@ -27,61 +26,7 @@ import {
  * @param {Object} firebaseAdmin
  * @param {Object} firebaseApp
  */
-export default function usersActions (
-    sqlDatabase,
-    firebaseAdmin,
-    firebaseApp
-) {
-
-    // ...
-    const create = async (req, res, _next) => {
-
-        const now = new Date()
-        try {
-            const uid = (
-                await firebaseAdmin.auth()
-                    .verifyIdToken(req.body.token)
-            ).uid
-
-            await firebaseApp.auth().signInWithEmailAndPassword(
-                req.body.email, req.body.password,
-            )
-
-            if (uid !== firebaseApp.auth().currentUser.uid) {
-                return res.status(403).json({ error: "Forbidden." })
-            }
-
-            const userAlreadyExists = await sqlDatabase.oneOrNone(
-                "SELECT uid FROM users WHERE uid = ${uid}", {
-                    uid: firebaseApp.auth().currentUser.uid,
-                }
-            )
-
-            if (!userAlreadyExists) {
-                const password_digest = await bcrypt.hash(req.body.password, 10)
-                const userCreateResp = await sqlDatabase.one(
-                    "INSERT INTO users(email, uid, password_digest, created_at, \
-                    updated_at) VALUES(${email}, ${uid}, ${password_digest}, \
-                    ${created_at}, ${updated_at}) RETURNING id",
-                    {
-                        email: req.body.email,
-                        uid: firebaseApp.auth().currentUser.uid,
-                        password_digest,
-                        created_at: now,
-                        updated_at: now,
-                    }
-                )
-
-                return res.status(201).json({ userid: userCreateResp.id })
-            }
-            return res.status(204).send()
-        } catch (error) {
-            return res.status(401).send()
-        }
-    }
-
-
-
+export default function usersActions () {
 
     // ...
     const subscribeEmail = async (req, res, _next) => {
@@ -177,7 +122,6 @@ export default function usersActions (
 
 
     return {
-        create,
         subscribeEmail,
         unsubscribeEmail,
     }

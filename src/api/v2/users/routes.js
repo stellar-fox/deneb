@@ -13,6 +13,7 @@
 import { apiRootV2 } from "../../../config/env"
 import usersActions from "./post"
 
+import createUser from "./actions/create_user"
 
 
 
@@ -33,7 +34,7 @@ export default function usersRoutes (
     // internal
     app.post(
         `${apiRootV2}user/create/`,
-        POST.create
+        createUser(db, firebaseAdmin, firebaseApp)
     )
     app.post(
         `${apiRootV2}user/subscribe-email/`,
