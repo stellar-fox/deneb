@@ -90,55 +90,12 @@ export default function contactsActions (sqlDatabase) {
 
 
     // ...
-    const listInternal = (req, res, next) => {
-        sqlDatabase.any(
-            `SELECT contacts.contact_id, contacts.status, contacts.created_at, \
-            contacts.updated_at, COALESCE(users.first_name, '') AS first_name, \
-            COALESCE(users.last_name, '') AS last_name, users.email, \
-            accounts.pubkey, COALESCE(accounts.alias, '') AS alias, \
-            COALESCE(accounts.domain, '') AS domain, accounts.currency, \
-            accounts.precision, accounts.email_md5, accounts.memo_type, \
-            accounts.memo FROM contacts INNER JOIN users ON \
-            users.id = contacts.contact_id INNER JOIN accounts ON \
-            users.id = accounts.user_id WHERE contacts.status = ${APPROVED} AND \
-            contacts.requested_by = $1`,
-            [ req.body.user_id ])
-            .then((results) => res.status(200).send(results))
-            .catch((error) => next(error.message))
-    }
-
-
-
-
-    // ...
     const listFederated = (req, res, next) => {
         sqlDatabase.any(
             `SELECT id, pubkey, alias, domain, currency, memo_type, \
             memo, email_md5, first_name, last_name FROM ext_contacts \
             WHERE status = ${APPROVED} AND ext_contacts.added_by = $1`,
             [ req.body.user_id ])
-            .then((results) => res.status(200).send(results))
-            .catch((error) => next(error.message))
-    }
-
-
-
-
-    // ...
-    const listRequested = (req, res, next) => {
-        sqlDatabase.any(
-            "SELECT contacts.contact_id, contacts.requested_by, \
-            contacts.created_at, contacts.status, accounts.alias, accounts.domain, \
-            accounts.pubkey, accounts.email_md5, \
-            users.first_name, users.last_name \
-            FROM contacts INNER JOIN accounts \
-            ON contacts.requested_by = accounts.user_id \
-            INNER JOIN users ON contacts.requested_by = users.id \
-            WHERE contacts.contact_id = $1 \
-            AND contacts.status IN ($2:csv)", [
-                req.body.user_id,
-                [ REQUESTED ],
-            ])
             .then((results) => res.status(200).send(results))
             .catch((error) => next(error.message))
     }
@@ -709,9 +666,7 @@ export default function contactsActions (sqlDatabase) {
     return {
         approveInternal,
         listFederated,
-        listInternal,
         listPending,
-        listRequested,
         rejectInternal,
         removeFederated,
         removeInternal,
