@@ -2,7 +2,6 @@
 
 
 -- List internal contacts with status code "APPROVED"
-
 SELECT
     COALESCE(users.first_name, '') AS first_name,
     COALESCE(users.last_name, '') AS last_name,
@@ -20,7 +19,8 @@ SELECT
     contacts.updated_at,
     users.email
 FROM contacts
-INNER JOIN users ON users.id = contacts.contact_id
-INNER JOIN accounts ON users.id = accounts.user_id
-WHERE contacts.status = $<approved>
-AND contacts.requested_by = $<user_id>;
+    INNER JOIN users ON users.id = contacts.contact_id
+    INNER JOIN accounts ON users.id = accounts.user_id
+WHERE
+    contacts.status = $<approved> AND
+    contacts.requested_by = $<user_id>;

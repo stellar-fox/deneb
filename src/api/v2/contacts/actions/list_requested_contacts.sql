@@ -2,7 +2,6 @@
 
 
 -- List internal contacts with status code "REQUESTED"
-
 SELECT
     contacts.contact_id,
     contacts.requested_by,
@@ -15,7 +14,8 @@ SELECT
     users.first_name,
     users.last_name
 FROM contacts
-INNER JOIN accounts ON contacts.requested_by = accounts.user_id
-INNER JOIN users ON contacts.requested_by = users.id
-WHERE contacts.contact_id = $<user_id>
-AND contacts.status IN ($<requested>);
+    INNER JOIN accounts ON contacts.requested_by = accounts.user_id
+    INNER JOIN users ON contacts.requested_by = users.id
+WHERE
+    contacts.contact_id = $<user_id> AND
+    contacts.status IN ($<requested>);

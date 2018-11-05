@@ -9,9 +9,11 @@
 
 
 
+
 import { contactStatusCodes } from "../../../../lib/helpers"
 import { sql } from "../../../../lib/utils"
 import listApprovedContactsSQL from "./list_approved_contacts.sql"
+
 
 
 
@@ -26,13 +28,14 @@ export default function listInternal (sqlDatabase) {
 
     return (req, res, next) => {
 
-        sqlDatabase.any(
-            sql(__dirname, listApprovedContactsSQL),
-            {
-                user_id: req.body.user_id,
-                approved: contactStatusCodes.APPROVED,
-            }
-        )
+        sqlDatabase
+            .any(
+                sql(__dirname, listApprovedContactsSQL),
+                {
+                    user_id: req.body.user_id,
+                    approved: contactStatusCodes.APPROVED,
+                }
+            )
             .then((results) => {
                 res.status(200).send(results)
                 next()

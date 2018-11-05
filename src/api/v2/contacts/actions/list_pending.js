@@ -16,6 +16,7 @@ import listPendingContactsSQL from "./list_pending_contacts.sql"
 
 
 
+
 /**
  * ...
  *
@@ -26,14 +27,15 @@ import listPendingContactsSQL from "./list_pending_contacts.sql"
 export default function listPending (sqlDatabase) {
 
     return (req, res, next) => {
-        sqlDatabase.any(
-            sql(__dirname, listPendingContactsSQL),
-            {
-                user_id: req.body.user_id,
-                pending: contactStatusCodes.PENDING,
-                blocked: contactStatusCodes.BLOCKED,
-            }
-        )
+        sqlDatabase
+            .any(
+                sql(__dirname, listPendingContactsSQL),
+                {
+                    user_id: req.body.user_id,
+                    pending: contactStatusCodes.PENDING,
+                    blocked: contactStatusCodes.BLOCKED,
+                }
+            )
             .then((results) => {
                 res.status(200).send(results)
                 next()

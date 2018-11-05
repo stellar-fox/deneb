@@ -9,10 +9,12 @@
 
 
 
+
 import bcrypt from "bcrypt"
 import { sql } from "../../../../lib/utils"
 import selectUser from "./select_user.sql"
 import insertUserSQL from "./insert_user.sql"
+
 
 
 
@@ -28,7 +30,9 @@ export default function insertUser (sqlDatabase, firebaseAdmin, firebaseApp) {
     return async (req, res, next) => {
 
         const now = new Date()
+
         try {
+
             const uid = (
                 await firebaseAdmin.auth()
                     .verifyIdToken(req.body.token)
@@ -67,7 +71,7 @@ export default function insertUser (sqlDatabase, firebaseAdmin, firebaseApp) {
             res.status(204).send()
             next()
 
-        } catch (error) {
+        } catch (_error) {
             res.status(401).send()
             next()
         }

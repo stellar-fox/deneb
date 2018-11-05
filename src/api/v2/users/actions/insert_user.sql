@@ -2,11 +2,9 @@
 
 
 -- insert new user into table
-
-INSERT INTO users(
+INSERT INTO users (
     email, uid, password_digest, created_at, updated_at
-)
-VALUES(
+) VALUES (
     $<email>, $<uid>, $<password_digest>, $<created_at>, $<updated_at>
 )
 RETURNING id;

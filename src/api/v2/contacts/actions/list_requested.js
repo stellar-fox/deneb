@@ -16,6 +16,7 @@ import listRequestedContactsSQL from "./list_requested_contacts.sql"
 
 
 
+
 /**
  * ...
  *
@@ -26,13 +27,14 @@ import listRequestedContactsSQL from "./list_requested_contacts.sql"
 export default function listRequested (sqlDatabase) {
 
     return (req, res, next) => {
-        sqlDatabase.any(
-            sql(__dirname, listRequestedContactsSQL),
-            {
-                user_id: req.body.user_id,
-                requested: contactStatusCodes.REQUESTED,
-            }
-        )
+        sqlDatabase
+            .any(
+                sql(__dirname, listRequestedContactsSQL),
+                {
+                    user_id: req.body.user_id,
+                    requested: contactStatusCodes.REQUESTED,
+                }
+            )
             .then((results) => {
                 res.status(200).send(results)
                 next()
