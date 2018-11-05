@@ -39,31 +39,6 @@ export default function contactsActions (sqlDatabase) {
 
 
     // ...
-    const approveInternal = (req, res, next) => {
-        sqlDatabase.tx((t) => {
-            return t.batch([
-                t.none(
-                    `UPDATE contacts SET status = ${APPROVED} \
-                    WHERE contact_id = $1 AND requested_by = $2`, [
-                        req.body.contact_id,
-                        req.body.user_id,
-                    ]),
-                t.none(
-                    `UPDATE contacts SET status = ${APPROVED} \
-                    WHERE contact_id = $1 AND requested_by = $2`, [
-                        req.body.user_id,
-                        req.body.contact_id,
-                    ]),
-            ])
-        })
-            .then(() => res.status(204).send())
-            .catch((error) => next(error.message))
-    }
-
-
-
-
-    // ...
     const rejectInternal = (req, res, next) => {
         sqlDatabase.tx((t) => {
             return t.batch([
@@ -616,7 +591,6 @@ export default function contactsActions (sqlDatabase) {
 
     // ...
     return {
-        approveInternal,
         listFederated,
         rejectInternal,
         removeFederated,

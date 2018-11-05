@@ -1,7 +1,7 @@
 /**
  * Deneb.
  *
- * 'Remove internal contact' action.
+ * 'Approve internal contact' action.
  *
  * @module actions
  * @license Apache-2.0
@@ -20,11 +20,11 @@ import updateContactStatus from "./update_contact_status.sql"
 /**
  * ...
  *
- * @function removeInternal
+ * @function approveInternal
  * @param {Object} sqlDatabase Database connection.
  * @returns {Function} express.js action.
  */
-export default function removeInternal (sqlDatabase) {
+export default function approveInternal (sqlDatabase) {
 
     return (req, res, next) =>
         sqlDatabase.tx((t) =>
@@ -34,7 +34,7 @@ export default function removeInternal (sqlDatabase) {
                     {
                         contact_id: req.body.contact_id,
                         user_id: req.body.user_id,
-                        status: contactStatusCodes.DELETED,
+                        status: contactStatusCodes.APPROVED,
                     }
                 ),
                 // this is reciprocal relation so we're switching the user_id
@@ -44,7 +44,7 @@ export default function removeInternal (sqlDatabase) {
                     {
                         contact_id: req.body.user_id,
                         user_id: req.body.contact_id,
-                        status: contactStatusCodes.DELETED,
+                        status: contactStatusCodes.APPROVED,
                     }
                 ),
             ])
