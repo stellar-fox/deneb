@@ -104,29 +104,6 @@ export default function contactsActions (sqlDatabase) {
 
 
     // ...
-    const listPending = (req, res, next) => {
-        sqlDatabase.any(
-            "SELECT contacts.contact_id, contacts.requested_by, \
-            contacts.created_at, contacts.status, contacts.request_str, \
-            accounts.alias, accounts.domain, \
-            accounts.pubkey, accounts.email_md5, \
-            users.first_name, users.last_name \
-            FROM contacts INNER JOIN accounts \
-            ON contacts.requested_by = accounts.user_id \
-            INNER JOIN users ON contacts.requested_by = users.id \
-            WHERE contacts.contact_id = $1 \
-            AND contacts.status IN ($2:csv)", [
-                req.body.user_id,
-                [ PENDING, BLOCKED ],
-            ])
-            .then((results) => res.status(200).send(results))
-            .catch((error) => next(error.message))
-    }
-
-
-
-
-    // ...
     const removeFederated = (req, res, next) => {
         sqlDatabase.tx((t) => {
             return t.batch([
@@ -666,7 +643,6 @@ export default function contactsActions (sqlDatabase) {
     return {
         approveInternal,
         listFederated,
-        listPending,
         rejectInternal,
         removeFederated,
         removeInternal,

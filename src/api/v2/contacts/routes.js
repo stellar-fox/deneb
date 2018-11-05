@@ -14,7 +14,10 @@ import { apiRootV2 } from "../../../config/env"
 import contactsActions from "./post"
 
 import listInternal from "./actions/list_internal"
+import listPending from "./actions/list_pending"
 import listRequested from "./actions/list_requested"
+
+
 
 
 /**
@@ -39,7 +42,7 @@ export default function contactsRoutes (app, db) {
     )
     app.post(
         `${apiRootV2}contacts/list/pending/`,
-        POST.listPending
+        listPending(db)
     )
     app.post(
         `${apiRootV2}contact/remove/internal/`,

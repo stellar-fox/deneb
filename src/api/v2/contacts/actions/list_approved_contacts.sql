@@ -1,7 +1,7 @@
 -- contacts
 
 
--- List internal contacts with status code "APPROVED" (2)
+-- List internal contacts with status code "APPROVED"
 
 SELECT
     COALESCE(users.first_name, '') AS first_name,
