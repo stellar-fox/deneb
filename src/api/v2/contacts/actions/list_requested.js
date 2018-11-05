@@ -1,7 +1,7 @@
 /**
  * Deneb.
  *
- * 'List internal contacts' action.
+ * 'List requested internal contacts' action.
  *
  * @module actions
  * @license Apache-2.0
@@ -9,28 +9,28 @@
 
 
 
+
 import { contactStatusCodes } from "../../../../lib/helpers"
 import { sql } from "../../../../lib/utils"
-import listApprovedContactsSQL from "./list_approved_contacts.sql"
+import listRequestedContactsSQL from "./list_requested_contacts.sql"
 
 
 
 /**
  * ...
  *
- * @function listInternal
+ * @function listRequested
  * @param {Object} sqlDatabase Database connection.
  * @returns {Function} express.js action.
  */
-export default function listInternal (sqlDatabase) {
+export default function listRequested (sqlDatabase) {
 
     return (req, res, next) => {
-
         sqlDatabase.any(
-            sql(__dirname, listApprovedContactsSQL),
+            sql(__dirname, listRequestedContactsSQL),
             {
                 user_id: req.body.user_id,
-                approved: contactStatusCodes.APPROVED,
+                requested: contactStatusCodes.REQUESTED,
             }
         )
             .then((results) => {

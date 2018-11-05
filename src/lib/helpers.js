@@ -19,6 +19,22 @@ import { apiKey } from "../config/configuration.json"
 
 
 /**
+ * @constant
+ * @type {Object}
+ * @property {String} status Approval status of a contact
+ */
+export const contactStatusCodes = {
+    REQUESTED   : 1,
+    APPROVED    : 2,
+    BLOCKED     : 3,
+    DELETED     : 4,
+    PENDING     : 5,
+}
+
+
+
+
+/**
  * ...
  *
  * @function errorMessageToRetCode

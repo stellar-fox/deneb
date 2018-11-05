@@ -22,5 +22,5 @@ SELECT
 FROM contacts
 INNER JOIN users ON users.id = contacts.contact_id
 INNER JOIN accounts ON users.id = accounts.user_id
-WHERE contacts.status = 2
+WHERE contacts.status = $<approved>
 AND contacts.requested_by = $<user_id>;
