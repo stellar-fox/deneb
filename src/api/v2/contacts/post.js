@@ -123,31 +123,6 @@ export default function contactsActions (sqlDatabase) {
 
 
     // ...
-    const removeInternal = (req, res, next) => {
-        sqlDatabase.tx((t) => {
-            return t.batch([
-                t.none(
-                    `UPDATE contacts SET status = ${DELETED} \
-                    WHERE contact_id = $1 AND requested_by = $2`, [
-                        req.body.contact_id,
-                        req.body.user_id,
-                    ]),
-                t.none(
-                    `UPDATE contacts SET status = ${DELETED} \
-                    WHERE contact_id = $1 AND requested_by = $2`, [
-                        req.body.user_id,
-                        req.body.contact_id,
-                    ]),
-            ])
-        })
-            .then(() => res.status(204).send())
-            .catch((error) => next(error.message))
-    }
-
-
-
-
-    // ...
     const requestByAccountNumber = async (req, res, next) => {
         let now = new Date()
 
@@ -645,7 +620,6 @@ export default function contactsActions (sqlDatabase) {
         listFederated,
         rejectInternal,
         removeFederated,
-        removeInternal,
         requestByAccountNumber,
         requestByEmail,
         requestByPaymentAddress,

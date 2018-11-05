@@ -16,6 +16,7 @@ import contactsActions from "./post"
 import listInternal from "./actions/list_internal"
 import listPending from "./actions/list_pending"
 import listRequested from "./actions/list_requested"
+import removeInternal from "./actions/remove_internal"
 
 
 
@@ -46,7 +47,7 @@ export default function contactsRoutes (app, db) {
     )
     app.post(
         `${apiRootV2}contact/remove/internal/`,
-        POST.removeInternal
+        removeInternal(db)
     )
     app.post(
         `${apiRootV2}contact/approve/internal/`,
