@@ -13,6 +13,7 @@
 import { apiRootV2 } from "../../../config/env"
 import contactsActions from "./post"
 
+import listInternal from "./actions/list_internal"
 
 
 
@@ -30,7 +31,7 @@ export default function contactsRoutes (app, db) {
     // internal
     app.post(
         `${apiRootV2}contacts/list/internal/`,
-        POST.listInternal
+        listInternal(db)
     )
     app.post(
         `${apiRootV2}contacts/list/requested/`,
