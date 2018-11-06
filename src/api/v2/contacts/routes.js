@@ -19,6 +19,7 @@ import listPending from "./actions/list_pending"
 import listRequested from "./actions/list_requested"
 import rejectInternal from "./actions/reject_internal"
 import removeInternal from "./actions/remove_internal"
+import unblockInternal from "./actions/unblock_internal"
 
 
 
@@ -61,7 +62,7 @@ export default function contactsRoutes (app, db) {
     )
     app.post(
         `${apiRootV2}contact/unblock/internal/`,
-        POST.unblockInternal
+        unblockInternal(db)
     )
 
 

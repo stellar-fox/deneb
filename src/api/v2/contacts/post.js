@@ -484,25 +484,6 @@ export default function contactsActions (sqlDatabase) {
 
 
     // ...
-    const unblockInternal = (req, res, next) => {
-        sqlDatabase.tx((t) => {
-            return t.batch([
-                t.none(
-                    `UPDATE contacts SET status = ${REQUESTED} \
-                    WHERE contact_id = $1 AND requested_by = $2`, [
-                        req.body.user_id,
-                        req.body.contact_id,
-                    ]),
-            ])
-        })
-            .then(() => res.status(204).send())
-            .catch((error) => next(error.message))
-    }
-
-
-
-
-    // ...
     const updateFederated = (req, res, next) => {
         sqlDatabase
             .tx((t) => {
@@ -577,7 +558,6 @@ export default function contactsActions (sqlDatabase) {
         requestByEmail,
         requestByPaymentAddress,
         root,
-        unblockInternal,
         updateFederated,
     }
 

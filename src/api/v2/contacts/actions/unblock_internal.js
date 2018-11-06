@@ -1,7 +1,7 @@
 /**
  * Deneb.
  *
- * 'Reject internal contact' action.
+ * 'Unblock internal contact' action.
  *
  * @module actions
  * @license Apache-2.0
@@ -20,11 +20,11 @@ import updateContactStatus from "./update_contact_status.sql"
 /**
  * ...
  *
- * @function rejectInternal
+ * @function unblockInternal
  * @param {Object} sqlDatabase Database connection.
  * @returns {Function} express.js action.
  */
-export default function rejectInternal (sqlDatabase) {
+export default function unblockInternal (sqlDatabase) {
 
     return (req, res, next) =>
 
@@ -36,7 +36,7 @@ export default function rejectInternal (sqlDatabase) {
                         {
                             contact_id: req.body.user_id,
                             user_id: req.body.contact_id,
-                            status: contactStatusCodes.BLOCKED,
+                            status: contactStatusCodes.REQUESTED,
                         }
                     ),
                 ])
