@@ -45,20 +45,6 @@ export default function contactsActions (sqlDatabase) {
 
 
     // ...
-    const listFederated = (req, res, next) => {
-        sqlDatabase.any(
-            `SELECT id, pubkey, alias, domain, currency, memo_type, \
-            memo, email_md5, first_name, last_name FROM ext_contacts \
-            WHERE status = ${APPROVED} AND ext_contacts.added_by = $1`,
-            [ req.body.user_id ])
-            .then((results) => res.status(200).send(results))
-            .catch((error) => next(error.message))
-    }
-
-
-
-
-    // ...
     const removeFederated = (req, res, next) => {
         sqlDatabase.tx((t) => {
             return t.batch([
@@ -552,7 +538,6 @@ export default function contactsActions (sqlDatabase) {
 
     // ...
     return {
-        listFederated,
         removeFederated,
         requestByAccountNumber,
         requestByEmail,

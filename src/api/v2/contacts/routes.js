@@ -14,6 +14,7 @@ import { apiRootV2 } from "../../../config/env"
 import contactsActions from "./post"
 
 import approveInternal from "./actions/approve_internal"
+import listFederated from "./actions/list_federated"
 import listInternal from "./actions/list_internal"
 import listPending from "./actions/list_pending"
 import listRequested from "./actions/list_requested"
@@ -69,7 +70,7 @@ export default function contactsRoutes (app, db) {
     // federated
     app.post(
         `${apiRootV2}contacts/list/federated/`,
-        POST.listFederated
+        listFederated(db)
     )
     app.post(
         `${apiRootV2}contact/update/federated/`,
