@@ -12,7 +12,7 @@
 
 import { contactStatusCodes } from "../../../../lib/helpers"
 import { sql } from "../../../../lib/utils"
-import updateContactStatus from "./update_contact_status.sql"
+import updateContactStatusSQL from "./update_contact_status.sql"
 
 
 
@@ -32,7 +32,7 @@ export default function rejectInternal (sqlDatabase) {
             .tx((t) =>
                 t.batch([
                     t.none(
-                        sql(__dirname, updateContactStatus),
+                        sql(__dirname, updateContactStatusSQL),
                         {
                             contact_id: req.body.user_id,
                             user_id: req.body.contact_id,
