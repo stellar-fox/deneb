@@ -30,7 +30,7 @@ import { saltRounds } from "../../../config/env"
  */
 export default function authenticate (sqlDatabase) {
 
-    return (req, res, next) => {
+    return (req, res, next) =>
 
         sqlDatabase
             .any(sql(__dirname, getUserByEmailSQL), {
@@ -106,7 +106,5 @@ export default function authenticate (sqlDatabase) {
                 })
                 next()
             })
-
-    }
 
 }

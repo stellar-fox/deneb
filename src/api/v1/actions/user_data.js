@@ -25,7 +25,7 @@ import getFullUserDataSQL from "./get_full_user_data.sql"
  */
 export default function userData (sqlDatabase) {
 
-    return (req, res, next) => {
+    return (req, res, next) =>
 
         sqlDatabase
             .one(sql(__dirname, getFullUserDataSQL), {
@@ -39,7 +39,5 @@ export default function userData (sqlDatabase) {
                 next()
             })
             .catch((error) => next(error.message))
-
-    }
 
 }

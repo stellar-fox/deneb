@@ -28,7 +28,7 @@ import deleteUser from "./delete_user.sql"
  */
 export default function implodeAccount (sqlDatabase) {
 
-    return (req, res, next) => {
+    return (req, res, next) =>
 
         sqlDatabase
             .tx((t) => {
@@ -54,7 +54,5 @@ export default function implodeAccount (sqlDatabase) {
                 next()
             })
             .catch((error) => next(error.message))
-
-    }
 
 }

@@ -26,7 +26,8 @@ import listRequestedContactsSQL from "./list_requested_contacts.sql"
  */
 export default function listRequested (sqlDatabase) {
 
-    return (req, res, next) => {
+    return (req, res, next) =>
+
         sqlDatabase
             .any(
                 sql(__dirname, listRequestedContactsSQL),
@@ -40,7 +41,5 @@ export default function listRequested (sqlDatabase) {
                 next()
             })
             .catch((error) => next(error.message))
-
-    }
 
 }

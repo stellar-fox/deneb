@@ -26,7 +26,8 @@ import listPendingContactsSQL from "./list_pending_contacts.sql"
  */
 export default function listPending (sqlDatabase) {
 
-    return (req, res, next) => {
+    return (req, res, next) =>
+
         sqlDatabase
             .any(
                 sql(__dirname, listPendingContactsSQL),
@@ -41,7 +42,5 @@ export default function listPending (sqlDatabase) {
                 next()
             })
             .catch((error) => next(error.message))
-
-    }
 
 }

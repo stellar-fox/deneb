@@ -32,7 +32,7 @@ import updateExchangeRateSQL from "./update_exchange_rate.sql"
  */
 export default function latestCurrency (sqlDatabase) {
 
-    return (req, res, next) => {
+    return (req, res, next) =>
 
         sqlDatabase
             .any(sql(__dirname, getExchangeRateSQL), {
@@ -108,7 +108,5 @@ export default function latestCurrency (sqlDatabase) {
             .catch((error) => {
                 return next(error.message)
             })
-
-    }
 
 }

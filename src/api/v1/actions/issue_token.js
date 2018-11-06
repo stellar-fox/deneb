@@ -29,7 +29,7 @@ import getUserByPubkeyPathSQL from "./get_user_by_pubkey_path.sql"
  */
 export default function issueToken (sqlDatabase) {
 
-    return (req, res, next) => {
+    return (req, res, next) =>
 
         sqlDatabase
             .any(
@@ -62,7 +62,5 @@ export default function issueToken (sqlDatabase) {
                 })
                 next()
             })
-
-    }
 
 }

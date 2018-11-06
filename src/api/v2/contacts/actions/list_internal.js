@@ -26,7 +26,7 @@ import listApprovedContactsSQL from "./list_approved_contacts.sql"
  */
 export default function listInternal (sqlDatabase) {
 
-    return (req, res, next) => {
+    return (req, res, next) =>
 
         sqlDatabase
             .any(
@@ -41,7 +41,5 @@ export default function listInternal (sqlDatabase) {
                 next()
             })
             .catch((error) => next(error.message))
-
-    }
 
 }
