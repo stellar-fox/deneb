@@ -44,25 +44,6 @@ export default function contactsActions (sqlDatabase) {
 
 
     // ...
-    const removeFederated = (req, res, next) => {
-        sqlDatabase.tx((t) => {
-            return t.batch([
-                t.none(
-                    `UPDATE ext_contacts SET status = ${DELETED} WHERE id = $1 \
-                    AND added_by = $2`, [
-                        req.body.id,
-                        req.body.added_by,
-                    ]),
-            ])
-        })
-            .then(() => res.status(204).send())
-            .catch((error) => next(error.message))
-    }
-
-
-
-
-    // ...
     const requestByAccountNumber = async (req, res, next) => {
         let now = new Date()
 
@@ -470,7 +451,6 @@ export default function contactsActions (sqlDatabase) {
 
     // ...
     return {
-        removeFederated,
         requestByAccountNumber,
         requestByEmail,
         requestByPaymentAddress,

@@ -19,6 +19,7 @@ import listInternal from "./actions/list_internal"
 import listPending from "./actions/list_pending"
 import listRequested from "./actions/list_requested"
 import rejectInternal from "./actions/reject_internal"
+import removeFederated from "./actions/remove_federated"
 import removeInternal from "./actions/remove_internal"
 import unblockInternal from "./actions/unblock_internal"
 import updateFederated from "./actions/update_federated"
@@ -79,7 +80,7 @@ export default function contactsRoutes (app, db) {
     )
     app.post(
         `${apiRootV2}contact/remove/federated/`,
-        POST.removeFederated
+        removeFederated(db)
     )
 
 
