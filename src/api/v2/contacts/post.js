@@ -31,28 +31,8 @@ export default function contactsActions (sqlDatabase) {
     const
         REQUESTED = 1,
         APPROVED = 2,
-        BLOCKED = 3,
         DELETED = 4,
         PENDING = 5
-
-
-
-
-    // ...
-    const rejectInternal = (req, res, next) => {
-        sqlDatabase.tx((t) => {
-            return t.batch([
-                t.none(
-                    `UPDATE contacts SET status = ${BLOCKED} \
-                    WHERE contact_id = $1 AND requested_by = $2`, [
-                        req.body.user_id,
-                        req.body.contact_id,
-                    ]),
-            ])
-        })
-            .then(() => res.status(204).send())
-            .catch((error) => next(error.message))
-    }
 
 
 
@@ -592,7 +572,6 @@ export default function contactsActions (sqlDatabase) {
     // ...
     return {
         listFederated,
-        rejectInternal,
         removeFederated,
         requestByAccountNumber,
         requestByEmail,
