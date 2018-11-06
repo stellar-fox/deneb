@@ -1,7 +1,9 @@
 {
     "compilerOptions": {
-        "target": "esnext",
-        "module": "commonjs"
+        "target": "es6"
     },
-    "checkJs" : true
+    "checkJs" : true,
+    "typingOptions" : {
+        "enableAutoDiscovery": true
+    }
 }
