@@ -11,7 +11,6 @@
 
 
 import axios from "axios"
-import { string } from "@xcmats/js-toolbox"
 import md5 from "blueimp-md5"
 import {
     mailchimp as mailchimpConfig,
@@ -470,80 +469,12 @@ export default function contactsActions (sqlDatabase) {
 
 
     // ...
-    const updateFederated = (req, res, next) => {
-        sqlDatabase
-            .tx((t) => {
-                const date = new Date()
-                return t.batch([
-                    req.body.currency ?
-                        t.none(
-                            "UPDATE ext_contacts SET currency = $1, \
-                            updated_at = $4 WHERE id = $2 AND added_by = $3", [
-                                req.body.currency,
-                                req.body.id,
-                                req.body.user_id,
-                                date,
-                            ]) : null,
-                    t.none(
-                        "UPDATE ext_contacts SET memo_type = 'text', \
-                        memo = $1, updated_at = $4 WHERE id = $2 \
-                        AND added_by = $3", [
-                            req.body.memo || string.empty(),
-                            req.body.id,
-                            req.body.user_id,
-                            date,
-                        ]),
-                    req.body.first_name ?
-                        t.none(
-                            "UPDATE ext_contacts SET first_name = $1, \
-                            updated_at = $4 WHERE id = $2 AND added_by = $3", [
-                                req.body.first_name,
-                                req.body.id,
-                                req.body.user_id,
-                                date,
-                            ]) : null,
-                    req.body.last_name ?
-                        t.none(
-                            "UPDATE ext_contacts SET last_name = $1, \
-                            updated_at = $4 WHERE id = $2 AND added_by = $3", [
-                                req.body.last_name,
-                                req.body.id,
-                                req.body.user_id,
-                                date,
-                            ]) : null,
-                    t.none(
-                        "UPDATE ext_contacts SET alias = $1, \
-                        updated_at = $4 WHERE id = $2 AND added_by = $3", [
-                            req.body.alias || string.empty(),
-                            req.body.id,
-                            req.body.user_id,
-                            date,
-                        ]),
-                    t.none(
-                        "UPDATE ext_contacts SET domain = $1, \
-                        updated_at = $4 WHERE id = $2 AND added_by = $3", [
-                            req.body.domain || string.empty(),
-                            req.body.id,
-                            req.body.user_id,
-                            date,
-                        ]),
-                ])
-            })
-            .then(() => res.status(204).send())
-            .catch((error) => next(error.message))
-    }
-
-
-
-
-    // ...
     return {
         removeFederated,
         requestByAccountNumber,
         requestByEmail,
         requestByPaymentAddress,
         root,
-        updateFederated,
     }
 
 }

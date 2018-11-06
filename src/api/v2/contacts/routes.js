@@ -21,6 +21,7 @@ import listRequested from "./actions/list_requested"
 import rejectInternal from "./actions/reject_internal"
 import removeInternal from "./actions/remove_internal"
 import unblockInternal from "./actions/unblock_internal"
+import updateFederated from "./actions/update_federated"
 
 
 
@@ -74,7 +75,7 @@ export default function contactsRoutes (app, db) {
     )
     app.post(
         `${apiRootV2}contact/update/federated/`,
-        POST.updateFederated
+        updateFederated(db)
     )
     app.post(
         `${apiRootV2}contact/remove/federated/`,
