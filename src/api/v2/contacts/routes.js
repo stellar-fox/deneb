@@ -21,6 +21,7 @@ import listRequested from "./actions/list_requested"
 import rejectInternal from "./actions/reject_internal"
 import removeFederated from "./actions/remove_federated"
 import removeInternal from "./actions/remove_internal"
+import requestByEmail from "./actions/request_by_email"
 import unblockInternal from "./actions/unblock_internal"
 import updateFederated from "./actions/update_federated"
 
@@ -87,7 +88,7 @@ export default function contactsRoutes (app, db) {
     // common
     app.post(
         `${apiRootV2}contact/request/by-email/`,
-        POST.requestByEmail
+        requestByEmail(db)
     )
     app.post(
         `${apiRootV2}contact/request/by-payment-address/`,

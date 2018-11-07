@@ -10,15 +10,6 @@
 
 
 
-import axios from "axios"
-import md5 from "blueimp-md5"
-import {
-    mailchimp as mailchimpConfig,
-} from "../../../config/configuration.json"
-
-
-
-
 /**
  * ...
  *
@@ -162,145 +153,6 @@ export default function contactsActions (sqlDatabase) {
 
             }
         }
-    }
-
-
-
-
-    // ...
-    const requestByEmail = async (req, res, next) => {
-
-        let now = new Date()
-
-        const registeredUser = await sqlDatabase.oneOrNone(
-            "SELECT id FROM users WHERE email = ${email}",
-            { email: req.body.email }
-        )
-
-        if (registeredUser) {
-            const contact_id = await sqlDatabase.oneOrNone(
-                "SELECT contact_id FROM contacts WHERE contact_id = ${contact_id} \
-                AND requested_by = ${requested_by} AND status = ${status}", {
-                    contact_id: registeredUser.id,
-                    requested_by: req.body.user_id,
-                    status: DELETED,
-                },
-                (e) => e && e.contact_id
-            )
-
-            if (contact_id) {
-                try {
-                    await sqlDatabase.tx((t) => {
-                        return t.batch([
-                            t.none(
-                                "UPDATE contacts SET status = ${status} \
-                            WHERE contact_id = ${contact_id} \
-                            AND requested_by = ${requested_by}", {
-                                    contact_id,
-                                    requested_by: req.body.user_id,
-                                    status: REQUESTED,
-                                }),
-                            t.none(
-                                "UPDATE contacts SET status = ${status} \
-                            WHERE contact_id = ${requested_by} \
-                            AND requested_by = ${contact_id}", {
-                                    contact_id,
-                                    requested_by: req.body.user_id,
-                                    status: PENDING,
-                                }),
-                        ])
-                    })
-                    return res.status(204).send()
-                } catch (error) {
-                    return next(error.message)
-                }
-
-            } else {
-                try {
-                    await sqlDatabase.tx((t) => {
-                        return t.batch([
-                            t.none(
-                                "INSERT INTO contacts(contact_id, requested_by, \
-                            status, created_at, updated_at) \
-                            VALUES(${contact_id}, ${requested_by}, ${status}, \
-                            ${created_at}, ${updated_at})",
-                                {
-                                    contact_id: registeredUser.id,
-                                    requested_by: req.body.user_id,
-                                    status: REQUESTED,
-                                    created_at: now,
-                                    updated_at: now,
-                                }
-                            ),
-                            t.none(
-                                "INSERT INTO contacts(contact_id, requested_by, \
-                            status, created_at, updated_at, request_str) \
-                            VALUES(${contact_id}, ${requested_by}, ${status}, \
-                            ${created_at}, ${updated_at}, ${request_str})",
-                                {
-                                    contact_id: req.body.user_id,
-                                    requested_by: registeredUser.id,
-                                    status: PENDING,
-                                    created_at: now,
-                                    updated_at: now,
-                                    request_str: req.body.email,
-                                }
-                            ),
-                        ])
-                    })
-                } catch (error) {
-                    return res.status(409).send()
-                }
-            }
-        }
-
-        try {
-            const client = axios.create({
-                auth: {
-                    username: mailchimpConfig.username,
-                    password: mailchimpConfig.apiKey,
-                },
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            })
-
-            try {
-                const subscriber = await client.get(`${mailchimpConfig.api}lists/${
-                    mailchimpConfig.lists.searchByEmail}/members/${
-                    md5(req.body.email.toLowerCase())
-                }`)
-
-                // email is already on the subscription list
-                if (subscriber.data.status === "subscribed") {
-                    return res.status(409).send()
-                }
-
-                // TODO: perhaps detect here different subscription states
-                // and return proper code along with message.
-                return res.status(409).send()
-
-            } catch (_error) {
-                // email is not yet on the subscription list
-                await client.post(`${mailchimpConfig.api}lists/${
-                    mailchimpConfig.lists.searchByEmail}/members/`, {
-                    email_address: req.body.email,
-                    status: "subscribed",
-                    merge_fields: {
-                        REFERRER: req.body.referrer.email,
-                        REFERRERFN: req.body.referrer.first_name,
-                        REFERRERLN: req.body.referrer.last_name,
-                    },
-                })
-                return res.status(201).send()
-            }
-
-        } catch (error) {
-            return res.status(error.response.data.status).json({
-                error: error.response.data.title,
-            })
-        }
-
     }
 
 
@@ -452,7 +304,6 @@ export default function contactsActions (sqlDatabase) {
     // ...
     return {
         requestByAccountNumber,
-        requestByEmail,
         requestByPaymentAddress,
         root,
     }
