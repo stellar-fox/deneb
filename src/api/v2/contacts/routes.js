@@ -11,8 +11,6 @@
 
 
 import { apiRootV2 } from "../../../config/env"
-import contactsActions from "./post"
-
 import approveInternal from "./actions/approve_internal"
 import listFederated from "./actions/list_federated"
 import listInternal from "./actions/list_internal"
@@ -21,6 +19,7 @@ import listRequested from "./actions/list_requested"
 import rejectInternal from "./actions/reject_internal"
 import removeFederated from "./actions/remove_federated"
 import removeInternal from "./actions/remove_internal"
+import requestByAccount from "./actions/request_by_account"
 import requestByEmail from "./actions/request_by_email"
 import requestByStellarAddress from "./actions/request_by_stellar_address"
 import unblockInternal from "./actions/unblock_internal"
@@ -36,9 +35,6 @@ import updateFederated from "./actions/update_federated"
  * @param {Object} db
  */
 export default function contactsRoutes (app, db) {
-
-    const POST = contactsActions(db)
-
 
     // internal
     app.post(
@@ -97,7 +93,7 @@ export default function contactsRoutes (app, db) {
     )
     app.post(
         `${apiRootV2}contact/request/by-account-number/`,
-        POST.requestByAccountNumber
+        requestByAccount(db)
     )
 
 }
