@@ -74,7 +74,8 @@ export default function requestByEmail (sqlDatabase) {
                                 }),
                         ])
                     })
-                    return res.status(204).send()
+                    res.status(204).send()
+                    next()
                 } catch (error) {
                     return next(error.message)
                 }
@@ -108,8 +109,9 @@ export default function requestByEmail (sqlDatabase) {
                             ),
                         ])
                     })
-                } catch (error) {
-                    return res.status(409).send()
+                } catch (_error) {
+                    res.status(409).send()
+                    next()
                 }
             }
         }
@@ -133,12 +135,14 @@ export default function requestByEmail (sqlDatabase) {
 
                 // email is already on the subscription list
                 if (subscriber.data.status === "subscribed") {
-                    return res.status(409).send()
+                    res.status(409).send()
+                    next()
                 }
 
                 // TODO: perhaps detect here different subscription states
                 // and return proper code along with message.
-                return res.status(409).send()
+                res.status(409).send()
+                next()
 
             } catch (_error) {
                 // email is not yet on the subscription list
@@ -152,13 +156,15 @@ export default function requestByEmail (sqlDatabase) {
                         REFERRERLN: req.body.referrer.last_name,
                     },
                 })
-                return res.status(201).send()
+                res.status(201).send()
+                next()
             }
 
         } catch (error) {
-            return res.status(error.response.data.status).json({
+            res.status(error.response.data.status).json({
                 error: error.response.data.title,
             })
+            next()
         }
 
 
