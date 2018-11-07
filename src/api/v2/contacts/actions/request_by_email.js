@@ -8,6 +8,8 @@
  */
 
 
+
+
 import axios from "axios"
 import md5 from "blueimp-md5"
 import {
@@ -21,6 +23,7 @@ import getContactIdSQL from "./get_contact_id.sql"
 import getUserIdSQL from "./get_user_id.sql"
 import insertContactSQL from "./insert_contact.sql"
 import updateContactStatusSQL from "./update_contact_status.sql"
+
 
 
 
@@ -166,8 +169,6 @@ export default function requestByEmail (sqlDatabase) {
             })
             next()
         }
-
-
 
     }
 

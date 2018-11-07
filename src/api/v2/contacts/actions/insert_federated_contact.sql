@@ -2,9 +2,8 @@
 
 
 -- Add federated contact.
-
-INSERT INTO ext_contacts(
+INSERT INTO ext_contacts (
     pubkey, added_by, created_at, updated_at, status
-) VALUES(
+) VALUES (
     $<pubkey>, $<added_by>, $<created_at>, $<updated_at>, $<status>
 );

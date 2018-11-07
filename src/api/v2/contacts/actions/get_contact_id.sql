@@ -2,7 +2,6 @@
 
 
 -- Get contact ID by status and requested_by.
-
 SELECT
     contact_id
 FROM contacts
