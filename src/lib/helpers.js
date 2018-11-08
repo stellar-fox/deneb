@@ -162,7 +162,8 @@ export const sendAsset = (
                 reason: error.response.data.extras.result_codes,
             })
 
-            // eslint-disable-next-line no-console
-            console.log(error.response.data.extras.result_codes)
+            throw new Error(
+                error.response.data.extras.result_codes.operations.join()
+            )
         })
 }

@@ -11,9 +11,9 @@
 
 
 import { apiRootV2 } from "../../../config/env"
-import accountActions from "./post"
-
 import implodeAccount from "./actions/implode_account"
+import fundWithStripe from "./actions/fund_with_stripe"
+import resubmitFundWithStripe from "./actions/resubmit_fund_with_stripe"
 
 
 
@@ -25,25 +25,21 @@ import implodeAccount from "./actions/implode_account"
  * @param {Object} db
  * @param {Object} rtdb
  */
-export default function accountRoutes (app, db, rtdb) {
+export default function accountRoutes (app, db, rtdb, stripe) {
 
-    const POST = accountActions(db, rtdb)
-
-    // new-school
     app.post(
         `${apiRootV2}account/implode/`,
         implodeAccount(db)
     )
 
-
-    // old-school but ok for now
     app.post(
         `${apiRootV2}account/fund/`,
-        POST.fund
+        fundWithStripe(rtdb, stripe)
     )
+
     app.post(
         `${apiRootV2}account/resubmit-fund/`,
-        POST.resubmitFund
+        resubmitFundWithStripe(rtdb)
     )
 
 }
