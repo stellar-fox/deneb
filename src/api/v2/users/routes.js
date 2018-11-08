@@ -11,9 +11,9 @@
 
 
 import { apiRootV2 } from "../../../config/env"
-import usersActions from "./post"
-
 import createUser from "./actions/create_user"
+import subscribeEmail from "./actions/subscribe_email"
+import unsubscribeEmail from "./actions/unsubscribe_email"
 
 
 
@@ -30,20 +30,17 @@ export default function usersRoutes (
     app, db, firebaseAdmin, firebaseApp
 ) {
 
-    const POST = usersActions(db, firebaseAdmin, firebaseApp)
-
-    // internal
     app.post(
         `${apiRootV2}user/create/`,
         createUser(db, firebaseAdmin, firebaseApp)
     )
     app.post(
         `${apiRootV2}user/subscribe-email/`,
-        POST.subscribeEmail
+        subscribeEmail()
     )
     app.post(
         `${apiRootV2}user/unsubscribe-email/`,
-        POST.unsubscribeEmail
+        unsubscribeEmail()
     )
 
 }

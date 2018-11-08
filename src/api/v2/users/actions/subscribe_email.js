@@ -1,9 +1,9 @@
 /**
  * Deneb.
  *
- * REST API (v2) - Users.
+ * 'Subscribe email' action.
  *
- * @module api-v2-actions-users
+ * @module actions
  * @license Apache-2.0
  */
 
@@ -14,7 +14,7 @@ import axios from "axios"
 import md5 from "blueimp-md5"
 import {
     mailchimp as mailchimpConfig,
-} from "../../../config/configuration.json"
+} from "../../../../config/configuration.json"
 
 
 
@@ -22,14 +22,13 @@ import {
 /**
  * ...
  *
- * @param {Object} sqlDatabase
- * @param {Object} firebaseAdmin
- * @param {Object} firebaseApp
+ * @function subscribeEmail
+ * @param {Object} sqlDatabase Database connection.
+ * @returns {Function} express.js action.
  */
-export default function usersActions () {
+export default function subscribeEmail () {
 
-    // ...
-    const subscribeEmail = async (req, res, _next) => {
+    return async (req, res, next) => {
         let subscription
 
         try {
@@ -80,50 +79,15 @@ export default function usersActions () {
                 )
             }
 
-            return res.status(201).send()
+            res.status(201).send()
+            next()
 
         } catch (error) {
-            return res.status(error.response.data.status).json({
+            res.status(error.response.data.status).json({
                 error: error.response.data.title,
             })
+            next()
         }
-    }
-
-
-
-
-    // ...
-    const unsubscribeEmail = async (req, res, _next) => {
-        try {
-            const client = axios.create({
-                auth: {
-                    username: mailchimpConfig.username,
-                    password: mailchimpConfig.apiKey,
-                },
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            })
-
-            await client.delete(`${mailchimpConfig.api}lists/${
-                mailchimpConfig.lists.newSignups}/members/${
-                md5(req.body.email.toLowerCase())}`)
-
-            return res.status(204).send()
-
-        } catch (error) {
-            return res.status(error.response.data.status).json({
-                error: error.response.data.title,
-            })
-        }
-    }
-
-
-
-
-    return {
-        subscribeEmail,
-        unsubscribeEmail,
     }
 
 }
