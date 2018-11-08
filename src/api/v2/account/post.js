@@ -14,10 +14,8 @@ import StellarSdk from "stellar-sdk"
 import BigNumber from "bignumber.js"
 import { array } from "@xcmats/js-toolbox"
 import Stripe from "stripe"
-import {
-    stripe as stripeConfig,
-    stellar as stellarConfig,
-} from "../../../config/configuration.json"
+import { stripe as stripeConfig } from "../../../config/configuration.json"
+import { sendAsset } from "../../../lib/helpers"
 
 
 
@@ -34,52 +32,6 @@ export default function accountActions (rtdb) {
     const stripe = new Stripe(stripeConfig.apiKey)
 
 
-    // ...
-    const sendAsset = (destinationId, amount, currency, payToken) => {
-
-        StellarSdk.Network.useTestNetwork()
-        const server = new StellarSdk.Server(stellarConfig.horizon)
-        const sourceKeys = StellarSdk.Keypair.fromSecret(
-            stellarConfig.distributionSecret
-        )
-        let transaction = null
-
-        return server.loadAccount(sourceKeys.publicKey())
-            .then((sourceAccount) => {
-                transaction = new StellarSdk.TransactionBuilder(sourceAccount)
-                    .addOperation(StellarSdk.Operation.payment({
-                        destination: destinationId,
-                        asset: new StellarSdk.Asset(
-                            currency.toUpperCase(),
-                            stellarConfig.issuingPublic
-                        ),
-                        amount,
-                    }))
-                    .addMemo(StellarSdk.Memo.text(stellarConfig.distMemo))
-                    .build()
-                transaction.sign(sourceKeys)
-                return server.submitTransaction(transaction)
-            })
-            .catch(function (error) {
-                /**
-                 * Store transaction envelope that could not be submitted
-                 */
-                rtdb.ref(`failedTxs/${destinationId}/${payToken}`).set({
-                    amount,
-                    currency,
-                    xdrBody: transaction.toEnvelope().toXDR().toString("base64"),
-                    submitted: false,
-                    retries: 0,
-                    lastAttempt: (new Date().getTime()),
-                    reason: error.response.data.extras.result_codes,
-                })
-
-                // eslint-disable-next-line no-console
-                console.log(error.response.data.extras.result_codes)
-            })
-    }
-
-
 
 
     // ...
@@ -92,7 +44,7 @@ export default function accountActions (rtdb) {
                 source: req.body.charge.token,
             })
 
-            await sendAsset(req.body.charge.publicKey,
+            await sendAsset(rtdb, req.body.charge.publicKey,
                 (new BigNumber(req.body.charge.amount))
                     .dividedBy(100).toString(),
                 req.body.charge.currency,
@@ -124,6 +76,7 @@ export default function accountActions (rtdb) {
                 req.body.chargeData.id}`).remove()
 
             await sendAsset(
+                rtdb,
                 verifiedOp.destination, verifiedOp.amount,
                 verifiedOp.asset.code, req.body.chargeData.id
             )

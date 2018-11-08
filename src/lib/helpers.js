@@ -13,7 +13,19 @@
 import axios from "axios"
 import bcrypt from "bcrypt"
 import { array } from "@xcmats/js-toolbox"
-import { apiKey } from "../config/configuration.json"
+import {
+    apiKey,
+    stellar as stellarConfig,
+} from "../config/configuration.json"
+import {
+    Asset,
+    Keypair,
+    Memo,
+    Network,
+    Operation,
+    Server,
+    TransactionBuilder,
+} from "stellar-sdk"
 
 
 
@@ -102,3 +114,55 @@ export const tokenIsValid = (token, userId) =>
         `${getApiKey()}${userId}`,
         Buffer.from(token, "base64").toString("ascii")
     )
+
+
+
+
+// ...
+export const sendAsset = (
+    rtdb, destinationId,
+    amount, currency,
+    payToken
+) => {
+
+    Network.useTestNetwork()
+    const server = new Server(stellarConfig.horizon)
+    const sourceKeys = Keypair.fromSecret(
+        stellarConfig.distributionSecret
+    )
+    let transaction = null
+
+    return server.loadAccount(sourceKeys.publicKey())
+        .then((sourceAccount) => {
+            transaction = new TransactionBuilder(sourceAccount)
+                .addOperation(Operation.payment({
+                    destination: destinationId,
+                    asset: new Asset(
+                        currency.toUpperCase(),
+                        stellarConfig.issuingPublic
+                    ),
+                    amount,
+                }))
+                .addMemo(Memo.text(stellarConfig.distMemo))
+                .build()
+            transaction.sign(sourceKeys)
+            return server.submitTransaction(transaction)
+        })
+        .catch(function (error) {
+            /**
+             * Store transaction envelope that could not be submitted
+             */
+            rtdb.ref(`failedTxs/${destinationId}/${payToken}`).set({
+                amount,
+                currency,
+                xdrBody: transaction.toEnvelope().toXDR().toString("base64"),
+                submitted: false,
+                retries: 0,
+                lastAttempt: (new Date().getTime()),
+                reason: error.response.data.extras.result_codes,
+            })
+
+            // eslint-disable-next-line no-console
+            console.log(error.response.data.extras.result_codes)
+        })
+}
