@@ -114,6 +114,7 @@ export default function requestByStellarAddress (sqlDatabase) {
         }
 
         if (contactId) {
+
             await sqlDatabase.tx((t) => {
                 return t.batch([
                     t.none(
@@ -138,6 +139,7 @@ export default function requestByStellarAddress (sqlDatabase) {
             next()
 
         } else {
+
             try {
                 await sqlDatabase.tx((t) => {
                     return t.batch([
@@ -149,8 +151,10 @@ export default function requestByStellarAddress (sqlDatabase) {
                                 status: contactStatusCodes.REQUESTED,
                                 created_at: now,
                                 updated_at: now,
+                                request_str: "",
                             }
                         ),
+                        // reciprocal relation with PENDING status
                         t.none(
                             sql(__dirname, insertContactSQL),
                             {
@@ -159,14 +163,15 @@ export default function requestByStellarAddress (sqlDatabase) {
                                 status: contactStatusCodes.PENDING,
                                 created_at: now,
                                 updated_at: now,
+                                request_str: "",
                             }
                         ),
                     ])
                 })
                 res.status(201).send()
                 next()
-            } catch (_error) {
-                res.status(409).send()
+            } catch (error) {
+                res.status(500).send()
                 next()
             }
         }
