@@ -10,7 +10,7 @@
 
 
 
-import bcrypt from "bcrypt"
+import bcrypt from "bcryptjs"
 import { array } from "@xcmats/js-toolbox"
 import { getApiKey } from "../../../lib/helpers"
 import { sql } from "../../../lib/utils"

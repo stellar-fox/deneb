@@ -10,7 +10,7 @@
 
 
 
-import bcrypt from "bcrypt"
+import bcrypt from "bcryptjs"
 import { sql } from "../../../../lib/utils"
 import selectUser from "./select_user.sql"
 import insertUserSQL from "./insert_user.sql"

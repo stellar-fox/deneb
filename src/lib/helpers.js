@@ -11,7 +11,7 @@
 
 
 import axios from "axios"
-import bcrypt from "bcrypt"
+import bcrypt from "bcryptjs"
 import { array } from "@xcmats/js-toolbox"
 import {
     apiKey,

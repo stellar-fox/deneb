@@ -10,7 +10,7 @@
 
 
 
-import bcrypt from "bcrypt"
+import bcrypt from "bcryptjs"
 import { getApiKey } from "../../../lib/helpers"
 import { saltRounds } from "../../../config/env"
 import { array } from "@xcmats/js-toolbox"
