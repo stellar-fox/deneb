@@ -60,23 +60,21 @@ export default function updateFederated (sqlDatabase) {
                         }
                     ),
 
-                    req.body.first_name ?
-                        t.none(
-                            sql(__dirname, updateFirstNameSQL), {
-                                first_name: req.body.first_name,
-                                id: req.body.id,
-                                user_id: req.body.user_id,
-                                date,
-                            }) : null,
+                    t.none(
+                        sql(__dirname, updateFirstNameSQL), {
+                            first_name: req.body.first_name || string.empty(),
+                            id: req.body.id,
+                            user_id: req.body.user_id,
+                            date,
+                        }),
 
-                    req.body.last_name ?
-                        t.none(
-                            sql(__dirname, updateLastNameSQL), {
-                                last_name: req.body.last_name,
-                                id: req.body.id,
-                                user_id: req.body.user_id,
-                                date,
-                            }) : null,
+                    t.none(
+                        sql(__dirname, updateLastNameSQL), {
+                            last_name: req.body.last_name || string.empty(),
+                            id: req.body.id,
+                            user_id: req.body.user_id,
+                            date,
+                        }),
 
                     t.none(
                         sql(__dirname, updateAliasSQL), {
