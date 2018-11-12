@@ -17,7 +17,7 @@ import updateMemoTypeSQL from "./update_memo_type.sql"
 import updatePreferredCurrencySQL from "./update_preferred_currency.sql"
 import updateStellarAddressSQL from "./update_stellar_address.sql"
 import updateStellarAddressVisibilitySQL from "./update_stellar_address_visibility.sql"
-
+import updateAccountsTimestampSQL from "./update_accounts_timestamp.sql"
 
 
 
@@ -112,7 +112,7 @@ export default function updateAccount (sqlDatabase) {
 
                     // update timestamp
                     t.none(
-                        sql(__dirname, updateCurrencyPrecisionSQL),
+                        sql(__dirname, updateAccountsTimestampSQL),
                         { updated_at: new Date() }
                     ),
                 ])
