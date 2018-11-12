@@ -11,3 +11,6 @@
 configuration.json
 configuration.localhost.json
 configuration.production.json
+
+# npm
+package-lock.json
