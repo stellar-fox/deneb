@@ -118,52 +118,74 @@ export const tokenIsValid = (token, userId) =>
 
 
 
-// ...
-export const sendAsset = (
+/**
+ * FIXME: accept 'network passphrase' as an argument
+ * and use it (get rid of hardcoded 'test-network').
+ * E.g.:
+ * ```
+ * Network.use(new Network(networkPassphrase))
+ * ```
+ *
+ * @function sendAsset
+ * @param {*} rtdb
+ * @param {*} destinationId
+ * @param {*} amount
+ * @param {*} currency
+ * @param {*} payToken
+ */
+export const sendAsset = async (
     rtdb, destinationId,
-    amount, currency,
-    payToken
+    amount, currency, payToken
 ) => {
 
     Network.useTestNetwork()
-    const server = new Server(stellarConfig.horizon)
-    const sourceKeys = Keypair.fromSecret(
-        stellarConfig.distributionSecret
-    )
-    let transaction = null
 
-    return server.loadAccount(sourceKeys.publicKey())
-        .then((sourceAccount) => {
-            transaction = new TransactionBuilder(sourceAccount)
-                .addOperation(Operation.payment({
-                    destination: destinationId,
-                    asset: new Asset(
-                        currency.toUpperCase(),
-                        stellarConfig.issuingPublic
-                    ),
-                    amount,
-                }))
-                .addMemo(Memo.text(stellarConfig.distMemo))
-                .build()
-            transaction.sign(sourceKeys)
-            return server.submitTransaction(transaction)
-        })
-        .catch(function (error) {
-            /**
-             * Store transaction envelope that could not be submitted
-             */
-            rtdb.ref(`failedTxs/${destinationId}/${payToken}`).set({
+    const
+        server = new Server(stellarConfig.horizon),
+        sourceKeys = Keypair.fromSecret(
+            stellarConfig.distributionSecret
+        )
+
+    let
+        transaction = null,
+        sourceAccount = await server.loadAccount(sourceKeys.publicKey())
+
+    try {
+
+        transaction = new TransactionBuilder(sourceAccount)
+            .addOperation(Operation.payment({
+                destination: destinationId,
+                asset: new Asset(
+                    currency.toUpperCase(),
+                    stellarConfig.issuingPublic
+                ),
                 amount,
-                currency,
-                xdrBody: transaction.toEnvelope().toXDR().toString("base64"),
-                submitted: false,
-                retries: 0,
-                lastAttempt: (new Date().getTime()),
-                reason: error.response.data.extras.result_codes,
-            })
+            }))
+            .addMemo(Memo.text(stellarConfig.distMemo))
+            .build()
 
-            throw new Error(
-                error.response.data.extras.result_codes.operations.join()
-            )
+        transaction.sign(sourceKeys)
+
+        return server.submitTransaction(transaction)
+
+    } catch (error) {
+
+        /**
+         * Store transaction envelope that could not be submitted
+         */
+        rtdb.ref(`failedTxs/${destinationId}/${payToken}`).set({
+            amount,
+            currency,
+            xdrBody: transaction.toEnvelope().toXDR().toString("base64"),
+            submitted: false,
+            retries: 0,
+            lastAttempt: (new Date().getTime()),
+            reason: error.response.data.extras.result_codes,
         })
+
+        throw new Error(
+            error.response.data.extras.result_codes.operations.join()
+        )
+    }
+
 }
