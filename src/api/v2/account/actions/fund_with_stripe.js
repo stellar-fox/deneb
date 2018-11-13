@@ -12,7 +12,7 @@
 
 import BigNumber from "bignumber.js"
 import { sendAsset } from "../../../../lib/helpers"
-
+import { stellar as stellarConfig } from "../../../../config/configuration"
 
 
 
@@ -40,7 +40,8 @@ export default function fundWithStripe (rtdb, stripe) {
                 (new BigNumber(req.body.charge.amount))
                     .dividedBy(100).toString(),
                 req.body.charge.currency,
-                req.body.charge.token
+                req.body.charge.token,
+                stellarConfig.networkPassphrase
             )
 
             res.status(200).json({ status })

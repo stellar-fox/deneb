@@ -119,12 +119,8 @@ export const tokenIsValid = (token, userId) =>
 
 
 /**
- * FIXME: accept 'network passphrase' as an argument
- * and use it (get rid of hardcoded 'test-network').
- * E.g.:
- * ```
- * Network.use(new Network(networkPassphrase))
- * ```
+ * Send payment with the amount of equivalent FIAT token as purchased with the
+ * credit card by using Stripe.
  *
  * @function sendAsset
  * @param {*} rtdb
@@ -135,10 +131,10 @@ export const tokenIsValid = (token, userId) =>
  */
 export const sendAsset = async (
     rtdb, destinationId,
-    amount, currency, payToken
+    amount, currency, payToken, networkPassphrase
 ) => {
 
-    Network.useTestNetwork()
+    Network.use(new Network(networkPassphrase))
 
     const
         server = new Server(stellarConfig.horizon),

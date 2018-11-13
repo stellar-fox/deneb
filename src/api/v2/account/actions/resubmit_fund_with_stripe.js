@@ -13,6 +13,7 @@
 import { array } from "@xcmats/js-toolbox"
 import { sendAsset } from "../../../../lib/helpers"
 import { Transaction } from "stellar-sdk"
+import { stellar as stellarConfig } from "../../../../config/configuration"
 
 
 
@@ -41,7 +42,8 @@ export default function resubmitFundWithStripe (rtdb) {
             await sendAsset(
                 rtdb,
                 verifiedOp.destination, verifiedOp.amount,
-                verifiedOp.asset.code, req.body.chargeData.id
+                verifiedOp.asset.code, req.body.chargeData.id,
+                stellarConfig.networkPassphrase
             )
 
             res.status(200).json({ ok: true })
