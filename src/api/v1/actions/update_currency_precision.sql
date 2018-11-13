@@ -3,5 +3,5 @@
 
 -- update preferred currency precision
 UPDATE accounts
-    SET precision = $<precision>
+SET precision = $<precision>
 WHERE user_id = $<user_id>;
