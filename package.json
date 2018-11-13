@@ -94,7 +94,7 @@
         "clean": "rimraf ./dist",
         "clean:all": "npm run clean && npm run clean:jsdoc",
         "clean:jsdoc": "rimraf ./jsdoc",
-        "clean:modules": "rimraf node_modules",
+        "clean:modules": "rimraf node_modules && rimraf package-lock.json",
         "jsdoc": "npm run clean:jsdoc && npm run build:jsdoc",
         "lint": "eslint ./src/",
         "production": "node ./dist/deneb.js",
