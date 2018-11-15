@@ -25,7 +25,6 @@ import firebaseAdminLib, {
     credential,
     database as realTimeDatabase,
 } from "firebase-admin"
-import StellarSdk from "stellar-sdk"
 import Stripe from "stripe"
 import { tokenIsValid } from "./lib/helpers"
 import {
