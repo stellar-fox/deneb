@@ -56,7 +56,7 @@ module.exports = function (api) {
             // deneb production environment
             production: esEnv,
 
-            // deneb environment for devApiServer
+            // deneb development environment
             development: {
                 presets: [
                     [
