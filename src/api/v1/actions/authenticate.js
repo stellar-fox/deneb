@@ -1,7 +1,7 @@
 /**
  * Deneb.
  *
- * 'Authenticate' action.
+ * API v1 actions.
  *
  * @module actions
  * @license Apache-2.0

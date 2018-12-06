@@ -3,7 +3,7 @@
  *
  * 'Implode account' action.
  *
- * @module actions
+ * @module account-actions
  * @license Apache-2.0
  */
 

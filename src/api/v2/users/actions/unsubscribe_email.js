@@ -3,7 +3,7 @@
  *
  * 'Unsubscribe email' action.
  *
- * @module actions
+ * @module users-actions
  * @license Apache-2.0
  */
 
@@ -20,7 +20,7 @@ import {
 
 
 /**
- * ...
+ * Remove user's email from the distribution list.
  *
  * @function unsubscribeEmail
  * @param {Object} sqlDatabase Database connection.

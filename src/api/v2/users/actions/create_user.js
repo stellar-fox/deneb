@@ -3,7 +3,7 @@
  *
  * 'Create user' action.
  *
- * @module actions
+ * @module users-actions
  * @license Apache-2.0
  */
 

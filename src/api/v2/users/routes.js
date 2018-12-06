@@ -20,11 +20,12 @@ import unsubscribeEmail from "./actions/unsubscribe_email"
 
 /**
  * ...
- *
+ * @function userRoutes
  * @param {Object} app
  * @param {Object} db
  * @param {Object} firebaseAdmin
  * @param {Object} firebaseApp
+ * @returns {void}
  */
 export default function usersRoutes (
     app, db, firebaseAdmin, firebaseApp

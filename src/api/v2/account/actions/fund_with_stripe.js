@@ -3,7 +3,7 @@
  *
  * 'Fund with Stripe' action.
  *
- * @module actions
+ * @module account-actions
  * @license Apache-2.0
  */
 

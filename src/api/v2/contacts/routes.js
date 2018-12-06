@@ -3,7 +3,7 @@
  *
  * REST API (v2) - Contacts route configuration.
  *
- * @module api-v2-routes-contact
+ * @module api-v2-routes-contacts
  * @license Apache-2.0
  */
 
@@ -30,9 +30,10 @@ import updateFederated from "./actions/update_federated"
 
 /**
  * ...
- *
+ * @function contactsRoutes
  * @param {Object} app
  * @param {Object} db
+ * @returns {void}
  */
 export default function contactsRoutes (app, db) {
 

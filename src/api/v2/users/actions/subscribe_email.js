@@ -3,7 +3,7 @@
  *
  * 'Subscribe email' action.
  *
- * @module actions
+ * @module users-actions
  * @license Apache-2.0
  */
 
@@ -20,7 +20,7 @@ import {
 
 
 /**
- * ...
+ * Subscribe user's email to welcome email distribution list.
  *
  * @function subscribeEmail
  * @param {Object} sqlDatabase Database connection.
@@ -49,15 +49,12 @@ export default function subscribeEmail () {
                         md5(req.body.email.toLowerCase())}`
                 )).data
             } catch (_error) {
-                /**
-                 * User not found on the list. Proceed.
-                 */
+                // User not found on the list. Proceed.
             }
 
 
-            /**
-             * User was not found on the subscription list. Add to list.
-             */
+
+            // User was not found on the subscription list. Add to list.
             if (!subscription) {
                 await client.post(`${mailchimpConfig.api}lists/${
                     mailchimpConfig.lists.newSignups}/members/`, {
@@ -65,9 +62,8 @@ export default function subscribeEmail () {
                     status: "subscribed",
                 })
             }
-            /**
-             * User was found but status was not "subscribed". Subscribe.
-             */
+
+            // User was found but status was not "subscribed". Subscribe.
             else if (subscription.status !== "subscribed") {
                 await client.patch(
                     `${mailchimpConfig.api}lists/${

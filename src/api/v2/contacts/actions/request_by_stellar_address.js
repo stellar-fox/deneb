@@ -1,9 +1,9 @@
 /**
  * Deneb.
  *
- * 'Request contact by stellar address' action.
+ * Contacts related actions.
  *
- * @module actions
+ * @module contacts-actions
  * @license Apache-2.0
  */
 

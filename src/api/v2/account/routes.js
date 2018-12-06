@@ -20,10 +20,11 @@ import resubmitFundWithStripe from "./actions/resubmit_fund_with_stripe"
 
 /**
  * ...
- *
+ * @function accountRoutes
  * @param {Object} app
  * @param {Object} db
  * @param {Object} rtdb
+ * @returns {void}
  */
 export default function accountRoutes (app, db, rtdb, stripe) {
 

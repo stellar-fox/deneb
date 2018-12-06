@@ -1,9 +1,9 @@
 /**
  * Deneb.
  *
- * 'List internal contacts' action.
+ * Contacts related actions.
  *
- * @module actions
+ * @module contacts-actions
  * @license Apache-2.0
  */
 

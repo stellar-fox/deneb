@@ -1,9 +1,9 @@
 /**
  * Deneb.
  *
- * 'Request contact by account ID' action.
+ * Contacts related actions.
  *
- * @module actions
+ * @module contacts-actions
  * @license Apache-2.0
  */
 
