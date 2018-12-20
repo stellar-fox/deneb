@@ -17,7 +17,7 @@ import express, {
 import pg from "pg-promise"
 import {
     string,
-    toBool,
+    type,
 } from "@xcmats/js-toolbox"
 import chalk from "chalk"
 import firebaseLib from "firebase"
@@ -108,7 +108,7 @@ app.use((req, res, next) => {
         req.method !== "OPTIONS"  &&
 
         // ... or if request URL points to whitelisted path ...
-        !toBool(whiteList.find((path) => {
+        !type.toBool(whiteList.find((path) => {
             let re = new RegExp(path)
             return re.test(req.originalUrl)
         }))  &&
