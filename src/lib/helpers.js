@@ -12,7 +12,10 @@
 
 import axios from "axios"
 import bcrypt from "bcryptjs"
-import { array } from "@xcmats/js-toolbox"
+import {
+    array,
+    timeUnit,
+} from "@xcmats/js-toolbox"
 import {
     apiKey,
     stellar as stellarConfig,
@@ -158,6 +161,7 @@ export const sendAsset = async (
                 amount,
             }))
             .addMemo(Memo.text(stellarConfig.distMemo))
+            .setTimeout(10 * timeUnit.second)
             .build()
 
         transaction.sign(sourceKeys)
