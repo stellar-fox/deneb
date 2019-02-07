@@ -18,6 +18,7 @@ import latestCurrency from "./actions/latest_currency"
 import addFederatedContact from "./actions/add_federated_contact"
 import updateAccount from "./actions/update_account"
 import userData from "./actions/user_data"
+import userDataUpdate from "./actions/user_data_update"
 
 
 
@@ -35,6 +36,10 @@ export default function configureApiV1Routes (app, db) {
     app.post(
         `${apiRootV1}user/`,
         userData(db)
+    )
+    app.post(
+        `${apiRootV1}user/update`,
+        userDataUpdate(db)
     )
     app.post(
         `${apiRootV1}user/authenticate/`,
