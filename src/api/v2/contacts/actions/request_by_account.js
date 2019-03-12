@@ -70,8 +70,8 @@ export default function requestByAccount (sqlDatabase) {
                             t.none(
                                 sql(__dirname, updateContactStatusSQL),
                                 {
-                                    user_id: contact_id,
                                     contact_id: req.body.user_id,
+                                    user_id: contact_id,
                                     status: contactStatusCodes.PENDING,
                                 }
                             ),
@@ -91,6 +91,17 @@ export default function requestByAccount (sqlDatabase) {
                             contact_id: registeredAccount.user_id,
                             requested_by: req.body.user_id,
                             status: contactStatusCodes.REQUESTED,
+                            created_at: now,
+                            updated_at: now,
+                            request_str: "",
+                        }
+                    )
+                    await sqlDatabase.none(
+                        sql(__dirname, insertContactSQL),
+                        {
+                            contact_id: req.body.user_id,
+                            requested_by: registeredAccount.user_id,
+                            status: contactStatusCodes.PENDING,
                             created_at: now,
                             updated_at: now,
                             request_str: "",
