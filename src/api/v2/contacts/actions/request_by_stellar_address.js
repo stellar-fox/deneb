@@ -34,8 +34,12 @@ export default function requestByStellarAddress (sqlDatabase) {
 
     return async (req, res, next) => {
 
-        const
-            now = new Date(),
+
+        const now = new Date()
+        let registeredUser = null
+        let contactId = null
+
+        try {
             registeredUser = await sqlDatabase.one(
                 sql(__dirname, getUserIdByStellarAddressSQL),
                 {
@@ -43,8 +47,11 @@ export default function requestByStellarAddress (sqlDatabase) {
                     domain: req.body.domain,
                 }
             )
+        } catch (error) {
+            res.status(404).send()
+            return next(error.message)
+        }
 
-        let contactId = null
 
         if (registeredUser) {
             try {
@@ -58,6 +65,7 @@ export default function requestByStellarAddress (sqlDatabase) {
                     (e) => e && e.contact_id
                 )
             } catch (error) {
+                res.status(500).send()
                 return next(error.message)
             }
         } else {
@@ -89,6 +97,7 @@ export default function requestByStellarAddress (sqlDatabase) {
                     res.status(204).send()
                     next()
                 } catch (error) {
+                    res.status(500).send()
                     return next(error.message)
                 }
 
@@ -107,6 +116,7 @@ export default function requestByStellarAddress (sqlDatabase) {
                     res.status(201).send()
                     next()
                 } catch (error) {
+                    res.status(500).send()
                     return next(error.message)
                 }
 
@@ -115,28 +125,33 @@ export default function requestByStellarAddress (sqlDatabase) {
 
         if (contactId) {
 
-            await sqlDatabase.tx((t) => {
-                return t.batch([
-                    t.none(
-                        sql(__dirname, updateContactStatusSQL),
-                        {
-                            contact_id: contactId,
-                            user_id: req.body.user_id,
-                            status: contactStatusCodes.REQUESTED,
-                        }
-                    ),
-                    t.none(
-                        sql(__dirname, updateContactStatusSQL),
-                        {
-                            user_id: contactId,
-                            contact_id: req.body.user_id,
-                            status: contactStatusCodes.PENDING,
-                        }
-                    ),
-                ])
-            })
-            res.status(204).send()
-            next()
+            try {
+                await sqlDatabase.tx((t) => {
+                    return t.batch([
+                        t.none(
+                            sql(__dirname, updateContactStatusSQL),
+                            {
+                                contact_id: contactId,
+                                user_id: req.body.user_id,
+                                status: contactStatusCodes.REQUESTED,
+                            }
+                        ),
+                        t.none(
+                            sql(__dirname, updateContactStatusSQL),
+                            {
+                                user_id: contactId,
+                                contact_id: req.body.user_id,
+                                status: contactStatusCodes.PENDING,
+                            }
+                        ),
+                    ])
+                })
+                res.status(204).send()
+                next()
+            } catch (error) {
+                res.status(500).send()
+                return next()
+            }
 
         } else {
 
@@ -172,7 +187,7 @@ export default function requestByStellarAddress (sqlDatabase) {
                 next()
             } catch (error) {
                 res.status(500).send()
-                next()
+                return next()
             }
         }
 

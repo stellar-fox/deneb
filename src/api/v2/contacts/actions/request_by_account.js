@@ -35,24 +35,39 @@ export default function requestByAccount (sqlDatabase) {
     return async (req, res, next) => {
 
         let now = new Date()
+        let registeredAccount = null
+        let contact_id = null
 
-        const registeredAccount = await sqlDatabase.oneOrNone(
-            sql(__dirname, getUserIdByAccountSQL),
-            {
-                pubkey: req.body.pubkey,
-            }
-        )
+        try {
+            registeredAccount = await sqlDatabase.oneOrNone(
+                sql(__dirname, getUserIdByAccountSQL),
+                {
+                    pubkey: req.body.pubkey,
+                }
+            )
+        } catch (error) {
+            res.status(500).send()
+            return next(error.message)
+        }
+
 
         if (registeredAccount) {
-            const contact_id = await sqlDatabase.oneOrNone(
-                sql(__dirname, getContactIdSQL),
-                {
-                    contact_id: registeredAccount.user_id,
-                    requested_by: req.body.user_id,
-                    status: contactStatusCodes.DELETED,
-                },
-                (e) => e && e.contact_id
-            )
+
+            try {
+                contact_id = await sqlDatabase.oneOrNone(
+                    sql(__dirname, getContactIdSQL),
+                    {
+                        contact_id: registeredAccount.user_id,
+                        requested_by: req.body.user_id,
+                        status: contactStatusCodes.DELETED,
+                    },
+                    (e) => e && e.contact_id
+                )
+            } catch (error) {
+                res.status(500).send()
+                return next(error.message)
+            }
+
 
             if (contact_id) {
                 try {
@@ -84,6 +99,7 @@ export default function requestByAccount (sqlDatabase) {
                 }
 
             } else {
+
                 try {
                     await sqlDatabase.none(
                         sql(__dirname, insertContactSQL),
@@ -110,20 +126,29 @@ export default function requestByAccount (sqlDatabase) {
                     res.status(201).send()
                     next()
                 } catch (error) {
-                    return res.status(409).send()
+                    res.status(409).send()
+                    return next()
                 }
 
             }
         } else {
-            const federatedId = await sqlDatabase.oneOrNone(
-                sql(__dirname, getFederatedByAccountSQL),
-                {
-                    pubkey: req.body.pubkey,
-                    added_by: req.body.user_id,
-                    status: contactStatusCodes.DELETED,
-                },
-                (e) => e && e.id
-            )
+
+            let federatedId = null
+
+            try {
+                federatedId = await sqlDatabase.oneOrNone(
+                    sql(__dirname, getFederatedByAccountSQL),
+                    {
+                        pubkey: req.body.pubkey,
+                        added_by: req.body.user_id,
+                        status: contactStatusCodes.DELETED,
+                    },
+                    (e) => e && e.id
+                )
+            } catch (error) {
+                res.status(500).send()
+                return next()
+            }
 
             if (federatedId) {
                 try {
@@ -141,6 +166,7 @@ export default function requestByAccount (sqlDatabase) {
                     res.status(204).send()
                     next()
                 } catch (error) {
+                    res.status(500).send()
                     return next(error.message)
                 }
 
@@ -159,6 +185,7 @@ export default function requestByAccount (sqlDatabase) {
                     res.status(201).send()
                     next()
                 } catch (error) {
+                    res.status(409).send()
                     return next(error.message)
                 }
 

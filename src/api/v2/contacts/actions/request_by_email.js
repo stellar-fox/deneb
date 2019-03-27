@@ -93,6 +93,7 @@ export default function requestByEmail (sqlDatabase) {
                     res.status(204).send()
                     next()
                 } catch (error) {
+                    res.status(409).send()
                     return next(error.message)
                 }
 
@@ -133,7 +134,7 @@ export default function requestByEmail (sqlDatabase) {
 
                 } catch (error) {
                     res.status(409).send()
-                    next()
+                    return next()
                 }
             }
         }
@@ -157,6 +158,7 @@ export default function requestByEmail (sqlDatabase) {
                     md5(req.body.email.toLowerCase())
                 }`)
 
+                // reward first person who invited this email address
                 if (!subscriber) {
                     await client.post(`${mailchimpConfig.api}lists/${
                         mailchimpConfig.lists.searchByEmail}/members/`, {
@@ -169,32 +171,37 @@ export default function requestByEmail (sqlDatabase) {
                         },
                     })
                 } else {
-                    // update REFERRER only if different from the last one
-                    if (subscriber.data.merge_fields.REFERRER !== req.body.referrer.email) {
-                        await client.patch(`${mailchimpConfig.api}lists/${
-                            mailchimpConfig.lists.searchByEmail}/members/${subscriber.data.id}`, {
-                            merge_fields: {
-                                REFERRER: req.body.referrer.email,
-                                REFERRERFN: req.body.referrer.first_name,
-                                REFERRERLN: req.body.referrer.last_name,
-                            },
-                        })
-                    }
+                    res.status(409).send()
+                    return next()
                 }
+
+                // else {
+                //     // update REFERRER only if different from the last one
+                //     if (subscriber.data.merge_fields.REFERRER !== req.body.referrer.email) {
+                //         await client.patch(`${mailchimpConfig.api}lists/${
+                //             mailchimpConfig.lists.searchByEmail}/members/${subscriber.data.id}`, {
+                //             merge_fields: {
+                //                 REFERRER: req.body.referrer.email,
+                //                 REFERRERFN: req.body.referrer.first_name,
+                //                 REFERRERLN: req.body.referrer.last_name,
+                //             },
+                //         })
+                //     }
+                // }
 
                 res.status(201).send()
                 next()
 
             } catch (error) {
                 res.status(409).send()
-                next()
+                return next()
             }
 
         } catch (error) {
             res.status(error.response.data.status).json({
                 error: error.response.data.title,
             })
-            next()
+            return next()
         }
 
     }
