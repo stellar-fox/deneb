@@ -39,16 +39,15 @@ export default function updateFederated (sqlDatabase) {
             .tx((t) =>
                 t.batch([
 
-                    req.body.currency ?
-                        t.none(
-                            sql(__dirname, updatePreferredCurrencySQL),
-                            {
-                                currency: req.body.currency,
-                                id: req.body.id,
-                                user_id: req.body.user_id,
-                                date,
-                            }
-                        ) : null,
+                    t.none(
+                        sql(__dirname, updatePreferredCurrencySQL),
+                        {
+                            currency: req.body.currency,
+                            id: req.body.id,
+                            user_id: req.body.user_id,
+                            date,
+                        }
+                    ),
 
                     t.none(
                         sql(__dirname, updateMemoSQL),
@@ -95,9 +94,16 @@ export default function updateFederated (sqlDatabase) {
                 ])
             )
             .then(() => {
-                res.status(204).send()
+                res.status(204).json({
+                    status: "success",
+                })
                 next()
             })
-            .catch((error) => next(error.message))
+            .catch((error) => {
+                res.status(500).json({
+                    error: error.message,
+                })
+                next()
+            })
 
 }

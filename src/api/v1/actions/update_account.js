@@ -14,7 +14,7 @@ import { string } from "@xcmats/js-toolbox"
 import { sql } from "../../../lib/utils"
 import updateCurrencyPrecisionSQL from "./update_currency_precision.sql"
 import updateMemoTypeSQL from "./update_memo_type.sql"
-import updatePreferredCurrencySQL from "./update_preferred_currency.sql"
+import updateUserPreferredCurrencySQL from "./update_user_preferred_currency.sql"
 import updateStellarAddressSQL from "./update_stellar_address.sql"
 import updateStellarAddressVisibilitySQL from "./update_stellar_address_visibility.sql"
 import updateAccountsTimestampSQL from "./update_accounts_timestamp.sql"
@@ -89,15 +89,14 @@ export default function updateAccount (sqlDatabase) {
                         null,
 
                     // update preferred currency
-                    req.body.currency ?
+                    req.body.currency &&
                         t.none(
-                            sql(__dirname, updatePreferredCurrencySQL),
+                            sql(__dirname, updateUserPreferredCurrencySQL),
                             {
                                 currency: req.body.currency,
                                 user_id: req.body.user_id,
                             }
-                        ) :
-                        null,
+                        ),
 
                     // update precision
                     req.body.precision ?
@@ -113,7 +112,10 @@ export default function updateAccount (sqlDatabase) {
                     // update timestamp
                     t.none(
                         sql(__dirname, updateAccountsTimestampSQL),
-                        { updated_at: new Date() }
+                        {
+                            updated_at: new Date(),
+                            user_id: req.body.user_id,
+                        }
                     ),
                 ])
             })
@@ -121,7 +123,7 @@ export default function updateAccount (sqlDatabase) {
                 res.status(204).json({
                     status: "success",
                 })
-                next()
+                return next()
             })
             .catch((error) => {
                 if (/alias_domain/.test(error.message)) {
@@ -133,7 +135,7 @@ export default function updateAccount (sqlDatabase) {
                         error: error.message,
                     })
                 }
-                next()
+                return next()
             })
 
     }
