@@ -29,29 +29,36 @@ import {
 export default function unsubscribeEmail () {
 
     return async (req, res, next) => {
-        try {
-            const client = axios.create({
-                auth: {
-                    username: mailchimpConfig.username,
-                    password: mailchimpConfig.apiKey,
-                },
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            })
 
+        const client = axios.create({
+            auth: {
+                username: mailchimpConfig.username,
+                password: mailchimpConfig.apiKey,
+            },
+            headers: {
+                "Content-Type": "application/json",
+            },
+        })
+
+        try {
+
+            // Delete email from the subscription list
             await client.delete(`${mailchimpConfig.api}lists/${
                 mailchimpConfig.lists.newSignups}/members/${
                 md5(req.body.email.toLowerCase())}`)
 
-            res.status(204).send()
+            res.status(204).json({
+                status: "success",
+            })
             next()
 
         } catch (error) {
-            res.status(error.response.data.status).json({
-                error: error.response.data.title,
+
+            res.status(error.response.status).json({
+                error: error.response.statusText,
             })
             next()
+
         }
     }
 

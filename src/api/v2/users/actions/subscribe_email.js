@@ -29,30 +29,33 @@ import {
 export default function subscribeEmail () {
 
     return async (req, res, next) => {
-        let subscription
+
+        const client = axios.create({
+            auth: {
+                username: mailchimpConfig.username,
+                password: mailchimpConfig.apiKey,
+            },
+            headers: {
+                "Content-Type": "application/json",
+            },
+        })
+
+        let subscription = null
+
 
         try {
-            const client = axios.create({
-                auth: {
-                    username: mailchimpConfig.username,
-                    password: mailchimpConfig.apiKey,
-                },
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            })
-
-            try {
-                subscription = (await client.get(
-                    `${mailchimpConfig.api}lists/${
-                        mailchimpConfig.lists.newSignups}/members/${
-                        md5(req.body.email.toLowerCase())}`
-                )).data
-            } catch (_error) {
-                // User not found on the list. Proceed.
-            }
+            subscription = await client.get(
+                `${mailchimpConfig.api}lists/${
+                    mailchimpConfig.lists.newSignups}/members/${
+                    md5(req.body.email.toLowerCase())}`
+            )
+        } catch (error) {
+            // catch Axios' 404 ...
+        }
 
 
+
+        try {
 
             // User was not found on the subscription list. Add to list.
             if (!subscription) {
@@ -64,7 +67,7 @@ export default function subscribeEmail () {
             }
 
             // User was found but status was not "subscribed". Subscribe.
-            else if (subscription.status !== "subscribed") {
+            else if (subscription.data && subscription.data.status !== "subscribed") {
                 await client.patch(
                     `${mailchimpConfig.api}lists/${
                         mailchimpConfig.lists.newSignups}/members/${
@@ -74,13 +77,14 @@ export default function subscribeEmail () {
                     }
                 )
             }
-
-            res.status(201).send()
+            res.status(201).json({
+                status: "success",
+            })
             next()
 
         } catch (error) {
-            res.status(error.response.data.status).json({
-                error: error.response.data.title,
+            res.status(error.response.status).json({
+                error: error.response.statusText,
             })
             next()
         }
