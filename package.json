@@ -23,11 +23,11 @@
         "body-parser": "^1.18.3",
         "chalk": "^2.4.2",
         "express": "^4.16.4",
-        "firebase": "^5.8.6",
+        "firebase": "^5.9.2",
         "firebase-admin": "^7.0.0",
-        "pg-promise": "^8.6.3",
-        "stellar-sdk": "^0.14.0",
-        "stripe": "^6.25.1"
+        "pg-promise": "^8.6.4",
+        "stellar-sdk": "^0.15.0",
+        "stripe": "^6.28.0"
     },
     "description": "REST API service for Stellar Fox applications.",
     "devDependencies": {
@@ -101,5 +101,5 @@
         "start": "nodemon -e js,sql --watch ./src/ ./src/index.js --exec \"cross-env BABEL_ENV=development babel-node\"",
         "test": "npm run lint  &&  echo \"Warning: no tests specified (yet)\""
     },
-    "version": "0.2.2"
+    "version": "0.2.3"
 }
