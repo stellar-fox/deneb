@@ -66,13 +66,14 @@ export default function insertUser (sqlDatabase, firebaseAdmin, firebaseApp) {
                 )
                 res.status(201).json({ userid: userCreateResp.id })
                 next()
+                return
             }
 
-            res.status(204).send()
+            res.status(204).json({})
             next()
 
-        } catch (_error) {
-            res.status(401).send()
+        } catch (error) {
+            res.status(401).json({error: error.message})
             next()
         }
 
