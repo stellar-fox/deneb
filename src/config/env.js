@@ -27,6 +27,7 @@ export const whiteList = [
     "^/api/v1/?$",
     "^/api/v2/?$",
     "^/api/v2/user/create/?$",
+    "^/api/v2/user/update-password/?$",
     "^/api/v1/account/create/?$",
     "^/favicon.ico/?$",
     "^/api/v1/user/authenticate/?$",

@@ -14,6 +14,7 @@ import { apiRootV2 } from "../../../config/env"
 import createUser from "./actions/create_user"
 import subscribeEmail from "./actions/subscribe_email"
 import unsubscribeEmail from "./actions/unsubscribe_email"
+import updatePassword from "./actions/update_password"
 
 
 
@@ -42,6 +43,10 @@ export default function usersRoutes (
     app.post(
         `${apiRootV2}user/unsubscribe-email/`,
         unsubscribeEmail()
+    )
+    app.post(
+        `${apiRootV2}user/update-password/`,
+        updatePassword(db, firebaseApp)
     )
 
 }
