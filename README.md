@@ -7,14 +7,14 @@
     </a>
 </p>
 
-> Next generation, personal micro finance solution, which offers nearly instant and extremely low fee remittance service.
+> Next generation, personal micro finance solutions.
 
 <br />
 
 
 
 
-# Stellar Fox (backend)
+# Deneb - Backend for Cygnus Wallet
 
 Moving Value at the Speed of Light
 
