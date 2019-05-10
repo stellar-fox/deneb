@@ -99,7 +99,9 @@
         "lint": "eslint ./src/",
         "production": "node ./dist/deneb.js",
         "start": "nodemon -e js,sql --watch ./src/ ./src/index.js --exec \"cross-env BABEL_ENV=development babel-node\"",
-        "test": "npm run lint  &&  echo \"Warning: no tests specified (yet)\""
+        "test": "npm run lint  &&  echo \"Warning: no tests specified (yet)\"",
+        "dev": "rimraf ./src/config/configuration.json && ln -s ./configuration.localhost.json ./src/config/configuration.json",
+        "prod": "rimraf ./src/config/configuration.json && ln -s ./configuration.production.json ./src/config/configuration.json"
     },
-    "version": "0.2.6"
+    "version": "0.2.7"
 }
