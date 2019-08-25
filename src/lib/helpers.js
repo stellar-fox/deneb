@@ -12,23 +12,8 @@
 
 import axios from "axios"
 import bcrypt from "bcryptjs"
-import {
-    array,
-    timeUnit,
-} from "@xcmats/js-toolbox"
-import {
-    apiKey,
-    stellar as stellarConfig,
-} from "../config/configuration.json"
-import {
-    Asset,
-    Keypair,
-    Memo,
-    Network,
-    Operation,
-    Server,
-    TransactionBuilder,
-} from "stellar-sdk"
+import { array } from "@xcmats/js-toolbox"
+import { apiKey } from "../config/configuration.json"
 
 
 
@@ -117,75 +102,3 @@ export const tokenIsValid = (token, userId) =>
         `${getApiKey()}${userId}`,
         Buffer.from(token, "base64").toString("ascii")
     )
-
-
-
-
-/**
- * Send payment with the amount of equivalent FIAT token as purchased with the
- * credit card by using Stripe.
- *
- * @function sendAsset
- * @param {*} rtdb
- * @param {*} destinationId
- * @param {*} amount
- * @param {*} currency
- * @param {*} payToken
- */
-export const sendAsset = async (
-    rtdb, destinationId,
-    amount, currency, payToken, networkPassphrase
-) => {
-
-    Network.use(new Network(networkPassphrase))
-
-    const
-        server = new Server(stellarConfig.horizon),
-        sourceKeys = Keypair.fromSecret(
-            stellarConfig.distributionSecret
-        )
-
-    let
-        transaction = null,
-        sourceAccount = await server.loadAccount(sourceKeys.publicKey())
-
-    try {
-
-        transaction = new TransactionBuilder(sourceAccount)
-            .addOperation(Operation.payment({
-                destination: destinationId,
-                asset: new Asset(
-                    currency.toUpperCase(),
-                    stellarConfig.issuingPublic
-                ),
-                amount,
-            }))
-            .addMemo(Memo.text(stellarConfig.distMemo))
-            .setTimeout(10 * timeUnit.second)
-            .build()
-
-        transaction.sign(sourceKeys)
-
-        return server.submitTransaction(transaction)
-
-    } catch (error) {
-
-        /**
-         * Store transaction envelope that could not be submitted
-         */
-        rtdb.ref(`failedTxs/${destinationId}/${payToken}`).set({
-            amount,
-            currency,
-            xdrBody: transaction.toEnvelope().toXDR().toString("base64"),
-            submitted: false,
-            retries: 0,
-            lastAttempt: (new Date().getTime()),
-            reason: error.response.data.extras.result_codes,
-        })
-
-        throw new Error(
-            error.response.data.extras.result_codes.operations.join()
-        )
-    }
-
-}

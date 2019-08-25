@@ -31,15 +31,4 @@
         "username": "<mailchimp_username>",
         "apiKey": "<mailchimp_api_key>"
     },
-    "stripe": {
-        "apiKey": "<stipe_api_key>"
-    },
-    "stellar": {
-        "issuingPublic": "<issuing account public key>",
-        "distributionSecret": "<distribution account secret key>",
-        "horizon": "<horizon url>",
-        "assetCode": "<asset code>",
-        "distMemo": "<distribution memo>",
-        "networkPassphrase": "Test SDF Network ; September 2015"
-    }
 }

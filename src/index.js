@@ -23,9 +23,7 @@ import chalk from "chalk"
 import firebaseLib from "firebase"
 import firebaseAdminLib, {
     credential,
-    database as realTimeDatabase,
 } from "firebase-admin"
-import Stripe from "stripe"
 import { tokenIsValid } from "./lib/helpers"
 import {
     port,
@@ -36,7 +34,6 @@ import {
     connectionStr,
     firebase as firebaseConfig,
     firebaseDB as firebaseDBConfig,
-    stripe as stripeConfig,
 } from "./config/configuration.json"
 import {
     name as applicationName,
@@ -61,8 +58,6 @@ const
         databaseURL: firebaseDBConfig,
     }),
     firebaseApp = firebaseLib.initializeApp(firebaseConfig),
-    rtdb = realTimeDatabase(),
-    stripe = new Stripe(stripeConfig.apiKey),
 
     // http server
     app = express()
@@ -152,7 +147,7 @@ configureApiV1Routes(app, db)
 
 
 // API v2 routes
-accountRoutes(app, db, rtdb, stripe)
+accountRoutes(app, db)
 contactsRoutes(app, db)
 usersRoutes(app, db, firebaseAdmin, firebaseApp)
 
